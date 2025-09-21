@@ -1,7 +1,7 @@
 # HanoiGo
 BTL môn Lập trình mobile
 # 🔑 Thiết lập Mapbox Access Token
-Repo này không chứa file token để tránh lộ key. Cần tự tạo file  ```bash mapbox_access_token.xml``` trước khi chạy project:
+Repo này không chứa file token để tránh lộ key. Cần tự tạo file  ```mapbox_access_token.xml``` trước khi chạy project:
 # 1. Vào thư mục:
 ```bash
 app/src/main/res/values/
