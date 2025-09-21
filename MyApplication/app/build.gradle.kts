@@ -39,5 +39,5 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("com.google.android.material:material:1.12.0")
-    implementation("com.mapbox.maps:android-ndk27:11.15.0")
+    implementation("com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.2")
 }

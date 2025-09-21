@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Quyền truy cập vị trí -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <meta-data
-        android:name="com.mapbox.maps.token"
-        android:value="@string/mapbox_access_token" />
 
     <application
         android:allowBackup="true"
@@ -16,8 +14,32 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication" />
-    <!-- Activity chính (Launcher) -->
+        android:theme="@style/Theme.MyApplication">
 
+        <!-- Main launcher activity (nếu dùng) -->
+        <!--
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        -->
+
+        <!-- MapActivity -->
+        <activity android:name=".MapActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Mapbox Token (nên khai báo trong application chứ không phải manifest root) -->
+        <meta-data
+            android:name="com.mapbox.maps.token"
+            android:value="@string/goong_api_key" />
+
+    </application>
 </manifest>
-

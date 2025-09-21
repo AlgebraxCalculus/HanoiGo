@@ -1,14 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- MapView full màn hình -->
-    <com.mapbox.maps.MapView
+    <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-    <!-- Bạn có thể thêm header, button, overlay ở đây nếu muốn -->
-
-</FrameLayout>
+    <!-- Text hiển thị trạng thái -->
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="8dp"
+        android:background="#80000000"
+        android:textColor="#FFFFFF"
+        android:text="Loading map..."
+        android:textSize="16sp"/>
+</RelativeLayout>
