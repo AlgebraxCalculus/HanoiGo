@@ -15,3 +15,4 @@
 local.properties
 
 app/src/main/res/values/mapbox_access_token.xml
+app/src/main/res/values/goongmap_access_token.xml

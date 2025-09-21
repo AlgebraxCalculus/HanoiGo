@@ -4,6 +4,9 @@
     <!-- Quyền truy cập vị trí -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <meta-data
+        android:name="com.mapbox.maps.token"
+        android:value="@string/mapbox_access_token" />
 
     <application
         android:allowBackup="true"
