@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Goong API Key -->
+    <string name="goong_api_key">YOUR_GOONG_API_KEY</string>
+</resources>

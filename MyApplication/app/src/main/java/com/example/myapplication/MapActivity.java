@@ -1,8 +1,10 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -12,33 +14,40 @@ import com.mapbox.mapboxsdk.maps.Style;
 public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
-    private TextView statusText;
+    private EditText searchBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Khởi tạo Mapbox với Goong API Key
+        // Init Mapbox with Goong API key
         Mapbox.getInstance(this, getString(R.string.goong_api_key));
 
         setContentView(R.layout.activity_map);
         mapView = findViewById(R.id.mapView);
-        statusText = findViewById(R.id.statusText);
+//        searchBar = findViewById(R.id.searchBar);
 
         mapView.onCreate(savedInstanceState);
 
+        // Load Goong map style
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 String apiKey = getString(R.string.goong_api_key);
                 String styleUrl = "https://tiles.goong.io/assets/goong_map_web.json?api_key=" + apiKey;
-
-                statusText.setText("Loading Goong map...");
-
-                mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl),
-                        style -> statusText.setText("✅ Goong map loaded!"));
+                mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
             }
         });
+
+//        // Handle search input
+//        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+//            String query = searchBar.getText().toString();
+//            if (!query.isEmpty()) {
+//                Toast.makeText(MapActivity.this, "Searching: " + query, Toast.LENGTH_SHORT).show();
+//                // TODO: Call Goong API search
+//            }
+//            return true;
+//        });
     }
 
     // lifecycle

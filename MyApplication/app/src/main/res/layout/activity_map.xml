@@ -1,22 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- MapView -->
     <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Text hiển thị trạng thái -->
-    <TextView
-        android:id="@+id/statusText"
-        android:layout_width="wrap_content"
+    <!-- Search bar -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:padding="8dp"
-        android:background="#80000000"
-        android:textColor="#FFFFFF"
-        android:text="Loading map..."
-        android:textSize="16sp"/>
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="@android:color/transparent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="@drawable/bg_searchbar">
+
+            <!-- Icon search -->
+            <ImageView
+                android:id="@+id/searchIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/routing"
+                android:contentDescription="@string/desc_search_icon"/>
+
+            <!-- Input search -->
+            <EditText
+                android:id="@+id/searchBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/hint_search"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:autofillHints="search"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/darker_gray"
+                android:textSize="16sp" />
+
+            <!-- Avatar  -->
+            <ImageView
+                android:id="@+id/actionButton"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/avatar"
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_round"
+                android:clipToOutline="true"
+                android:contentDescription="@string/desc_action_icon"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Tag filters -->
+    <HorizontalScrollView
+        android:id="@+id/tagScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/searchContainer"
+        android:layout_marginTop="12dp"
+        android:scrollbars="none"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:id="@+id/tagContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                style="@style/TagStyle"
+                android:text="@string/tag_iconic" />
+
+            <TextView
+                style="@style/TagStyle"
+                android:layout_marginStart="8dp"
+                android:text="@string/tag_cuisine" />
+
+            <TextView
+                style="@style/TagStyle"
+                android:layout_marginStart="8dp"
+                android:text="@string/tag_entertaining" />
+
+            <TextView
+                style="@style/TagStyle"
+                android:layout_marginStart="8dp"
+                android:text="@string/tag_culture" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
 </RelativeLayout>
