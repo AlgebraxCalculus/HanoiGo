@@ -24,10 +24,14 @@ public class MainActivity extends AppCompatActivity {
         View bottomPanel = findViewById(R.id.bottomPanel);
         View groupIntro = findViewById(R.id.groupIntro);
         View groupLogin = findViewById(R.id.groupLogin);
-        MaterialButton btnLetsGo = findViewById(R.id.btnLetsGo);
+        View groupSignUp = findViewById(R.id.groupSignUp);   // thêm Sign Up panel
 
+        MaterialButton btnLetsGo = findViewById(R.id.btnLetsGo);
+        View tvSignUp = findViewById(R.id.tvSignUp);         // link "Sign up now"
+        View tvLoginNow = findViewById(R.id.tvLoginNow);     // link "Login now" trong Sign Up
+
+        // Khi bấm "Let’s Go" → Intro -> Login
         btnLetsGo.setOnClickListener(v -> {
-            // 1. Animate tăng chiều cao panel
             int startH = bottomPanel.getHeight();
             int targetH = (int) (getResources().getDisplayMetrics().heightPixels * 0.78f);
             targetH = Math.max(targetH, dpToPx(560));
@@ -41,12 +45,40 @@ public class MainActivity extends AppCompatActivity {
             });
             anim.start();
 
-            // 2. Chuyển Intro -> Login (crossfade)
+            // intro -> login
             groupIntro.animate()
                     .alpha(0f)
                     .setDuration(200)
                     .withEndAction(() -> {
                         groupIntro.setVisibility(View.GONE);
+                        groupLogin.setAlpha(0f);
+                        groupLogin.setVisibility(View.VISIBLE);
+                        groupLogin.animate().alpha(1f).setDuration(300).start();
+                    })
+                    .start();
+        });
+
+        // Khi bấm "Sign up now" → Login -> Sign Up
+        tvSignUp.setOnClickListener(v -> {
+            groupLogin.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> {
+                        groupLogin.setVisibility(View.GONE);
+                        groupSignUp.setAlpha(0f);
+                        groupSignUp.setVisibility(View.VISIBLE);
+                        groupSignUp.animate().alpha(1f).setDuration(300).start();
+                    })
+                    .start();
+        });
+
+        // Khi bấm "Login now" → Sign Up -> Login
+        tvLoginNow.setOnClickListener(v -> {
+            groupSignUp.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> {
+                        groupSignUp.setVisibility(View.GONE);
                         groupLogin.setAlpha(0f);
                         groupLogin.setVisibility(View.VISIBLE);
                         groupLogin.animate().alpha(1f).setDuration(300).start();
