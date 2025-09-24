@@ -274,7 +274,7 @@
                 app:cornerRadius="32dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="#FFD700"
-                app:icon="@drawable/ggdradk"
+                app:icon="@drawable/ic_google_24"
                 app:iconGravity="textStart"
                 app:iconPadding="10dp"
                 app:iconTint="@null"
