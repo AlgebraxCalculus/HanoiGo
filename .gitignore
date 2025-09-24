@@ -32,3 +32,6 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Backend Configuration
+backend/src/main/resources/application.properties
