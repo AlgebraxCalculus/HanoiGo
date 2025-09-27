@@ -28,18 +28,6 @@ public class FirebaseService {
         userInfo.setPicture(decodedToken.getPicture());
         userInfo.setEmailVerified(decodedToken.isEmailVerified());
         
-        // Lấy thông tin provider (cách đăng nhập)
-        String signInProvider = decodedToken.getClaims().get("firebase").toString();
-        if (signInProvider.contains("password")) {
-            userInfo.setSignInProvider("email");
-        } else if (signInProvider.contains("google.com")) {
-            userInfo.setSignInProvider("google");
-        } else if (signInProvider.contains("facebook.com")) {
-            userInfo.setSignInProvider("facebook");
-        } else {
-            userInfo.setSignInProvider("unknown");
-        }
-        
         return userInfo;
     }
     
