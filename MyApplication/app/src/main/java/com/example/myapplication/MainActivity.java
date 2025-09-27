@@ -16,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
         return (int) (dp * density);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,3 +88,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+
