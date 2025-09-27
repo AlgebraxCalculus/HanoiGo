@@ -38,16 +38,6 @@ public class MapActivity extends AppCompatActivity {
                 mapboxMap.setStyle(new Style.Builder().fromUri(styleUrl));
             }
         });
-
-//        // Handle search input
-//        searchBar.setOnEditorActionListener((v, actionId, event) -> {
-//            String query = searchBar.getText().toString();
-//            if (!query.isEmpty()) {
-//                Toast.makeText(MapActivity.this, "Searching: " + query, Toast.LENGTH_SHORT).show();
-//                // TODO: Call Goong API search
-//            }
-//            return true;
-//        });
     }
 
     // lifecycle
