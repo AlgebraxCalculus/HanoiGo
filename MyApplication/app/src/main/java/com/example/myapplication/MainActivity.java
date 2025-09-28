@@ -24,13 +24,12 @@ public class MainActivity extends AppCompatActivity {
         View bottomPanel = findViewById(R.id.bottomPanel);
         View groupIntro = findViewById(R.id.groupIntro);
         View groupLogin = findViewById(R.id.groupLogin);
-        View groupSignUp = findViewById(R.id.groupSignUp);   // thêm Sign Up panel
+        View groupSignUp = findViewById(R.id.groupSignUp);
 
         MaterialButton btnLetsGo = findViewById(R.id.btnLetsGo);
-        View tvSignUp = findViewById(R.id.tvSignUp);         // link "Sign up now"
-        View tvLoginNow = findViewById(R.id.tvLoginNow);     // link "Login now" trong Sign Up
+        View tvSignUp = findViewById(R.id.tvSignUp);
+        View tvLoginNow = findViewById(R.id.tvLoginNow);
 
-        // Khi bấm "Let’s Go" → Intro -> Login
         btnLetsGo.setOnClickListener(v -> {
             int startH = bottomPanel.getHeight();
             int targetH = (int) (getResources().getDisplayMetrics().heightPixels * 0.78f);
@@ -45,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
             });
             anim.start();
 
-            // intro -> login
             groupIntro.animate()
                     .alpha(0f)
                     .setDuration(200)
@@ -58,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
                     .start();
         });
 
-        // Khi bấm "Sign up now" → Login -> Sign Up
         tvSignUp.setOnClickListener(v -> {
             groupLogin.animate()
                     .alpha(0f)
@@ -72,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
                     .start();
         });
 
-        // Khi bấm "Login now" → Sign Up -> Login
         tvLoginNow.setOnClickListener(v -> {
             groupSignUp.animate()
                     .alpha(0f)
