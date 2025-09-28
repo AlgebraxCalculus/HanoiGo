@@ -1,71 +1,65 @@
-package com.example.hanoiGo.util;
+ package com.example.hanoiGo.util;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+ import io.jsonwebtoken.Claims;
+ import io.jsonwebtoken.Jwts;
+ import io.jsonwebtoken.SignatureAlgorithm;
+ import io.jsonwebtoken.security.Keys;
+ import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.util.Date;
+ import javax.crypto.SecretKey;
+ import java.util.Date;
 
-@Component
-public class JwtUtil {
-
-    @Value("${jwt.secret}")
-    private String jwtSecret;
-
-    @Value("${jwt.expiration}")
-    private long jwtExpirationMs;
-
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
-    }
-
-    public String generateToken(String email) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(getSigningKey())
-                .compact();
-    }
-
-    public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    public boolean isTokenExpired(String token) {
-        try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return claims.getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
-            return true;
-        }
-    }
-}
+ @Component
+ public class JwtUtil {
+    
+     private static final String SECRET_KEY = "mySecretKey123456789012345678901234567890"; // 32 ký tự
+     private static final int EXPIRATION_TIME = 86400000; // 24 giờ (milliseconds)
+    
+     private SecretKey getSigningKey() {
+         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+     }
+    
+     // Tạo JWT token
+     public String generateToken(String username) {
+         return Jwts.builder()
+                 .setSubject(username)
+                 .setIssuedAt(new Date())
+                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                 .compact();
+     }
+    
+     // Lấy username từ token
+     public String getUsernameFromToken(String token) {
+         Claims claims = Jwts.parserBuilder()
+                 .setSigningKey(getSigningKey())
+                 .build()
+                 .parseClaimsJws(token)
+                 .getBody();
+         return claims.getSubject();
+     }
+    
+     // Kiểm tra token có hợp lệ không
+     public boolean validateToken(String token, String username) {
+         try {
+             String tokenUsername = getUsernameFromToken(token);
+             return (username.equals(tokenUsername) && !isTokenExpired(token));
+         } catch (Exception e) {
+             return false;
+         }
+     }
+    
+     // Kiểm tra token đã hết hạn chưa
+     private boolean isTokenExpired(String token) {
+         try {
+             Claims claims = Jwts.parserBuilder()
+                     .setSigningKey(getSigningKey())
+                     .build()
+                     .parseClaimsJws(token)
+                     .getBody();
+             return claims.getExpiration().before(new Date());
+         } catch (Exception e) {
+             return true;
+         }
+     }
+ }

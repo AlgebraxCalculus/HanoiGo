@@ -1,16 +1,13 @@
 package com.example.hanoiGo.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -18,39 +15,43 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-
+    
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false, length = 50)
-    @NotBlank(message = "Username không được để trống")
-    @Size(min = 3, max = 50, message = "Username phải có từ 3-50 ký tự")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    
+    @Column(nullable = false)
     private String username;
-
-    @Column(unique = true, nullable = false, length = 100)
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
+    
+    @Column(unique = true, nullable = false)
     private String email;
-
+    
     @Column(nullable = false)
-    @NotBlank(message = "Password không được để trống")
     private String password;
-
-    @Column(name = "full_name", length = 100)
-    private String fullName;
-
-    @Column(length = 20)
-    private String phone;
-
-    @Column(nullable = false)
-    private Boolean enabled = true;
-
+    
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+    
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer points = 0;
+    
+    @Column(name = "rank")
+    private Integer rank;
+    
+    // Thêm các trường cho Firebase authentication
+    @Column(name = "firebase_uid", unique = true)
+    private String firebaseUid;
+    
+    // @Column(name = "full_name")
+    // private String fullName;
+    
+    @Column(name = "profile_picture")
+    private String profilePicture;
+    
+    // @Column(name = "sign_in_provider")
+    // private String signInProvider; // google, email, etc.
 }

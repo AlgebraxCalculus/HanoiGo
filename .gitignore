@@ -33,5 +33,5 @@ google-services.json
 # Android Profiling
 *.hprof
 
-# Backend Configuration
-backend/src/main/resources/application.properties
+# Firebase admin key
+/backend/src/main/resources/hanoi-go-firebase-adminsdk.json
