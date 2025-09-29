@@ -24,7 +24,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Tắt CSRF cho API
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không sử dụng session
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/user/firebase-login", "/api/user/test", "/api/user/me").permitAll() // Cho phép truy cập không cần đăng nhập
+                .requestMatchers("/api/users/firebase-login", "/api/users/test", "/api/users/me", "/api/users/register", "/api/users/login").permitAll() // Cho phép truy cập không cần đăng nhập
                 .anyRequest().authenticated() // Các request khác cần đăng nhập
             );
         

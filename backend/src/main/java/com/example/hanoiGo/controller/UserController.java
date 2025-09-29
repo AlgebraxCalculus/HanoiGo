@@ -1,63 +1,81 @@
 package com.example.hanoiGo.controller;
 
-import com.example.hanoiGo.dto.UserDTO;
- import com.example.hanoiGo.service.UserService;
- import com.example.hanoiGo.util.JwtUtil;
+import com.example.hanoiGo.dto.request.FirebaseLoginRequest;
+import com.example.hanoiGo.dto.request.LoginRequest;
+import com.example.hanoiGo.dto.request.RegisterRequest;
+import com.example.hanoiGo.dto.response.ApiResponse;
+import com.example.hanoiGo.dto.response.LoginResponse;
+import com.example.hanoiGo.dto.response.UserResponse;
+import com.example.hanoiGo.service.UserService;
+import com.example.hanoiGo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Cho phép CORS
+@CrossOrigin(origins = "*")
+@Slf4j
 public class UserController {
 
-     private final UserService userService;
-     private final JwtUtil jwtUtil;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-//     API đăng nhập bằng Firebase
-     @PostMapping("/firebase-login")
-     public ResponseEntity<?> loginWithFirebase(@RequestBody UserDTO.FirebaseLoginRequest request) {
-         try {
-            //  System.out.println("Loginnnnn")
-             UserDTO.LoginResponse response = userService.loginWithFirebase(request.getFirebaseToken());
-             return ResponseEntity.ok(response);
-         } catch (Exception e) {
-             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-         }
-     }
+     // Đăng ký user
+    @PostMapping("/register")
+    public ApiResponse<UserResponse> register(@RequestBody RegisterRequest request) {
+        UserResponse response = userService.register(request);
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .message("Đăng ký thành công")
+                .result(response)
+                .build();
+    }
 
-     // API lấy thông tin user hiện tại
-     @GetMapping("/me")
-     public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-         try {
-             System.out.println("Received Authorization header: " + authHeader);
+    // Đăng nhập (username/password)
+    @PostMapping("/login")
+    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse response = userService.login(request);
+        return ApiResponse.<LoginResponse>builder()
+                .code(1000)
+                .message("Đăng nhập thành công")
+                .result(response)
+                .build();
+    }
 
-             // Lấy token từ header "Authorization: Bearer <token>"
-             String token = authHeader.substring(7); // Bỏ "Bearer "
-             System.out.println("Extracted token: " + token);
+    // Đăng nhập Firebase
+    @PostMapping("/firebase-login")
+    public ApiResponse<LoginResponse> loginWithFirebase(@RequestBody FirebaseLoginRequest request) {
+        LoginResponse response = userService.loginWithFirebase(request.getFirebaseToken());
+        return ApiResponse.<LoginResponse>builder()
+                .code(1000)
+                .message("Đăng nhập thành công")
+                .result(response)
+                .build();
+    }
 
-             // Lấy username từ token
-             String username = jwtUtil.getUsernameFromToken(token);
-             System.out.println("Username from token: " + username);
+    // Lấy thông tin user hiện tại
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
+        String username = jwtUtil.getUsernameFromToken(token);
 
-             // Lấy thông tin user
-             UserDTO user = userService.getCurrentUser(username);
-             System.out.println("User info: " + user);
+        UserResponse user = userService.getCurrentUser(username);
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .message("Lấy thông tin user thành công")
+                .result(user)
+                .build();
+    }
 
-             return ResponseEntity.ok(user);
-         } catch (Exception e) {
-             e.printStackTrace(); // In stacktrace ra console
-             System.err.println("Error in /me: " + e.getMessage());
-             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ: " + e.getMessage());
-         }
-     }
-
-    // API test
+    // Test API
     @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("API hoạt động bình thường!");
+    public ApiResponse<String> test() {
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("API hoạt động bình thường!")
+                .result("ok")
+                .build();
     }
 }

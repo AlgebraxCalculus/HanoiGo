@@ -1,4 +1,4 @@
-package com.example.hanoiGo.dto;
+package com.example.hanoiGo.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +10,7 @@ import lombok.Data;
 public class RegisterRequest {
 
     @NotBlank(message = "Username không được để trống")
-    @Size(min = 3, max = 50, message = "Username phải có từ 3-50 ký tự")
+    @Size(min = 3, max = 50, message = "Username phải có từ 3 - 50 ký tự")
     private String username;
 
     @NotBlank(message = "Email không được để trống")
@@ -23,7 +23,4 @@ public class RegisterRequest {
         message = "Password phải có ít nhất 8 ký tự, bao gồm chữ cái, số và ký tự đặc biệt"
     )
     private String password;
-
-    private String fullName;
-    private String phone;
 }
