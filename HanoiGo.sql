@@ -1,17 +1,15 @@
--- Database: HanoiGo
-
 -- DROP DATABASE IF EXISTS "HanoiGo";
 
--- CREATE DATABASE "HanoiGo"
---     WITH
---     OWNER = postgres
---     ENCODING = 'UTF8'
---     LC_COLLATE = 'en-US'
---     LC_CTYPE = 'en-US'
---     LOCALE_PROVIDER = 'libc'
---     TABLESPACE = pg_default
---     CONNECTION LIMIT = -1
---     IS_TEMPLATE = False;
+CREATE DATABASE "HanoiGo"
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'en-US'
+    LC_CTYPE = 'en-US'
+    LOCALE_PROVIDER = 'libc'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -32,7 +30,7 @@ CREATE TABLE users (
     rank INT
 );
 
-select * from users
+select * from users;
 
 
 -- =========================
@@ -123,4 +121,15 @@ CREATE TABLE bookmarks (
     location_id UUID REFERENCES locations(id) ON DELETE CASCADE,
     bookmarked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, location_id) -- prevent duplicate bookmark
+);
+
+ALTER TABLE users
+ALTER COLUMN profile_picture TYPE TEXT;
+
+CREATE TABLE password_reset_token (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id UUID NOT NULL,
+    expiry_date TIMESTAMP,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );

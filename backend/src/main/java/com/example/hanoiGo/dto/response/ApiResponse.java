@@ -40,4 +40,13 @@ public class ApiResponse<T> {
                 .message(customMessage)
                 .build();
     }
+    
+    // error response custom data
+    public static <T> ApiResponse<T> error(ErrorCode errorCode, T data) {
+    return ApiResponse.<T>builder()
+            .code(errorCode.getCode())
+            .message(errorCode.getMessage())
+            .result(data)
+            .build();
+}
 }

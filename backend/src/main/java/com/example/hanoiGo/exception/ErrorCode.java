@@ -15,7 +15,8 @@ public enum ErrorCode {
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
     LOGIN_FAIL(1006, "Login fail", HttpStatus.BAD_REQUEST),
     USERNAME_EXISTED(1007, "Username existed", HttpStatus.BAD_REQUEST),
-    EMAIL_EXISTED(1008, "Email existed", HttpStatus.BAD_REQUEST)
+    EMAIL_EXISTED(1008, "Email existed", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1009, "Invalid token", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

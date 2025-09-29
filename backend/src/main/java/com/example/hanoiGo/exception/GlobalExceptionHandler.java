@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     // Lỗi validate @Valid
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+        MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
         return ResponseEntity
                 .status(errorCode.getStatusCode().value())
-                .body(ApiResponse.error(errorCode, errors.toString()));
+                .body(ApiResponse.error(errorCode, errors));
     }
 
     // Lỗi custom AppException

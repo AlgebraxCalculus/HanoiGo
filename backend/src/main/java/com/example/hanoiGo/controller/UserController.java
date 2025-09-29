@@ -8,6 +8,8 @@ import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.service.UserService;
 import com.example.hanoiGo.util.JwtUtil;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,7 @@ public class UserController {
 
      // Đăng ký user
     @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@RequestBody RegisterRequest request) {
+    public ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         UserResponse response = userService.register(request);
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
@@ -35,7 +37,7 @@ public class UserController {
 
     // Đăng nhập (username/password)
     @PostMapping("/login")
-    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = userService.login(request);
         return ApiResponse.<LoginResponse>builder()
                 .code(1000)
