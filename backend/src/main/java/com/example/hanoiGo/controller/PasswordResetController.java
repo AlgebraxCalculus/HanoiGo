@@ -10,6 +10,7 @@ import com.example.hanoiGo.dto.request.ResetPasswordRequest;
 import com.example.hanoiGo.dto.response.ApiResponse;
 import com.example.hanoiGo.service.PasswordResetService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,13 +21,13 @@ public class PasswordResetController {
     private final PasswordResetService passwordResetService;
 
     @PostMapping("/forgot-password")
-    public ApiResponse<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ApiResponse<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         passwordResetService.sendOtp(request);
         return ApiResponse.success(null, "OTP sent successfully to " + request.getEmail());
     }
 
     @PostMapping("/reset-password")
-    public ApiResponse<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ApiResponse<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordResetService.resetPassword(request);
         return ApiResponse.success(null, "Password reset successfully");
     }
