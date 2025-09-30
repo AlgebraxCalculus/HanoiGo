@@ -12,7 +12,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
+    private static final String[] PUBLIC_ENDPOINTS = {
+        "/api/users/**", 
+        "/api/auth/**"   
+    };
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -24,7 +27,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Tắt CSRF cho API
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không sử dụng session
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/firebase-login", "/api/users/test", "/api/users/me", "/api/users/register", "/api/users/login", "/api/auth/forgot-password", "/api/auth/reset-password").permitAll() // Cho phép truy cập không cần đăng nhập
+                .requestMatchers(PUBLIC_ENDPOINTS).permitAll() // Cho phép truy cập không cần đăng nhập
                 .anyRequest().authenticated() // Các request khác cần đăng nhập
             );
         

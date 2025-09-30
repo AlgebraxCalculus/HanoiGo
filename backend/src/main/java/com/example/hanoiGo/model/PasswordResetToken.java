@@ -25,4 +25,6 @@ public class PasswordResetToken {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiryDate;
+
+    private boolean verified;
 }

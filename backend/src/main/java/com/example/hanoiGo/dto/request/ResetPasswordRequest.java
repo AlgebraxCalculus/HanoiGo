@@ -6,8 +6,6 @@ import lombok.Data;
 
 @Data
 public class ResetPasswordRequest {
-    private String email;
-    private String otp;
     @NotBlank(message = "Password mới không được để trống")
     @Pattern(
         regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@$!%*?&:/])[A-Za-z\\d@$!%*?&:/]{8,}$",

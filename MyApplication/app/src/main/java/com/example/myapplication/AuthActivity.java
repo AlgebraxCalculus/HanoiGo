@@ -2,10 +2,12 @@ package com.example.myapplication;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -319,6 +321,9 @@ public class AuthActivity extends AppCompatActivity {
                     })
                     .start();
         });
+
+        TextView tvResendOtp = findViewById(R.id.tvResendOtp);
+        tvResendOtp.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
     }
 
     

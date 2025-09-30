@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.hanoiGo.dto.request.ForgotPasswordRequest;
 import com.example.hanoiGo.dto.request.ResetPasswordRequest;
+import com.example.hanoiGo.dto.request.VerifyOtpRequest;
 import com.example.hanoiGo.dto.response.ApiResponse;
 import com.example.hanoiGo.service.PasswordResetService;
 
@@ -24,6 +25,11 @@ public class PasswordResetController {
     public ApiResponse<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         passwordResetService.sendOtp(request);
         return ApiResponse.success(null, "OTP sent successfully to " + request.getEmail());
+    }
+    @PostMapping("/verify-otp")
+    public ApiResponse<String> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        passwordResetService.verifyOtp(request);
+        return ApiResponse.success(null, "OTP verified successfully");
     }
 
     @PostMapping("/reset-password")

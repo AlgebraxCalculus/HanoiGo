@@ -447,24 +447,24 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
-            android:paddingTop="90dp">
+            android:paddingTop="60dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Forgot\npassword"
                 android:textColor="#FFD700"
-                android:textSize="36sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/poppins_semibold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
                 android:text="Please enter your account’s email to receive a verification OTP code"
                 android:textColor="#FAFAD2"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:fontFamily="@font/poppins_regular" />
 
             <TextView
@@ -491,7 +491,10 @@
                     android:layout_height="wrap_content"
                     android:hint="enter your account’s email"
                     android:textColor="#FFFFFF"
-                    android:textColorHint="#4DFFFFFF" />
+                    android:textColorHint="#4DFFFFFF"
+                    android:inputType="textEmailAddress"
+                    android:singleLine="true"
+                    android:imeOptions="actionDone" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <View
@@ -504,7 +507,7 @@
                 android:id="@+id/btnSend"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:layout_marginTop="130dp"
+                android:layout_marginTop="50dp"
                 android:text="Send"
                 android:textAllCaps="false"
                 android:textColor="#000000"
@@ -531,7 +534,6 @@
 
         <!-- ===================== Verify your email ===================== -->
         <LinearLayout
-
             android:id="@+id/groupVerifyEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -544,57 +546,71 @@
                 android:layout_height="wrap_content"
                 android:text="Verify\nyour email"
                 android:textColor="#FFD700"
-                android:textSize="36sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/poppins_semibold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="20dp"
                 android:text="Please enter the OTP code sent to"
                 android:textColor="#FAFAD2"
-                android:textSize="20sp"
+                android:textSize="19sp"
                 android:fontFamily="@font/poppins_regular" />
+
+            <TextView
+                android:id="@+id/tvMaskedEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="thuyvncb3103@gmail.com"
+                android:textColor="#FAFAD2"
+                android:textSize="19sp"
+                android:fontFamily="@font/poppins_medium"/>
 
             <com.chaos.view.PinView
                 android:id="@+id/pinViewOtp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
+                android:layout_gravity="center"
                 android:cursorVisible="true"
                 android:inputType="number"
                 android:gravity="center"
-                android:textSize="20sp"
+                android:textSize="25sp"
+                android:textColor="#000000"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 app:itemCount="6"
-                app:itemHeight="55dp"
-                app:itemWidth="55dp"
-                app:itemBackground="@drawable/bg_otp_item"
-                app:lineWidth="1dp"/>
-
-
+                app:itemHeight="50dp"
+                app:itemWidth="50dp"
+                app:itemSpacing="12dp"
+                android:itemBackground="@drawable/bg_otp_item"
+                app:lineWidth="0dp"
+                app:lineColor="@android:color/transparent"/>
 
 
             <TextView
                 android:id="@+id/tvResendOtp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="25dp"
+                android:layout_gravity="center"
                 android:text="Resend OTP code"
                 android:textColor="#019E9B"
-                android:textSize="14sp"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 android:fontFamily="@font/poppins_regular"
                 android:clickable="true"
                 android:focusable="true"
-                android:foreground="?attr/selectableItemBackgroundBorderless" />
+                android:foreground="?attr/selectableItemBackgroundBorderless"/>
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVerify"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:layout_marginTop="130dp"
+                android:layout_marginTop="20dp"
                 android:text="Verify"
                 android:textAllCaps="false"
                 android:textColor="#000000"
@@ -626,14 +642,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
-            android:paddingTop="72dp">
+            android:paddingTop="90dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Reset password"
                 android:textColor="#FFD700"
-                android:textSize="32sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/poppins_semibold" />
 
@@ -643,7 +659,7 @@
                 android:layout_marginTop="12dp"
                 android:text="Please enter your new password"
                 android:textColor="#FAFAD2"
-                android:textSize="14sp"
+                android:textSize="20sp"
                 android:fontFamily="@font/poppins_regular" />
 
             <TextView
@@ -653,7 +669,7 @@
                 android:text="New password"
                 android:textColor="#FFD700"
                 android:textStyle="bold"
-                android:textSize="14sp" />
+                android:textSize="20sp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilNewPassword"
@@ -668,7 +684,7 @@
                     android:id="@+id/edtNewPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="enter your new password"
+                    android:hint="Enter your new password"
                     android:inputType="textPassword"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#4DFFFFFF" />
@@ -687,7 +703,7 @@
                 android:text="Confirm password"
                 android:textColor="#FFD700"
                 android:textStyle="bold"
-                android:textSize="14sp" />
+                android:textSize="20sp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilConfirmPassword"
@@ -702,7 +718,7 @@
                     android:id="@+id/edtConfirmPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="confirm your new password"
+                    android:hint="Confirm your new password"
                     android:inputType="textPassword"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#4DFFFFFF" />

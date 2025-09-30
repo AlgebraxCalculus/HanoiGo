@@ -135,3 +135,6 @@ CREATE TABLE password_reset_token (
 );
 
 select * from password_reset_token
+
+ALTER TABLE password_reset_token
+ADD COLUMN verified BOOLEAN NOT NULL DEFAULT FALSE;
