@@ -133,3 +133,5 @@ CREATE TABLE password_reset_token (
     expiry_date TIMESTAMP,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+select * from password_reset_token
