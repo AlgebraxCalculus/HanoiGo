@@ -26,6 +26,7 @@ public class PasswordResetController {
         passwordResetService.sendOtp(request);
         return ApiResponse.success(null, "OTP sent successfully to " + request.getEmail());
     }
+
     @PostMapping("/verify-otp")
     public ApiResponse<String> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         passwordResetService.verifyOtp(request);

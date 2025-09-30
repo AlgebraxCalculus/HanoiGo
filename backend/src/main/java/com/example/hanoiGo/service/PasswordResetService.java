@@ -57,14 +57,14 @@ public class PasswordResetService {
     // verify OTP
     public void verifyOtp(VerifyOtpRequest request) {
         PasswordResetToken token = tokenRepository.findByToken(request.getOtp());
+
         if(token == null || !token.getToken().equals(request.getOtp())) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
         if(token.getExpiryDate().before(new Date())) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-
-        if (token.getExpiryDate().before(new Date())) {
+        if(!token.getUser().getEmail().equals(request.getEmail())) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -74,11 +74,14 @@ public class PasswordResetService {
 
     // reset password
     public void resetPassword(ResetPasswordRequest request) {
-        PasswordResetToken token = tokenRepository.findFirstByVerifiedTrueOrderByExpiryDateDesc();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        PasswordResetToken token = tokenRepository.findByUser(user);
+
         if(token == null) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-        User user = token.getUser();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 

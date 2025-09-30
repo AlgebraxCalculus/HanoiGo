@@ -563,7 +563,7 @@
                 android:id="@+id/tvMaskedEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="thuyvncb3103@gmail.com"
+                android:text="example@gmail.com"
                 android:textColor="#FAFAD2"
                 android:textSize="19sp"
                 android:fontFamily="@font/poppins_medium"/>

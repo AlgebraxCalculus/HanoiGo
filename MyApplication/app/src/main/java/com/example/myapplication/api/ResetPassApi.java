@@ -61,11 +61,12 @@ public class ResetPassApi {
         }
     }
 
-    public static void verifyEmail(String otp, Context context, ResetPassApi.ResetPassApiCallback callback) {
+    public static void verifyEmail(String email, String otp, Context context, ResetPassApi.ResetPassApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
         try {
             JSONObject json = new JSONObject();
+            json.put("email", email);
             json.put("otp", otp);
 
             RequestBody body = RequestBody.create(
@@ -74,7 +75,7 @@ public class ResetPassApi {
             );
 
             Request request = new Request.Builder()
-                    .url(BASE_URL + "/verify-email")
+                    .url(BASE_URL + "/verify-otp")
                     .post(body)
                     .build();
 
@@ -104,12 +105,13 @@ public class ResetPassApi {
         }
     }
 
-    public static void resetPassword(String password, Context context, ResetPassApi.ResetPassApiCallback callback) {
+    public static void resetPassword(String email, String password, Context context, ResetPassApi.ResetPassApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
         try {
             JSONObject json = new JSONObject();
-            json.put("password", password);
+            json.put("email", email);
+            json.put("newPassword", password);
 
             RequestBody body = RequestBody.create(
                     json.toString(),

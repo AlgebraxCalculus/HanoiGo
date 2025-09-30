@@ -72,8 +72,8 @@ public class AuthActivity extends AppCompatActivity {
         authFirebaseController = new AuthFirebaseController(this);
         authFirebaseController.signOut();
 
-        PinView pinView = findViewById(R.id.pinViewOtp);
-//        pinView.requestFocus();
+        TextView tvResendOtp = findViewById(R.id.tvResendOtp);
+        tvResendOtp.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
 
 
 
@@ -290,6 +290,7 @@ public class AuthActivity extends AppCompatActivity {
 
         //NÚT btnSend
         MaterialButton btnSend = findViewById(R.id.btnSend);
+        TextView tvMaskedEmail = findViewById(R.id.tvMaskedEmail);
         btnSend.setOnClickListener(v -> {
             String email = ((EditText)findViewById(R.id.edtForgotEmail)).getText().toString();
 
@@ -299,6 +300,7 @@ public class AuthActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         Toast.makeText(AuthActivity.this, message, Toast.LENGTH_SHORT).show();
                         System.out.println(message);
+                        tvMaskedEmail.setText(email);
 
                         groupForgotPass.animate()
                                 .alpha(0f)
@@ -310,6 +312,25 @@ public class AuthActivity extends AppCompatActivity {
                                     groupVerifyEmail.animate().alpha(1f).setDuration(300).start();
                                 })
                                 .start();
+                    });
+
+                }
+
+                public void onFailure(String errorMessage){
+                    runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Forgot password failed: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            });
+        });
+
+        tvResendOtp.setOnClickListener(v -> {
+            String email = ((EditText)findViewById(R.id.edtForgotEmail)).getText().toString();
+
+            ResetPassApi.forgotPassword(email, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
+                @Override
+                public void onSuccess(String message){
+                    runOnUiThread(() -> {
+                        Toast.makeText(AuthActivity.this, message, Toast.LENGTH_SHORT).show();
+                        System.out.println(message);
                     });
                 }
 
@@ -323,9 +344,11 @@ public class AuthActivity extends AppCompatActivity {
         MaterialButton btnVerify = findViewById(R.id.btnVerify);
         btnVerify.setOnClickListener(v -> {
             String otp = ((EditText)findViewById(R.id.pinViewOtp)).getText().toString();
+            String email = ((EditText)findViewById(R.id.edtForgotEmail)).getText().toString();
             System.out.println("otp: "+ otp);
+            System.out.println("email: "+ email);
 
-            ResetPassApi.verifyEmail(otp, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
+            ResetPassApi.verifyEmail(email, otp, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
                 @Override
                 public void onSuccess(String message){
                     runOnUiThread(() -> {
@@ -354,6 +377,7 @@ public class AuthActivity extends AppCompatActivity {
         //NÚT btnSave
         MaterialButton btnSave = findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> {
+            String email = ((EditText)findViewById(R.id.edtForgotEmail)).getText().toString();
             String password = ((EditText)findViewById(R.id.edtNewPassword)).getText().toString();
             String newPassword = ((EditText)findViewById(R.id.edtConfirmPassword)).getText().toString();
 
@@ -361,7 +385,7 @@ public class AuthActivity extends AppCompatActivity {
                 Toast.makeText(AuthActivity.this, "Password does not match", Toast.LENGTH_SHORT).show();
                 return;
             }else{
-                ResetPassApi.resetPassword(password, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
+                ResetPassApi.resetPassword(email, password, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
                     @Override
                     public void onSuccess(String message){
                         runOnUiThread(() -> {
@@ -388,8 +412,7 @@ public class AuthActivity extends AppCompatActivity {
             }
         });
 
-        TextView tvResendOtp = findViewById(R.id.tvResendOtp);
-        tvResendOtp.setPaintFlags(Paint.UNDERLINE_TEXT_FLAG);
+
     }
 
     
