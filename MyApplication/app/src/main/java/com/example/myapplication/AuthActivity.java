@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chaos.view.PinView;
+import com.example.myapplication.api.ResetPassApi;
 import com.example.myapplication.controller.AuthFirebaseController;
 import com.example.myapplication.api.AuthApi;
 import com.google.android.material.button.MaterialButton;
@@ -72,7 +73,7 @@ public class AuthActivity extends AppCompatActivity {
         authFirebaseController.signOut();
 
         PinView pinView = findViewById(R.id.pinViewOtp);
-        pinView.requestFocus();
+//        pinView.requestFocus();
 
 
 
@@ -219,22 +220,27 @@ public class AuthActivity extends AppCompatActivity {
             String username = ((EditText)findViewById(R.id.edtUsername)).getText().toString();
             String password = ((EditText)findViewById(R.id.edtPassword)).getText().toString();
 
-            AuthApi.login(username, password, AuthActivity.this, new AuthApi.AuthApiCallback() {
-                @Override
-                public void onSuccess(String jwtToken, JSONObject userObj) {
-                    runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login successful!", Toast.LENGTH_SHORT).show());
-                    System.out.println("JWT token:" + jwtToken);
-                    System.out.println("user information: " + userObj.toString());
-                }
+            if(username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(AuthActivity.this, "Username or password is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }else{
+                AuthApi.login(username, password, AuthActivity.this, new AuthApi.AuthApiCallback() {
+                    @Override
+                    public void onSuccess(String jwtToken, JSONObject userObj) {
+                        runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login successful!", Toast.LENGTH_SHORT).show());
+                        System.out.println("JWT token:" + jwtToken);
+                        System.out.println("user information: " + userObj.toString());
+                    }
 
-                @Override
-                public void onSuccess(JSONObject userObj) {}
+                    @Override
+                    public void onSuccess(JSONObject userObj) {}
 
-                @Override
-                public void onFailure(String errorMessage) {
-                    runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login failed: " + errorMessage, Toast.LENGTH_SHORT).show());
-                }
-            });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login failed: " + errorMessage, Toast.LENGTH_SHORT).show());
+                    }
+                });
+            }
         });
 
         //NÚT btnSignup
@@ -244,82 +250,142 @@ public class AuthActivity extends AppCompatActivity {
             String email = ((EditText)findViewById(R.id.edtSignUpEmail)).getText().toString();
             String password = ((EditText)findViewById(R.id.edtSignUpPassword)).getText().toString();
 
-            AuthApi.register(username, email, password, AuthActivity.this, new AuthApi.AuthApiCallback() {
-                @Override
-                public void onSuccess(String jwtToken,JSONObject userObj) {}
+            if(username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(AuthActivity.this, "Username or email or password is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }else{
+                AuthApi.register(username, email, password, AuthActivity.this, new AuthApi.AuthApiCallback() {
+                    @Override
+                    public void onSuccess(String jwtToken,JSONObject userObj) {}
 
-                @Override
-                public void onSuccess(JSONObject userObj) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(AuthActivity.this, "Signup successful!", Toast.LENGTH_SHORT).show();
-                        System.out.println("user information: " + userObj.toString());
+                    @Override
+                    public void onSuccess(JSONObject userObj) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(AuthActivity.this, "Signup successful!", Toast.LENGTH_SHORT).show();
+                            System.out.println("user information: " + userObj.toString());
 
-                        // Chuyển từ Sign Up sang Login
-                        groupSignUp.animate()
-                                .alpha(0f)
-                                .setDuration(200)
-                                .withEndAction(() -> {
-                                    groupSignUp.setVisibility(View.GONE);
-                                    groupLogin.setAlpha(0f);
-                                    groupLogin.setVisibility(View.VISIBLE);
-                                    groupLogin.animate().alpha(1f).setDuration(300).start();
-                                })
-                                .start();
-                    });
-                    //TODO: chuyển sang màn hình login
+                            // Chuyển từ Sign Up sang Login
+                            groupSignUp.animate()
+                                    .alpha(0f)
+                                    .setDuration(200)
+                                    .withEndAction(() -> {
+                                        groupSignUp.setVisibility(View.GONE);
+                                        groupLogin.setAlpha(0f);
+                                        groupLogin.setVisibility(View.VISIBLE);
+                                        groupLogin.animate().alpha(1f).setDuration(300).start();
+                                    })
+                                    .start();
+                        });
+                        //TODO: chuyển sang màn hình login
 
-                }
+                    }
 
-                @Override
-                public void onFailure(String errorMessage) {
-                    runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Signup failed: " + errorMessage, Toast.LENGTH_SHORT).show());
-                }
-            });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Signup failed: " + errorMessage, Toast.LENGTH_SHORT).show());
+                    }
+                });
+            }
         });
 
         //NÚT btnSend
         MaterialButton btnSend = findViewById(R.id.btnSend);
         btnSend.setOnClickListener(v -> {
-            groupForgotPass.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> {
-                        groupForgotPass.setVisibility(View.GONE);
-                        groupVerifyEmail.setAlpha(0f);
-                        groupVerifyEmail.setVisibility(View.VISIBLE);
-                        groupVerifyEmail.animate().alpha(1f).setDuration(300).start();
-                    })
-                    .start();
+            String email = ((EditText)findViewById(R.id.edtForgotEmail)).getText().toString();
+
+            ResetPassApi.forgotPassword(email, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
+                @Override
+                public void onSuccess(String message){
+                    runOnUiThread(() -> {
+                        Toast.makeText(AuthActivity.this, message, Toast.LENGTH_SHORT).show();
+                        System.out.println(message);
+
+                        groupForgotPass.animate()
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> {
+                                    groupForgotPass.setVisibility(View.GONE);
+                                    groupVerifyEmail.setAlpha(0f);
+                                    groupVerifyEmail.setVisibility(View.VISIBLE);
+                                    groupVerifyEmail.animate().alpha(1f).setDuration(300).start();
+                                })
+                                .start();
+                    });
+                }
+
+                public void onFailure(String errorMessage){
+                    runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Forgot password failed: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            });
         });
 
         //NÚT btnVerify
         MaterialButton btnVerify = findViewById(R.id.btnVerify);
         btnVerify.setOnClickListener(v -> {
-            groupVerifyEmail.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> {
-                        groupVerifyEmail.setVisibility(View.GONE);
-                        groupResetPass.setAlpha(0f);
-                        groupResetPass.setVisibility(View.VISIBLE);
-                        groupResetPass.animate().alpha(1f).setDuration(300).start();
-                    })
-                    .start();
+            String otp = ((EditText)findViewById(R.id.pinViewOtp)).getText().toString();
+            System.out.println("otp: "+ otp);
+
+            ResetPassApi.verifyEmail(otp, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
+                @Override
+                public void onSuccess(String message){
+                    runOnUiThread(() -> {
+                        Toast.makeText(AuthActivity.this, message, Toast.LENGTH_SHORT).show();
+                        System.out.println(message);
+
+                        groupVerifyEmail.animate()
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> {
+                                    groupVerifyEmail.setVisibility(View.GONE);
+                                    groupResetPass.setAlpha(0f);
+                                    groupResetPass.setVisibility(View.VISIBLE);
+                                    groupResetPass.animate().alpha(1f).setDuration(300).start();
+                                })
+                                .start();
+                    });
+                }
+
+                public void onFailure(String errorMessage){
+                    runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Verify email failed: " + errorMessage, Toast.LENGTH_SHORT).show());
+                }
+            });
         });
 
         //NÚT btnSave
         MaterialButton btnSave = findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> {
-            groupResetPass.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction(() -> {
-                        groupResetPass.setVisibility(View.GONE);
-                        groupLogin.setAlpha(0f);
-                        groupLogin.setVisibility(View.VISIBLE);
-                        groupLogin.animate().alpha(1f).setDuration(300).start();
-                    })
-                    .start();
+            String password = ((EditText)findViewById(R.id.edtNewPassword)).getText().toString();
+            String newPassword = ((EditText)findViewById(R.id.edtConfirmPassword)).getText().toString();
+
+            if(password.isEmpty() || newPassword.isEmpty() || !password.equals(newPassword)) {
+                Toast.makeText(AuthActivity.this, "Password does not match", Toast.LENGTH_SHORT).show();
+                return;
+            }else{
+                ResetPassApi.resetPassword(password, AuthActivity.this, new ResetPassApi.ResetPassApiCallback() {
+                    @Override
+                    public void onSuccess(String message){
+                        runOnUiThread(() -> {
+                            Toast.makeText(AuthActivity.this, message, Toast.LENGTH_SHORT).show();
+                            System.out.println(message);
+
+                            groupResetPass.animate()
+                                    .alpha(0f)
+                                    .setDuration(200)
+                                    .withEndAction(() -> {
+                                        groupResetPass.setVisibility(View.GONE);
+                                        groupLogin.setAlpha(0f);
+                                        groupLogin.setVisibility(View.VISIBLE);
+                                        groupLogin.animate().alpha(1f).setDuration(300).start();
+                                    })
+                                    .start();
+                        });
+                    }
+
+                    public void onFailure(String errorMessage){
+                        runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Reset password failed: " + errorMessage, Toast.LENGTH_SHORT).show());
+                    }
+                });
+            }
         });
 
         TextView tvResendOtp = findViewById(R.id.tvResendOtp);
