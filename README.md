@@ -1,5 +1,5 @@
 # HanoiGo
-BTL môn Lập trình mobile
+BTL môn Lập trình mobile LMAO
 # 🔑 Thiết lập Mapbox Access Token
 Repo này không chứa file token để tránh lộ key. Cần tự tạo file  ```mapbox_access_token.xml``` trước khi chạy project:
 # 1. Vào thư mục:
