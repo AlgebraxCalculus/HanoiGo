@@ -380,6 +380,7 @@
                 app:boxBackgroundMode="none"
                 app:startIconDrawable="@drawable/ic_lock_24"
                 app:startIconTint="#FFD700"
+                app:endIconMode="password_toggle"
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -678,6 +679,7 @@
                 app:boxBackgroundMode="none"
                 app:startIconDrawable="@drawable/ic_lock_24"
                 app:startIconTint="#FFD700"
+                app:endIconMode="password_toggle"
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -712,6 +714,7 @@
                 app:boxBackgroundMode="none"
                 app:startIconDrawable="@drawable/ic_lock_24"
                 app:startIconTint="#FFD700"
+                app:endIconMode="password_toggle"
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
