@@ -1,19 +1,7 @@
 # HanoiGo
-BTL môn Lập trình mobile LMAO
-# 🔑 Thiết lập Mapbox Access Token
-Repo này không chứa file token để tránh lộ key. Cần tự tạo file  ```mapbox_access_token.xml``` trước khi chạy project:
-# 1. Vào thư mục:
-```bash
-app/src/main/res/values/
-```
-# 2. Tạo file mới tên:
-```bash
-mapbox_access_token.xml
-```
-# 3. Thêm nội dung sau vào file vừa tạo, và thay YOUR_MAPBOX_TOKEN_HERE (token do Mapbox tạo) bằng token thật:
-```bash
-<resources>
-    <string name="mapbox_access_token">YOUR_MAPBOX_TOKEN_HERE</string>
-</resources>
-```
-# 4. Lưu file và build lại project.
+BTL môn Lập trình mobile
+# Một số lưu ý cài đặt
+1. Bổ sung thêm Mapbox API key dạng download - only trong file gradles.properties
+   ``MAPBOX_DOWNLOADS_TOKEN= sk.YOUR_MAPBOX_TOKEN``
+2. Bổ sung thêm Goong maptile key trong res/values/goong_api_key.xml
+   ``<string name="goong_api_key">YOUR_GOONG_API_KEY</string>``
