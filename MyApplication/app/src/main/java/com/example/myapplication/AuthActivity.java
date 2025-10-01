@@ -46,6 +46,7 @@ public class AuthActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(String errorMessage) {
+                                    authFirebaseController.signOut();
                                     runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login failed: " + errorMessage, Toast.LENGTH_SHORT).show());
                                 }
                             });
