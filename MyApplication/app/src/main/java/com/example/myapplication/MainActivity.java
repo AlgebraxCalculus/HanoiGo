@@ -4,10 +4,13 @@ import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.content.Intent;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
         MaterialButton btnLetsGo = findViewById(R.id.btnLetsGo);
         View tvSignUp = findViewById(R.id.tvSignUp);
         View tvLoginNow = findViewById(R.id.tvLoginNow);
+
+        MaterialButton btnLogin = findViewById(R.id.btnLogin);
+        TextInputEditText edtUsername = findViewById(R.id.edtUsername);
+        TextInputEditText edtPassword = findViewById(R.id.edtPassword);
 
         btnLetsGo.setOnClickListener(v -> {
             int startH = bottomPanel.getHeight();
@@ -82,6 +89,22 @@ public class MainActivity extends AppCompatActivity {
                     })
                     .start();
         });
+
+        btnLogin.setOnClickListener(v -> {
+            String username = edtUsername.getText().toString().trim();
+            String password = edtPassword.getText().toString().trim();
+
+            if (!username.isEmpty() && !password.isEmpty()) {
+                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(MainActivity.this,
+                        "Please enter username and password",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 }
 
