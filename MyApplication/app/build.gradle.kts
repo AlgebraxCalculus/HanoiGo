@@ -54,4 +54,5 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.github.chaosleung:pinview:1.4.4")
     implementation("com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.2")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
