@@ -49,9 +49,9 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("com.google.android.material:material:1.12.0")
     implementation(libs.material)
-//    implementation("com.mapbox.maps:android-ndk27:11.15.0")
     implementation("com.github.bumptech.glide:glide:5.0.5")
     implementation("com.google.android.gms:play-services-auth:21.4.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.github.chaosleung:pinview:1.4.4")
+    implementation("com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.2")
 }
