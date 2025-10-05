@@ -14,7 +14,6 @@ import com.mapbox.mapboxsdk.maps.Style;
 public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
-    private EditText searchBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +24,6 @@ public class MapActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_map);
         mapView = findViewById(R.id.mapView);
-//        searchBar = findViewById(R.id.searchBar);
 
         mapView.onCreate(savedInstanceState);
 
