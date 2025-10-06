@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="client_id">252380724311-5gonosnpqs2g2uruilf6q6rqgv6ear2t.apps.googleusercontent.com</string>
+
+    <!-- Search -->
+    <string name="hint_search">Search here…</string>
+    <string name="desc_search_icon">Search icon</string>
+    <string name="desc_action_icon">Action button</string>
+
+    <!-- Tags -->
+    <string name="tag_iconic">★ Iconic</string>
+    <string name="tag_cuisine">🍴 Cuisine</string>
+    <string name="tag_entertaining">👜 Entertaining</string>
+    <string name="tag_culture">🏛️ Culture</string>
+
 </resources>

@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.myapplication">
 
-    <!-- Add Internet permission -->
+    <!-- Quyền truy cập Internet và mạng -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
-    <!-- Existing permissions -->
+
+    <!-- Quyền truy cập vị trí -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -33,6 +33,16 @@
             </intent-filter>
         </activity>
 
+        <!-- MapActivity -->
+        <activity
+            android:name=".MapActivity"
+            android:exported="true">
+        </activity>
+
+        <!-- Mapbox/Goong API Key -->
+        <meta-data
+            android:name="com.mapbox.maps.token"
+            android:value="@string/goong_api_key" />
+
     </application>
 </manifest>
-
