@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -146,6 +146,7 @@
                             android:background="@drawable/bg_chip_gray"
                             android:padding="6dp"
                             android:text="Your highest achievement 🥇"
+                            android:textColor="@color/main_app_color"
                             android:textSize="12sp" />
 
                         <TextView
@@ -317,7 +318,8 @@
                     android:fontFamily="@font/poppins_regular"
                     android:text="Check out these recommendations"
                     android:textColor="#333333"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
             </LinearLayout>
 
             <LinearLayout
@@ -691,6 +693,7 @@
                     android:text="Check out your achievements collection and climb to the top of the community leaderboard with every trip!"
                     android:textColor="#444444"
                     android:textSize="18dp"
+                    android:textStyle="bold"
                     android:lineSpacingExtra="2dp"/>
             </LinearLayout>
             <LinearLayout
@@ -906,7 +909,7 @@
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="bottom|center_horizontal"
-                                    android:background="@drawable/bg_circle_number"
+                                    android:background="@drawable/bg_circle_number_2"
                                     android:gravity="center"
                                     android:text="2"
                                     android:textColor="@android:color/black"
@@ -916,15 +919,28 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="The36Slayer"
+                                android:text="TheGundamSlayer"
                                 android:textColor="@android:color/white"
                                 android:textSize="12sp"/>
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="1136"
-                                android:textColor="@android:color/white"/>
+                                android:orientation="horizontal"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:src="@drawable/ic_point_user"
+                                    android:layout_marginEnd="5dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1136"
+                                    android:textColor="@android:color/white"/>
+                            </LinearLayout>
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -947,7 +963,7 @@
                                     android:layout_width="26dp"
                                     android:layout_height="26dp"
                                     android:layout_gravity="bottom|center_horizontal"
-                                    android:background="@drawable/bg_circle_number"
+                                    android:background="@drawable/bg_circle_number_1"
                                     android:gravity="center"
                                     android:text="1"
                                     android:textColor="@android:color/black"
@@ -961,11 +977,24 @@
                                 android:textColor="@android:color/white"
                                 android:textSize="12sp"/>
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="1234"
-                                android:textColor="@android:color/white"/>
+                                android:orientation="horizontal"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:src="@drawable/ic_point_user"
+                                    android:layout_marginEnd="5dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1234"
+                                    android:textColor="@android:color/white"/>
+                            </LinearLayout>
                         </LinearLayout>
                         <LinearLayout
                             android:layout_width="0dp"
@@ -988,7 +1017,7 @@
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
                                     android:layout_gravity="bottom|center_horizontal"
-                                    android:background="@drawable/bg_circle_number"
+                                    android:background="@drawable/bg_circle_number_3"
                                     android:gravity="center"
                                     android:text="3"
                                     android:textColor="@android:color/black"
@@ -1002,11 +1031,24 @@
                                 android:textColor="@android:color/white"
                                 android:textSize="12sp"/>
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="1037"
-                                android:textColor="@android:color/white"/>
+                                android:orientation="horizontal"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:src="@drawable/ic_point_user"
+                                    android:layout_marginEnd="5dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1037"
+                                    android:textColor="@android:color/white"/>
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
                     <TextView
@@ -1046,11 +1088,24 @@
                             android:text="Đỗ Trung Quân"
                             android:textColor="@android:color/white"/>
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1236"
-                            android:textColor="@android:color/white"/>
+                            android:orientation="horizontal"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_point_user"
+                                android:layout_marginEnd="5dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1504"
+                                android:textColor="@android:color/white"/>
+                        </LinearLayout>
                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -1086,13 +1141,127 @@
                                 android:text="Đỗ Trung Quân"
                                 android:textColor="@android:color/white"/>
 
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:src="@drawable/ic_point_user"
+                                    android:layout_marginEnd="5dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="988"
+                                    android:textColor="@android:color/white"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="#5"
+                            android:textColor="@android:color/white"/>
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_person_24"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/bg_circle"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:text="Đỗ Trung Quân"
+                            android:textColor="@android:color/white"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_point_user"
+                                android:layout_marginEnd="5dp"/>
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="936"
+                                android:text="827"
                                 android:textColor="@android:color/white"/>
                         </LinearLayout>
                     </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="#7"
+                            android:textColor="@android:color/white"/>
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_person_24"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/bg_circle"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:text="Đỗ Trung Quân"
+                            android:textColor="@android:color/white"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@drawable/ic_point_user"
+                                android:layout_marginEnd="5dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="536"
+                                android:textColor="@android:color/white"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
