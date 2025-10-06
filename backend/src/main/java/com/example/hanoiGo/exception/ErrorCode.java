@@ -17,6 +17,9 @@ public enum ErrorCode {
     USERNAME_EXISTED(1007, "Username existed", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1008, "Email existed", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(1009, "Invalid token", HttpStatus.BAD_REQUEST),
+    LOCATION_NOT_EXISTED(2001, "Location not existed", HttpStatus.NOT_FOUND),
+    API_FAIL_RESPONSE(2002, "Fail to get response from external API", HttpStatus.SERVICE_UNAVAILABLE),
+    CHECKPOINT_EXISTED(2003, "User has already checked in at this location", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

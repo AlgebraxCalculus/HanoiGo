@@ -30,4 +30,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     
     // Kiểm tra Firebase UID đã tồn tại chưa
     boolean existsByFirebaseUid(String firebaseUid);
+
+    // Tìm user theo ID
+    Optional<User> findUserById(UUID id);
 }
