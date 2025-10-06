@@ -1,12 +1,7 @@
 package com.example.hanoiGo.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.hanoiGo.dto.request.CheckpointRequest;
 import com.example.hanoiGo.dto.response.CheckpointResponse;
@@ -30,39 +25,32 @@ public class CheckpointService {
 
     @Value("${goong.api.key}")
     private String goongApiKey;
-    private final RestTemplate restTemplate = new RestTemplate();
 
     public CheckpointResponse checkIn(CheckpointRequest request) {
-        LocationResponse locationResponse = locationService.getLocationDetailById(request.getLocationId());
-        UserResponse userResponse = userService.getUserById(request.getUserId().toString());
+
+        // Gọi service đã có sẵn logic lấy place detail + distance
+        LocationResponse locationResponse = locationService.getLocationDetailById(
+                request.getLocationId(),
+                request.getUserLatitude(),
+                request.getUserLongitude()
+        );
+
         if (locationResponse == null) {
             throw new AppException(ErrorCode.LOCATION_NOT_EXISTED);
         }
-        double locLat = locationResponse.getLatitude();
-        double locLng = locationResponse.getLongitude();
 
-        String url = UriComponentsBuilder
-                .fromUriString("https://rsapi.goong.io/DistanceMatrix")
-                .queryParam("origins", request.getUserLatitude() + "," + request.getUserLongitude())
-                .queryParam("destinations", locLat + "," + locLng)
-                .queryParam("vehicle", "car") 
-                .queryParam("api_key", goongApiKey)
-                .toUriString();
-        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-        if (response == null) {
-            throw new AppException(ErrorCode.API_FAIL_RESPONSE);
-        }
+        // Kiểm tra khoảng cách tính được từ Goong DistanceMatrix
+        int distanceValue = locationResponse.getDistanceValue(); // đơn vị: mét
+        double allowedRadius = 100.0; // cho phép check-in trong bán kính 100m
 
-        List<Map<String, Object>> rows = (List<Map<String, Object>>) response.get("rows");
-        Map<String, Object> elements = (Map<String, Object>) ((List<?>) rows.get(0).get("elements")).get(0);
-        Map<String, Object> distance = (Map<String, Object>) elements.get("distance");
-
-        int distanceValue = (int) distance.get("value"); // in meters
-
-        double radius = 100.0; // 100 meters
-        if (distanceValue > radius) {
+        if (distanceValue > allowedRadius) {
             throw new RuntimeException("User is too far from location. Distance: " + distanceValue + "m");
         }
+
+        // Lấy thông tin user
+        UserResponse userResponse = userService.getUserById(request.getUserId().toString());
+
+        // Tạo checkpoint mới
         Checkpoint checkpoint = checkpointMapper.toCheckpoint(request);
 
         try {
@@ -70,6 +58,8 @@ public class CheckpointService {
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.CHECKPOINT_EXISTED);
         }
+
+        // Trả về dữ liệu phản hồi gồm thông tin địa điểm và người dùng
         return checkpointMapper.toCheckpointResponse(checkpoint, locationResponse, userResponse);
     }
 }
