@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
  @Service
  @RequiredArgsConstructor
@@ -76,6 +77,12 @@ import java.util.Optional;
              throw new AppException(ErrorCode.USER_NOT_EXISTED);
          }
          return userMapper.toUserResponse(userOpt.get());
+     }
+
+     // Lấy tất cả user
+     public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return userMapper.toUserResponseList(users);
      }
     
      // Lấy user theo Firebase UID

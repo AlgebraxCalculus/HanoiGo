@@ -8,6 +8,7 @@ import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.service.UserService;
 import com.example.hanoiGo.util.JwtUtil;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,12 +63,22 @@ public class UserController {
     public ApiResponse<UserResponse> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
         String username = jwtUtil.getUsernameFromToken(token);
-
         UserResponse user = userService.getCurrentUser(username);
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .message("Lấy thông tin user thành công")
                 .result(user)
+                .build();
+    }
+
+    // Lấy thông tin tất cả user
+    @GetMapping("/get")
+    public ApiResponse<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(1000)
+                .message("Lấy thông tin tất cả user thành công")
+                .result(users)
                 .build();
     }
 
