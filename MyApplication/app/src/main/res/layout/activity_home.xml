@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -177,6 +178,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:gravity="center"
+                                    android:paddingBottom="10dp"
                                     android:text="Rank"
                                     android:textColor="@android:color/black"
                                     android:textSize="15sp"
@@ -189,17 +191,17 @@
                                     android:orientation="horizontal">
 
                                     <ImageView
-                                        android:layout_width="20dp"
-                                        android:layout_height="20dp"
-                                        android:layout_marginEnd="4dp"
-                                        android:src="@drawable/ic_rank_24" />
+                                        android:layout_width="40dp"
+                                        android:layout_height="40dp"
+                                        android:layout_marginEnd="10dp"
+                                        android:src="@drawable/ic_rank" />
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="29th"
                                         android:textColor="@android:color/black"
-                                        android:textSize="15sp" />
+                                        android:textSize="19sp" />
                                 </LinearLayout>
                             </LinearLayout>
 
@@ -218,6 +220,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:gravity="center"
+                                    android:paddingBottom="10dp"
                                     android:text="Points"
                                     android:textColor="@android:color/black"
                                     android:textSize="15sp"
@@ -230,16 +233,17 @@
                                     android:orientation="horizontal">
 
                                     <ImageView
-                                        android:layout_width="20dp"
-                                        android:layout_height="20dp"
-                                        android:src="@drawable/ic_points_24" />
+                                        android:layout_width="40dp"
+                                        android:layout_height="40dp"
+                                        android:layout_marginEnd="10dp"
+                                        android:src="@drawable/ic_points" />
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="1219"
                                         android:textColor="@android:color/black"
-                                        android:textSize="15sp" />
+                                        android:textSize="19sp" />
                                 </LinearLayout>
                             </LinearLayout>
 
@@ -256,6 +260,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:gravity="center"
+                                    android:paddingBottom="10dp"
                                     android:text="Achievement"
                                     android:textColor="@android:color/black"
                                     android:textSize="15sp"
@@ -268,16 +273,17 @@
                                     android:orientation="horizontal">
 
                                     <ImageView
-                                        android:layout_width="20dp"
-                                        android:layout_height="20dp"
-                                        android:src="@drawable/ic_trophy_24" />
+                                        android:layout_width="40dp"
+                                        android:layout_height="40dp"
+                                        android:layout_marginEnd="12dp"
+                                        android:src="@drawable/ic_medal" />
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="29"
                                         android:textColor="@android:color/black"
-                                        android:textSize="15sp" />
+                                        android:textSize="20sp" />
                                 </LinearLayout>
                             </LinearLayout>
                         </LinearLayout>
@@ -793,13 +799,375 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bậc S+"
+                        android:text="Rank S+"
+                        android:gravity="center_vertical"
                         android:padding="6dp"
                         android:background="@drawable/bg_card_red_orange"
                         android:textColor="@android:color/white"
                         android:textSize="12sp"/>
                 </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_gold_medal_24"
+                        android:layout_marginEnd="8dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Home is where the heart is"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Checkin 25 tourist destination"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="12sp"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rank S  "
+                        android:padding="6dp"
+                        android:background="@drawable/bg_chip_purple"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp"/>
+                </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="14dp"
+                    android:text="View all achievements"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:background="#002244"
+                    android:drawablePadding="8dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_card_rounded_dark"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LEADERBOARD"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/white"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <FrameLayout
+                                android:layout_width="72dp"
+                                android:layout_height="72dp">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_circle_rank_2"
+                                    android:scaleType="centerCrop"/>
+
+                                <TextView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="bottom|center_horizontal"
+                                    android:background="@drawable/bg_circle_number"
+                                    android:gravity="center"
+                                    android:text="2"
+                                    android:textColor="@android:color/black"
+                                    android:textStyle="bold"/>
+                            </FrameLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="The36Slayer"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1136"
+                                android:textColor="@android:color/white"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <FrameLayout
+                                android:layout_width="88dp"
+                                android:layout_height="88dp">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_circle_rank_1"
+                                    android:scaleType="centerCrop"/>
+
+                                <TextView
+                                    android:layout_width="26dp"
+                                    android:layout_height="26dp"
+                                    android:layout_gravity="bottom|center_horizontal"
+                                    android:background="@drawable/bg_circle_number"
+                                    android:gravity="center"
+                                    android:text="1"
+                                    android:textColor="@android:color/black"
+                                    android:textStyle="bold"/>
+                            </FrameLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Han Solo"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1234"
+                                android:textColor="@android:color/white"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <FrameLayout
+                                android:layout_width="72dp"
+                                android:layout_height="72dp">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_circle_rank_3"
+                                    android:scaleType="centerCrop"/>
+
+                                <TextView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="bottom|center_horizontal"
+                                    android:background="@drawable/bg_circle_number"
+                                    android:gravity="center"
+                                    android:text="3"
+                                    android:textColor="@android:color/black"
+                                    android:textStyle="bold"/>
+                            </FrameLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Kim ri cha"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1037"
+                                android:textColor="@android:color/white"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="Your current rank:"
+                        android:textColor="@android:color/white"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp"
+                        android:background="@drawable/bg_rank_highlight"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="#1"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold"/>
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_person_24"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/bg_circle"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:text="Đỗ Trung Quân"
+                            android:textColor="@android:color/white"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1236"
+                            android:textColor="@android:color/white"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="8dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="8dp"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="#4"
+                                android:textColor="@android:color/white"/>
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_person_24"
+                                android:layout_marginStart="12dp"
+                                android:background="@drawable/bg_circle"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:layout_weight="1"
+                                android:text="Đỗ Trung Quân"
+                                android:textColor="@android:color/white"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="936"
+                                android:textColor="@android:color/white"/>
+                        </LinearLayout>
+                    </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/main_app_color"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="#0C2238">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_home"
+                    android:layout_gravity="center" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Home"
+                    android:textColor="@color/teal_200"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_map"
+                    android:layout_gravity="center" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Map"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_personal"
+                    android:layout_gravity="center" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Personal"
+                    android:textColor="@color/white"
+                    android:textAlignment="center"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>
