@@ -8,6 +8,7 @@
 
  import javax.crypto.SecretKey;
  import java.util.Date;
+ import java.util.UUID;
 
  @Component
  public class JwtUtil {
@@ -19,26 +20,38 @@
          return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
      }
     
-     // Tạo JWT token
-     public String generateToken(String username) {
-         return Jwts.builder()
-                 .setSubject(username)
-                 .setIssuedAt(new Date())
-                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                 .compact();
-     }
-    
-     // Lấy username từ token
-     public String getUsernameFromToken(String token) {
-         Claims claims = Jwts.parserBuilder()
-                 .setSigningKey(getSigningKey())
-                 .build()
-                 .parseClaimsJws(token)
-                 .getBody();
-         return claims.getSubject();
-     }
-    
+        // Tạo JWT token có cả username + userId
+        public String generateToken(String username, UUID userId) {
+            return Jwts.builder()
+                    .setSubject(username)
+                    .claim("userId", userId.toString()) 
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
+        }
+
+        // Lấy username từ token
+        public String getUsernameFromToken(String token) {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        }
+
+        // Lấy userId trực tiếp từ token
+        public UUID extractUserId(String token) {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            String userIdStr = claims.get("userId", String.class);
+            return UUID.fromString(userIdStr);
+        }
+
      // Kiểm tra token có hợp lệ không
      public boolean validateToken(String token, String username) {
          try {

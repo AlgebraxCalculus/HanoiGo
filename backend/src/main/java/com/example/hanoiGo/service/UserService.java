@@ -62,7 +62,7 @@ import java.util.List;
              }
             
              // Tạo JWT token cho backend
-             String token = jwtUtil.generateToken(user.getUsername());
+             String token = jwtUtil.generateToken(user.getUsername(), user.getId());
              return new LoginResponse(token, userMapper.toUserResponse(user));
 
          } catch (Exception e) {
@@ -93,6 +93,15 @@ import java.util.List;
          }
          return userMapper.toUserResponse(userOpt.get());
      }
+
+        // Lấy user theo ID
+        public UserResponse getUserById(String id) {
+            Optional<User> userOpt = userRepository.findUserById(java.util.UUID.fromString(id));
+            if (userOpt.isEmpty()) {
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            }
+            return userMapper.toUserResponse(userOpt.get());
+        }
 
      public UserResponse register(RegisterRequest request) {
         //  Kiểm tra username, email đã tồn tại chưa
@@ -132,7 +141,7 @@ import java.util.List;
             userRepository.save(user);
             
             // Tạo JWT token
-            String token = jwtUtil.generateToken(user.getUsername());
+            String token = jwtUtil.generateToken(user.getUsername(), user.getId());
             return new LoginResponse(token, userMapper.toUserResponse(user));
      }
 }

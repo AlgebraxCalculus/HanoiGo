@@ -64,7 +64,7 @@ public class LocationService {
         // gọi đến api goong place_detail để lấy address, latitude, longitude
             try {
             String url = UriComponentsBuilder
-                    .fromHttpUrl("https://rsapi.goong.io/v2/place/detail")
+                    .fromUriString("https://rsapi.goong.io/v2/place/detail")
                     .queryParam("api_key", goongApiKey)
                     .queryParam("place_id", locationId)  // bạn có thể thay locationId bằng place_id tương ứng
                     .toUriString();

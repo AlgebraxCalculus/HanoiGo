@@ -13,10 +13,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/api/users/**", 
+        "/api/users/register",
+        "/api/users/login",
+        "/api/users/firebase-login",
+        "/api/users/get",
+        "/api/users/test",
         "/api/auth/**",  
         "/api/achievements/**",
         "/api/locations/**",
+        "/api/checkpoints/**"
     };
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -71,8 +71,7 @@ CREATE TABLE checkpoints (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     location_id TEXT REFERENCES location_detail(id) ON DELETE CASCADE,
-    checked_in_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	radius DOUBLE PRECISION NOT NULL DEFAULT 50
+    checked_in_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================
@@ -315,6 +314,4 @@ select * from location_detail;
 select * from location_tags;
 
 select * from tags;
-ALTER TABLE checkpoints
-ADD COLUMN radius DOUBLE PRECISION NOT NULL DEFAULT 50;
 
