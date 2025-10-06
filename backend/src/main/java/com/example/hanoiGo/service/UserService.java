@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.List;
 
  @Service
@@ -95,8 +96,8 @@ import java.util.List;
      }
 
         // Lấy user theo ID
-        public UserResponse getUserById(String id) {
-            Optional<User> userOpt = userRepository.findUserById(java.util.UUID.fromString(id));
+        public UserResponse getUserById(UUID id) {
+            Optional<User> userOpt = userRepository.findUserById(id);
             if (userOpt.isEmpty()) {
                 throw new AppException(ErrorCode.USER_NOT_EXISTED);
             }

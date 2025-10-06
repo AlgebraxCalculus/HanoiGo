@@ -32,11 +32,9 @@ public class LocationController {
 
     @GetMapping("/get-detail-by-id")
     public ApiResponse<LocationResponse> getDetailByLocationId(
-        @RequestParam(value = "locationId") String locationId,
-        @RequestParam(value = "lat", required = false) Float lat,
-        @RequestParam(value = "lng", required = false) Float lng
-        ) {
-        LocationResponse locationDetail = locationService.getLocationDetailById(locationId, lat, lng);
+        @RequestParam(value = "locationId") String locationId
+    ) {
+        LocationResponse locationDetail = locationService.getLocationDetailById(locationId);
         return ApiResponse.<LocationResponse>builder()
                 .code(1000)
                 .message("Lấy thông tin chi tiết của location thành công")

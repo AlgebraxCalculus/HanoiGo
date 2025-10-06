@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.UUID;
 
 @Entity
 @Table(name = "location_detail")
@@ -27,4 +25,13 @@ public class LocationDetail {
 
     @Column(name = "default_picture", nullable = false)
     private String defaultPicture;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private double longitude;
 }

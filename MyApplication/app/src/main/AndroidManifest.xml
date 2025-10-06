@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <!-- MapActivity -->
+        <!-- Activity bản đồ -->
         <activity
             android:name=".MapActivity"
             android:exported="true">
