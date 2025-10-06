@@ -17,8 +17,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
 
-        <activity android:name=".MainActivity" />
-
         <activity
             android:name=".HomeActivity"
             android:exported="true">
