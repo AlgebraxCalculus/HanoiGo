@@ -49,7 +49,7 @@ public class LocationService {
         return tagNames;
     }
 
-    public LocationResponse getLocationDetailById (String locationId) {
+    public LocationResponse getLocationDetailById (String locationId, Float userLat, Float userLng) {
         Optional<LocationDetail> locationDetail = locationDetailRepository.findById(locationId);
         // if (locationDetail.isEmpty()) {
         //     throw new AppException(ErrorCode.LOCATION_NOT_EXISTED);
@@ -95,9 +95,44 @@ public class LocationService {
             System.err.println("Error calling Goong API: " + e.getMessage());
         }
 
-        //gọi đến getDistanceById
 
-        //gọi đến getRatingById
+
+        //gọi đến Goong distance_matrix để lấy distance
+        if(userLat != null && userLng != null) { 
+            try {
+                String url = UriComponentsBuilder
+                        .fromHttpUrl("https://rsapi.goong.io/v2/distancematrix")
+                        .queryParam("api_key", goongApiKey)
+                        .queryParam("origins", userLat + "," + userLng)
+                        .queryParam("destinations", locationResponse.getLatitude() + "," + locationResponse.getLongitude())
+                        .toUriString();
+
+                // Gọi API và nhận JSON trả về dưới dạng Map
+                Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+                if (response != null) {
+                    List<Map<String, Object>> rows = (List<Map<String, Object>>) response.get("rows");
+                    if (rows != null && !rows.isEmpty()) {
+                        Map<String, Object> firstRow = rows.get(0);
+
+                        List<Map<String, Object>> elements = (List<Map<String, Object>>) firstRow.get("elements");
+                        if (elements != null && !elements.isEmpty()) {
+                            Map<String, Object> firstElement = elements.get(0);
+
+                            Map<String, Object> distance = (Map<String, Object>) firstElement.get("distance");
+                            if(distance != null) {
+                                locationResponse.setDistance((String) distance.get("text"));
+                                locationResponse.setDistanceValue((int) distance.get("value"));
+                            }
+                        }
+                    }
+                } else {
+                    System.out.println("Goong API error or invalid response");
+                }
+
+            } catch (Exception e) {
+                System.err.println("Error calling Goong API: " + e.getMessage());
+            }
+        }
 
         return locationResponse;
     }
