@@ -49,8 +49,6 @@ public class LocationService {
         return tagNames;
     }
 
-    public 
-
     public LocationResponse getLocationDetailById (String locationId) {
         Optional<LocationDetail> locationDetail = locationDetailRepository.findById(locationId);
         // if (locationDetail.isEmpty()) {
