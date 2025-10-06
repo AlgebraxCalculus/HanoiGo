@@ -15,6 +15,4 @@ public class LocationResponse {
     private double latitude;
     private double longitude;
     private String defaultPicture;
-    private String distance;
-    private int distanceValue;
 }

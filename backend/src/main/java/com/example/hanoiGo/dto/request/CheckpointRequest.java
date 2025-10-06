@@ -11,6 +11,6 @@ import lombok.*;
 public class CheckpointRequest {
     private UUID userId;
     private String locationId;
-    private double userLatitude;
-    private double userLongitude;
+    private float userLatitude;
+    private float userLongitude;
 }

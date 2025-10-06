@@ -9,4 +9,5 @@ import com.example.hanoiGo.model.Checkpoint;
 public interface CheckpointRepository extends JpaRepository<Checkpoint, UUID> {
     List<Checkpoint> findByUserId(UUID userId);
     List<Checkpoint> findByLocationId(String locationId);
+    boolean existsByUserIdAndLocationId(UUID userId, String locationId);
 }
