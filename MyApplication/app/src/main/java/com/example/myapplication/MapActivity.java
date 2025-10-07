@@ -36,7 +36,7 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Init Mapbox with Goong API key
-        Mapbox.getInstance(this, getString(R.string.goong_api_key));
+        Mapbox.getInstance(this, getString(R.string.goong_map_key));
 
         setContentView(R.layout.activity_map);
         mapView = findViewById(R.id.mapView);
