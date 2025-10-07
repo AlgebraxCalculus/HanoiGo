@@ -33,8 +33,7 @@
                 android:layout_height="24dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_bookmark"
-                android:contentDescription="@string/desc_list_icon"
-                app:tint="@android:color/white" />
+                android:contentDescription="@string/desc_list_icon" />
         </androidx.cardview.widget.CardView>
 
         <!-- Title and place count -->

@@ -1,11 +1,14 @@
 package com.example.myapplication.adapter;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.R;
 import com.example.myapplication.model.SavedList;
@@ -30,6 +33,14 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
     public void onBindViewHolder(@NonNull SavedListViewHolder holder, int position) {
         SavedList savedList = savedLists.get(position);
         holder.listIcon.setImageResource(savedList.getIconResId());
+
+        // Set tint white for non-heart icons, no tint for heart to keep red color
+        if (savedList.getIconResId() == R.drawable.ic_heart) {
+            ImageViewCompat.setImageTintList(holder.listIcon, null); // No tint - keep original red color
+        } else {
+            ImageViewCompat.setImageTintList(holder.listIcon, ColorStateList.valueOf(Color.WHITE)); // White tint
+        }
+
         holder.listTitle.setText(savedList.getTitle());
         holder.placeCount.setText(savedList.getPlaceCount() + " places");
     }
