@@ -28,12 +28,16 @@
             android:name=".AuthActivity"
             android:exported="true"
             android:label="@string/app_name">
-            android:name=".HomeActivity"
-            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <!-- Activity trang chủ -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true">
         </activity>
 
         <!-- Activity bản đồ -->
