@@ -17,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,19 +45,18 @@ import java.util.List;
              User user;
              if (userOpt.isPresent()) {
                  // User đã tồn tại
-                 user = userOpt.get();
-                System.out.println("Thông tin user: " + user);
+                user = userOpt.get();
+                user.setLastLogin(LocalDateTime.now());
+                user = userRepository.save(user);
                 
              } else {
                  // User mới, tạo mới
                  user = new User();
                  user.setFirebaseUid(firebaseUser.getUid());
                  user.setEmail(firebaseUser.getEmail());
-                 user.setUsername(firebaseUser.getName()); // Dùng email làm username
-                //  user.setFullName(firebaseUser.getName());
+                 user.setUsername(firebaseUser.getName());
                  user.setProfilePicture(firebaseUser.getPicture());
-                //  user.setSignInProvider(firebaseUser.getSignInProvider());
-                 user.setPassword(""); // Không cần password cho Firebase user
+                 user.setPassword("");
                  user.setPoints(0);
                  user.setLastLogin(LocalDateTime.now());
                  user = userRepository.save(user);
@@ -80,10 +80,24 @@ import java.util.List;
          return userMapper.toUserResponse(userOpt.get());
      }
 
-     // Lấy tất cả user
-     public List<UserResponse> getAllUsers() {
+     // Lấy tất cả user có thể xếp theo điểm
+     public List<UserResponse> getAllUsers(boolean orderByPoints) {
         List<User> users = userRepository.findAll();
+        if (orderByPoints) {
+            users.sort(Comparator.comparingInt(User::getPoints).reversed());
+        }
         return userMapper.toUserResponseList(users);
+     }
+
+     // Lấy rank của user theo username
+     public int getMyRank(String username) {
+        List<UserResponse> users = getAllUsers(true);
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUsername().equals(username)) {
+                return i + 1; // Rank bắt đầu từ 1
+            }
+        }
+        return -1;
      }
     
      // Lấy user theo Firebase UID

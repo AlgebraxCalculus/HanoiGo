@@ -27,6 +27,7 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository tokenRepository;
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
+    private final AsyncEmailService asyncEmailService;
 
     // send OTP
     public void sendOtp(ForgotPasswordRequest request) {
@@ -51,7 +52,7 @@ public class PasswordResetService {
         message.setText("Xin chào " + user.getUsername() +
                 ",\n\nMã OTP đặt lại mật khẩu của bạn là: " + otp +
                 "\nOTP này có hiệu lực trong 5 phút.\n\nHanoiGo Team");
-        mailSender.send(message);
+        asyncEmailService.sendMail(message);
     }
 
     // verify OTP

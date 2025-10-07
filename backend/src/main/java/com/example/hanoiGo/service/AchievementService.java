@@ -28,12 +28,21 @@ public class AchievementService {
     private final AchievementMapper achievementMapper;
     private final UserRepository userRepository;
 
+    public Integer getTotalAchievementsForCurrentUser(String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);    
+        }
+        UUID userId = userOpt.get().getId();
+        return userAchievementRepository.countByUserId(userId);
+    }
+
     public List<AchievementResponse> getAchievementsForCurrentUser(String jwtToken, String tierSort, String earnedAtSort) {
         String username = jwtUtil.getUsernameFromToken(jwtToken);
         System.out.println("Username from token: " + username);
         Optional<User> userOpt = userRepository.findByUsername(username);
          if (userOpt.isEmpty()) {
-             throw new AppException(ErrorCode.USER_NOT_EXISTED);
+             throw new AppException(ErrorCode.USER_NOT_EXISTED);    
          }
         UUID userId = userOpt.get().getId();
         List<UserAchievement> achievements = userAchievementRepository.findByUserId(userId);

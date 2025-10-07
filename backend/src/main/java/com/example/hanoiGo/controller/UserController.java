@@ -71,14 +71,29 @@ public class UserController {
                 .build();
     }
 
-    // Lấy thông tin tất cả user
+    // Lấy thông tin tất cả user có thứ tự xếp hạng
     @GetMapping("/get")
-    public ApiResponse<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.getAllUsers();
+    public ApiResponse<List<UserResponse>> getAllUsers(
+        @RequestParam (value = "orderByPoints", required = false) boolean orderByPoints) {
+        List<UserResponse> users = userService.getAllUsers(orderByPoints);
+        String message = orderByPoints ? "Lấy thông tin tất cả user theo thứ tự điểm số thành công" : "Lấy thông tin tất cả user thành công";
         return ApiResponse.<List<UserResponse>>builder()
                 .code(1000)
-                .message("Lấy thông tin tất cả user thành công")
+                .message(message)
                 .result(users)
+                .build();
+    }
+
+    // Lấy rank của user hiện tại
+    @GetMapping("/my-rank")
+    public ApiResponse<Integer> getMyRank(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
+        String username = jwtUtil.getUsernameFromToken(token);
+        Integer rank = userService.getMyRank(username);
+        return ApiResponse.<Integer>builder()
+                .code(1000)
+                .message("Lấy rank của user thành công")
+                .result(rank)
                 .build();
     }
 

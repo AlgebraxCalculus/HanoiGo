@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     // lấy ra mọi user
     List<User> findAll();
-    
+
     // Tìm user theo username
     Optional<User> findByUsername(String username);
     

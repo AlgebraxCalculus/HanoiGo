@@ -13,11 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/api/users/register",
-        "/api/users/login",
-        "/api/users/firebase-login",
-        "/api/users/get",
-        "/api/users/test",
+        "/api/users/**",
         "/api/auth/**",  
         "/api/achievements/**",
         "/api/locations/**",
