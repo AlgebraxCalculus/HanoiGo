@@ -44,40 +44,13 @@
                 android:contentDescription="Explore icon" />
 
             <TextView
-                android:id="@+id/btnExplore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="Explore"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="|"
-                android:textColor="#666666"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/btnSaved"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="Saved"
-                android:textColor="#999999"
-                android:textSize="24sp"
-                android:textStyle="normal"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="4dp" />
+                android:textStyle="bold" />
 
             <View
                 android:layout_width="0dp"
@@ -95,11 +68,9 @@
 
         <!-- Explore Content -->
         <LinearLayout
-            android:id="@+id/exploreContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="visible">
+            android:orientation="vertical">
 
         <!-- Iconic places -->
         <TextView
@@ -258,65 +229,6 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         </LinearLayout>
-        <!-- End Explore Content -->
-
-        <!-- Saved Content -->
-        <LinearLayout
-            android:id="@+id/savedContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <!-- New List Button -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/newListButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="#2D5F5D">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:padding="14dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+"
-                        android:textColor="@android:color/white"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/new_list"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Saved Lists RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/savedListsRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:paddingBottom="16dp" />
-
-        </LinearLayout>
-        <!-- End Saved Content -->
 
     </LinearLayout>
 

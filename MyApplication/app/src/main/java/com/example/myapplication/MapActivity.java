@@ -13,10 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.PlaceAdapter;
 import com.example.myapplication.adapter.RouteAdapter;
-import com.example.myapplication.adapter.SavedListAdapter;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Route;
-import com.example.myapplication.model.SavedList;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -31,10 +29,6 @@ public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
     private BottomSheetBehavior<View> bottomSheetBehavior;
-    private View exploreContent;
-    private View savedContent;
-    private SavedListAdapter savedListAdapter;
-    private List<SavedList> savedLists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +64,6 @@ public class MapActivity extends AppCompatActivity {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(200);
 
-        // Get content views
-        exploreContent = findViewById(R.id.exploreContent);
-        savedContent = findViewById(R.id.savedContent);
-
         // Add callback for state changes
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -93,51 +83,11 @@ public class MapActivity extends AppCompatActivity {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
 
-        // Toggle buttons
-        findViewById(R.id.btnExplore).setOnClickListener(v -> showExploreContent());
-        findViewById(R.id.btnSaved).setOnClickListener(v -> showSavedContent());
-
         // Setup RecyclerViews with sample data
         setupIconicPlaces();
         setupTopVisited();
         setupPopularNearYou();
         setupSuggestedRoutes();
-        setupSavedLists();
-    }
-
-    private void showExploreContent() {
-        exploreContent.setVisibility(View.VISIBLE);
-        savedContent.setVisibility(View.GONE);
-
-        // Update button styles
-        findViewById(R.id.btnExplore).setAlpha(1.0f);
-        findViewById(R.id.btnSaved).setAlpha(0.5f);
-        findViewById(R.id.iconExplore).setVisibility(View.VISIBLE);
-    }
-
-    private void showSavedContent() {
-        exploreContent.setVisibility(View.GONE);
-        savedContent.setVisibility(View.VISIBLE);
-
-        // Update button styles
-        findViewById(R.id.btnExplore).setAlpha(0.5f);
-        findViewById(R.id.btnSaved).setAlpha(1.0f);
-        findViewById(R.id.iconExplore).setVisibility(View.GONE);
-    }
-
-    private void setupSavedLists() {
-        RecyclerView savedListsRecyclerView = findViewById(R.id.savedListsRecyclerView);
-        savedListsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        savedLists = new ArrayList<>();
-        savedLists.add(new SavedList(R.drawable.ic_bookmark, "Saved places", 0));
-        savedLists.add(new SavedList(R.drawable.ic_heart, "Favorites", 0));
-        savedLists.add(new SavedList(R.drawable.ic_flag, "Want to go", 0));
-        savedLists.add(new SavedList(R.drawable.ic_heart, "Dating", 3));
-        savedLists.add(new SavedList(R.drawable.ic_bookmark, "Hanging out", 6));
-
-        savedListAdapter = new SavedListAdapter(savedLists);
-        savedListsRecyclerView.setAdapter(savedListAdapter);
     }
 
     private void setupIconicPlaces() {
