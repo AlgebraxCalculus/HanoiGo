@@ -2,6 +2,7 @@ package com.example.hanoiGo.controller;
 
 import com.example.hanoiGo.dto.response.ApiResponse;
 import com.example.hanoiGo.dto.response.LocationResponse;
+import com.example.hanoiGo.dto.response.LocationListResponse;
 import com.example.hanoiGo.service.LocationService;
 import com.example.hanoiGo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,28 @@ public class LocationController {
                 .build();
     }
 
+    //API lấy danh sách location gồm param: locationId, lat, lng, tag, mostVisited, nearest, limit
+    @GetMapping("/get-list")
+    public ApiResponse<List<LocationListResponse>> getListLocation(
+        @RequestParam(value = "lat") Double lat,
+        @RequestParam(value = "lng") Double lng,
+        @RequestParam(value = "tag", required = false) String tag,
+        @RequestParam(value = "mostVisited", required = false) Boolean mostVisited,
+        @RequestParam(value = "nearest", required = false) Boolean nearest,
+        @RequestParam(value = "limit", required = false) Integer limit
+    ) {
+        List<LocationListResponse> locationList = locationService.getListLocation(
+            lat, lng, tag, mostVisited, nearest, limit
+        );
 
+        String message = "Lấy danh sách location thành công";
+        if(tag != null && !tag.isEmpty()) message = "Lấy danh sách location có tag '" + tag + "' thành công";
+        else if(mostVisited != null && mostVisited) message = "Lấy danh sách location theo số lượt checked-in giảm dần thành công";
+        else if(nearest != null && nearest) message = "Lấy danh sách location theo thứ tự khoảng cách tăng dần thành công";
+        return ApiResponse.<List<LocationListResponse>>builder()
+                .code(1000)
+                .message(message)
+                .result(locationList)
+                .build();
+    }
 }

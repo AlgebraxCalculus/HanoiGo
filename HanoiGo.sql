@@ -27,7 +27,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
     points INT DEFAULT 0,
-    rank INT
 );
 
 select * from users;
@@ -57,7 +56,7 @@ CREATE TABLE location_detail (
 -- =========================
 CREATE TABLE location_tags (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tags_id UUID REFERENCES tags(id) ON DELETE CASCADE,PRE
+    tags_id UUID REFERENCES tags(id) ON DELETE CASCADE,
     location_id TEXT REFERENCES location_detail(id) ON DELETE CASCADE
 );
 
@@ -472,5 +471,13 @@ VALUES
      'YbAHR4n5BJ1HiFJ-kHGJ63SjH0yIY-KSbJAeP6RcmYl3jiQ7oJ5uzkCONmGUzo3tdokRapd0mnNunz5Ep9i9RkCdLkencKHadbFTKJFhkfh0iT1RcpweBkXajLFyRBurR');
 
 select * from location_detail;
-
+select * from checkpoints;
 select * from location_tags;
+select * from achievements;
+select * from users;
+
+ALTER TABLE users DROP COLUMN rank;
+
+
+
+

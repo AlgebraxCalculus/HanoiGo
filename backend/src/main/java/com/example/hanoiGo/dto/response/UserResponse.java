@@ -10,5 +10,4 @@ public class UserResponse {
     private String email;
     private String profilePicture;
     private Integer points;
-    private Integer rank;
 }

@@ -35,4 +35,18 @@ public class AchievementController {
                 .result(achievements)
                 .build();
     }
+
+    // lấy tổng số achievement đã đạt được
+    @GetMapping("my-total")
+    public ApiResponse<Integer> getTotalAchievementsForCurrentUser(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        String jwtToken = jwtUtil.extractToken(authorizationHeader); // Lấy JWT token từ header
+        String username = jwtUtil.getUsernameFromToken(jwtToken);
+        int total = achievementService.getTotalAchievementsForCurrentUser(username);
+        return ApiResponse.<Integer>builder()
+                .code(1000)
+                .message("Lấy tổng số achievements của user thành công")
+                .result(total)
+                .build();
+    }
 }
