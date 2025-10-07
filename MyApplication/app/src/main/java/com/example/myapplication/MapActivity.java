@@ -13,8 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.PlaceAdapter;
 import com.example.myapplication.adapter.RouteAdapter;
+import com.example.myapplication.adapter.SavedListAdapter;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Route;
+import com.example.myapplication.model.SavedList;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -29,6 +31,10 @@ public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
     private BottomSheetBehavior<View> bottomSheetBehavior;
+    private View exploreContent;
+    private View savedContent;
+    private SavedListAdapter savedListAdapter;
+    private List<SavedList> savedLists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +70,10 @@ public class MapActivity extends AppCompatActivity {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(200);
 
+        // Get content views
+        exploreContent = findViewById(R.id.exploreContent);
+        savedContent = findViewById(R.id.savedContent);
+
         // Add callback for state changes
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -83,11 +93,51 @@ public class MapActivity extends AppCompatActivity {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
 
+        // Toggle buttons
+        findViewById(R.id.btnExplore).setOnClickListener(v -> showExploreContent());
+        findViewById(R.id.btnSaved).setOnClickListener(v -> showSavedContent());
+
         // Setup RecyclerViews with sample data
         setupIconicPlaces();
         setupTopVisited();
         setupPopularNearYou();
         setupSuggestedRoutes();
+        setupSavedLists();
+    }
+
+    private void showExploreContent() {
+        exploreContent.setVisibility(View.VISIBLE);
+        savedContent.setVisibility(View.GONE);
+
+        // Update button styles
+        findViewById(R.id.btnExplore).setAlpha(1.0f);
+        findViewById(R.id.btnSaved).setAlpha(0.5f);
+        findViewById(R.id.iconExplore).setVisibility(View.VISIBLE);
+    }
+
+    private void showSavedContent() {
+        exploreContent.setVisibility(View.GONE);
+        savedContent.setVisibility(View.VISIBLE);
+
+        // Update button styles
+        findViewById(R.id.btnExplore).setAlpha(0.5f);
+        findViewById(R.id.btnSaved).setAlpha(1.0f);
+        findViewById(R.id.iconExplore).setVisibility(View.GONE);
+    }
+
+    private void setupSavedLists() {
+        RecyclerView savedListsRecyclerView = findViewById(R.id.savedListsRecyclerView);
+        savedListsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        savedLists = new ArrayList<>();
+        savedLists.add(new SavedList(R.drawable.ic_bookmark, "Saved places", 0));
+        savedLists.add(new SavedList(R.drawable.ic_heart, "Favorites", 0));
+        savedLists.add(new SavedList(R.drawable.ic_flag, "Want to go", 0));
+        savedLists.add(new SavedList(R.drawable.ic_heart, "Dating", 3));
+        savedLists.add(new SavedList(R.drawable.ic_bookmark, "Hanging out", 6));
+
+        savedListAdapter = new SavedListAdapter(savedLists);
+        savedListsRecyclerView.setAdapter(savedListAdapter);
     }
 
     private void setupIconicPlaces() {
@@ -96,8 +146,11 @@ public class MapActivity extends AppCompatActivity {
         rvIconicPlaces.setLayoutManager(layoutManager);
 
         List<Place> places = new ArrayList<>();
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.placeholder_hoan_kiem));
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.placeholder_hoan_kiem));
+        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.hoguom));
+        places.add(new Place("Temple of Literature", "description bla bla bla bla bla bla", "4.2 km", R.drawable.hoguom));
+        places.add(new Place("Old Quarter", "description bla bla bla bla bla bla", "2.8 km", R.drawable.hoguom));
+        places.add(new Place("Ho Chi Minh Mausoleum", "description bla bla bla bla bla bla", "5.1 km", R.drawable.hoguom));
+        places.add(new Place("West Lake", "description bla bla bla bla bla bla", "6.3 km", R.drawable.hoguom));
 
         PlaceAdapter adapter = new PlaceAdapter(places);
         rvIconicPlaces.setAdapter(adapter);
@@ -109,8 +162,11 @@ public class MapActivity extends AppCompatActivity {
         rvTopVisited.setLayoutManager(layoutManager);
 
         List<Place> places = new ArrayList<>();
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.placeholder_hoan_kiem));
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.placeholder_hoan_kiem));
+        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.hoguom));
+        places.add(new Place("Dong Xuan Market", "description bla bla bla bla bla bla", "2.5 km", R.drawable.hoguom));
+        places.add(new Place("Long Bien Bridge", "description bla bla bla bla bla bla", "3.9 km", R.drawable.hoguom));
+        places.add(new Place("Thang Long Imperial Citadel", "description bla bla bla bla bla bla", "4.7 km", R.drawable.hoguom));
+        places.add(new Place("Vietnam Museum of Ethnology", "description bla bla bla bla bla bla", "7.2 km", R.drawable.hoguom));
 
         PlaceAdapter adapter = new PlaceAdapter(places);
         rvTopVisited.setAdapter(adapter);
@@ -122,8 +178,11 @@ public class MapActivity extends AppCompatActivity {
         rvPopularNearYou.setLayoutManager(layoutManager);
 
         List<Place> places = new ArrayList<>();
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.placeholder_hoan_kiem));
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.placeholder_hoan_kiem));
+        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.hoguom));
+        places.add(new Place("St. Joseph's Cathedral", "description bla bla bla bla bla bla", "1.8 km", R.drawable.hoguom));
+        places.add(new Place("Hanoi Opera House", "description bla bla bla bla bla bla", "2.3 km", R.drawable.hoguom));
+        places.add(new Place("Train Street", "description bla bla bla bla bla bla", "1.5 km", R.drawable.hoguom));
+        places.add(new Place("Tran Quoc Pagoda", "description bla bla bla bla bla bla", "5.8 km", R.drawable.hoguom));
 
         PlaceAdapter adapter = new PlaceAdapter(places);
         rvPopularNearYou.setAdapter(adapter);
@@ -135,11 +194,11 @@ public class MapActivity extends AppCompatActivity {
         rvSuggestedRoutes.setLayoutManager(layoutManager);
 
         List<Route> routes = new ArrayList<>();
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.placeholder_old_quarter));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.placeholder_old_quarter));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.placeholder_old_quarter));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.placeholder_old_quarter));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.placeholder_old_quarter));
+        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
+        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
+        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
+        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
+        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
 
         RouteAdapter adapter = new RouteAdapter(routes);
         rvSuggestedRoutes.setAdapter(adapter);

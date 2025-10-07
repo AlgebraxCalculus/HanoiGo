@@ -11,5 +11,8 @@
 
     <!-- Chip colors -->
     <color name="chip_background">#1A3A3A</color>
+    <color name="chip_background_selected">#FFF4B7</color>
     <color name="chip_stroke">#4DD4AC</color>
+    <color name="chip_text_default">#FFFFFF</color>
+    <color name="chip_text_selected">#000000</color>
 </resources>
