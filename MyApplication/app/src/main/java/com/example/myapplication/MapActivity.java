@@ -4,21 +4,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-import android.view.View;
-import android.widget.ImageView;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +19,9 @@ import com.example.myapplication.adapter.PlaceAdapter;
 import com.example.myapplication.adapter.RouteAdapter;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Route;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -41,17 +37,16 @@ import java.util.List;
 public class MapActivity extends AppCompatActivity {
 
     private MapView mapView;
-
     private MapboxMap map;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
-    private FusedLocationProviderClient fusedLocationClient;
     private BottomSheetBehavior<View> bottomSheetBehavior;
+    private FusedLocationProviderClient fusedLocationClient;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Init Mapbox with Goong API key
+        // Init Mapbox với Goong API key
         Mapbox.getInstance(this, getString(R.string.goong_map_key));
 
         setContentView(R.layout.activity_map);
@@ -67,46 +62,41 @@ public class MapActivity extends AppCompatActivity {
                 String styleUrl = "https://tiles.goong.io/assets/goong_map_web.json?api_key=" + apiKey;
                 map.setStyle(new Style.Builder().fromUri(styleUrl));
 
+                // Kiểm tra quyền và lấy vị trí
                 checkLocationPermissionAndGetLocation();
             }
         });
 
-        // Setup Bottom Sheet
+        // Thiết lập Bottom Sheet và RecyclerViews
         setupBottomSheet();
     }
 
+    // ======= Bottom Sheet setup =======
     private void setupBottomSheet() {
         View bottomSheet = findViewById(R.id.bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        // Thiết lập trạng thái ban đầu
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(200);
 
-        // Callback khi trạng thái BottomSheet thay đổi
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                // Xử lý nếu cần
-            }
+            public void onStateChanged(@NonNull View bottomSheet, int newState) { }
 
             @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                // Xử lý khi slide nếu cần
-            }
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) { }
         });
 
-        // Nút đóng BottomSheet
         ImageView btnClose = findViewById(R.id.btnCloseExplore);
         btnClose.setOnClickListener(v -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED));
 
-        // Thiết lập RecyclerViews với dữ liệu mẫu
         setupIconicPlaces();
         setupTopVisited();
         setupPopularNearYou();
         setupSuggestedRoutes();
     }
 
+    // ======= RecyclerViews setup =======
     private void setupIconicPlaces() {
         RecyclerView rvIconicPlaces = findViewById(R.id.rvIconicPlaces);
         rvIconicPlaces.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -154,16 +144,20 @@ public class MapActivity extends AppCompatActivity {
         rvSuggestedRoutes.setLayoutManager(new LinearLayoutManager(this));
 
         List<Route> routes = new ArrayList<>();
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
+        for (int i = 0; i < 5; i++) {
+            routes.add(new Route(
+                    "Hoan Kiem lake - Hanoi Old Q...",
+                    "description bla bla bla bla bla bla",
+                    "6.36 km",
+                    "20m 36s",
+                    R.drawable.hoguom
+            ));
+        }
 
-        RouteAdapter adapter = new RouteAdapter(routes);
-        rvSuggestedRoutes.setAdapter(adapter);
+        rvSuggestedRoutes.setAdapter(new RouteAdapter(routes));
     }
 
+    // ======= Location permission & get location =======
     private void checkLocationPermissionAndGetLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -174,18 +168,15 @@ public class MapActivity extends AppCompatActivity {
             getLastKnownLocation();
         }
     }
+
     private void getLastKnownLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
@@ -194,6 +185,7 @@ public class MapActivity extends AppCompatActivity {
                             Toast.makeText(MapActivity.this,
                                     "Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude(),
                                     Toast.LENGTH_LONG).show();
+
                             map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(location.getLatitude(), location.getLongitude()), 15));
                         } else {
@@ -206,8 +198,11 @@ public class MapActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getLastKnownLocation();
