@@ -13,4 +13,10 @@
     <string name="tag_entertaining">👜 Entertaining</string>
     <string name="tag_culture">🏛️ Culture</string>
 
+    <!-- Saved Lists -->
+    <string name="desc_list_icon">List icon</string>
+    <string name="desc_menu_icon">Menu icon</string>
+    <string name="saved_title">Saved</string>
+    <string name="new_list">New list</string>
+
 </resources>
