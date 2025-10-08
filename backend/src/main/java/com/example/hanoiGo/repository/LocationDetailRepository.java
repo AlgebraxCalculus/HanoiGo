@@ -32,4 +32,8 @@ public interface LocationDetailRepository extends JpaRepository<LocationDetail, 
 
     // Tìm location detail theo Id
     Optional<LocationDetail> findById(String locationId);
+
+    // Tìm location detail theo Name
+    @Query("SELECT l.id FROM LocationDetail l WHERE l.name = :name")
+    Optional<String> findIdByName(String name);
 }
