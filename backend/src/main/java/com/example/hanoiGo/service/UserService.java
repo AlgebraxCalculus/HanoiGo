@@ -17,8 +17,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.List;
 
  @Service
  @RequiredArgsConstructor
@@ -42,26 +45,25 @@ import java.util.Optional;
              User user;
              if (userOpt.isPresent()) {
                  // User đã tồn tại
-                 user = userOpt.get();
-                System.out.println("Thông tin user: " + user);
+                user = userOpt.get();
+                user.setLastLogin(LocalDateTime.now());
+                user = userRepository.save(user);
                 
              } else {
                  // User mới, tạo mới
                  user = new User();
                  user.setFirebaseUid(firebaseUser.getUid());
                  user.setEmail(firebaseUser.getEmail());
-                 user.setUsername(firebaseUser.getName()); // Dùng email làm username
-                //  user.setFullName(firebaseUser.getName());
+                 user.setUsername(firebaseUser.getName());
                  user.setProfilePicture(firebaseUser.getPicture());
-                //  user.setSignInProvider(firebaseUser.getSignInProvider());
-                 user.setPassword(""); // Không cần password cho Firebase user
+                 user.setPassword("");
                  user.setPoints(0);
                  user.setLastLogin(LocalDateTime.now());
                  user = userRepository.save(user);
              }
             
              // Tạo JWT token cho backend
-             String token = jwtUtil.generateToken(user.getUsername());
+             String token = jwtUtil.generateToken(user.getUsername(), user.getId());
              return new LoginResponse(token, userMapper.toUserResponse(user));
 
          } catch (Exception e) {
@@ -77,6 +79,26 @@ import java.util.Optional;
          }
          return userMapper.toUserResponse(userOpt.get());
      }
+
+     // Lấy tất cả user có thể xếp theo điểm
+     public List<UserResponse> getAllUsers(boolean orderByPoints) {
+        List<User> users = userRepository.findAll();
+        if (orderByPoints) {
+            users.sort(Comparator.comparingInt(User::getPoints).reversed());
+        }
+        return userMapper.toUserResponseList(users);
+     }
+
+     // Lấy rank của user theo username
+     public int getMyRank(String username) {
+        List<UserResponse> users = getAllUsers(true);
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUsername().equals(username)) {
+                return i + 1; // Rank bắt đầu từ 1
+            }
+        }
+        return -1;
+     }
     
      // Lấy user theo Firebase UID
      public UserResponse getUserByFirebaseUid(String firebaseUid) {
@@ -86,6 +108,15 @@ import java.util.Optional;
          }
          return userMapper.toUserResponse(userOpt.get());
      }
+
+        // Lấy user theo ID
+        public UserResponse getUserById(UUID id) {
+            Optional<User> userOpt = userRepository.findUserById(id);
+            if (userOpt.isEmpty()) {
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            }
+            return userMapper.toUserResponse(userOpt.get());
+        }
 
      public UserResponse register(RegisterRequest request) {
         //  Kiểm tra username, email đã tồn tại chưa
@@ -125,7 +156,7 @@ import java.util.Optional;
             userRepository.save(user);
             
             // Tạo JWT token
-            String token = jwtUtil.generateToken(user.getUsername());
+            String token = jwtUtil.generateToken(user.getUsername(), user.getId());
             return new LoginResponse(token, userMapper.toUserResponse(user));
      }
 }

@@ -39,19 +39,10 @@ public class User {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer points = 0;
     
-    @Column(name = "rank")
-    private Integer rank;
-    
     // Thêm các trường cho Firebase authentication
     @Column(name = "firebase_uid", unique = true)
     private String firebaseUid;
     
-    // @Column(name = "full_name")
-    // private String fullName;
-    
     @Column(name = "profile_picture")
     private String profilePicture;
-    
-    // @Column(name = "sign_in_provider")
-    // private String signInProvider; // google, email, etc.
 }

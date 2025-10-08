@@ -5,10 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    
+
+    // lấy ra mọi user
+    List<User> findAll();
+
     // Tìm user theo username
     Optional<User> findByUsername(String username);
     
@@ -26,4 +30,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     
     // Kiểm tra Firebase UID đã tồn tại chưa
     boolean existsByFirebaseUid(String firebaseUid);
+
+    // Tìm user theo ID
+    Optional<User> findUserById(UUID id);
 }

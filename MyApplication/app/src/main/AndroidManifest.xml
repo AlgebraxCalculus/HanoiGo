@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Quyền truy cập vị trí -->
+    
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -33,7 +34,13 @@
             </intent-filter>
         </activity>
 
-        <!-- MapActivity -->
+        <!-- Activity trang chủ -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true">
+        </activity>
+
+        <!-- Activity bản đồ -->
         <activity
             android:name=".MapActivity"
             android:exported="true">
