@@ -49,7 +49,7 @@ public class CheckpointService {
                 null,  // tag
                 false, // mostVisited
                 true,  // nearest (sorted tăng dần distance)
-                null   // limit (lấy tất cả để đảm bảo tìm đủ)
+                null   // limit 
         );
 
         List<EnableCheckpointResponse> enableCheckpoints = new ArrayList<>();
@@ -57,7 +57,7 @@ public class CheckpointService {
         for (LocationListResponse locResponse : locationListResponses) {
             LocationResponse locationRes = locResponse.getLocationResponse();
             String locName = locationRes.getName();
-            int distanceValue = locResponse.getDistanceValue();  // Tận dụng distance đã tính từ Goong
+            int distanceValue = locResponse.getDistanceValue();  
 
             String locId = locationDetailRepository.findIdByName(locName).orElse(null);
 
@@ -75,12 +75,12 @@ public class CheckpointService {
             if (distanceValue <= 100) {
                 enableCheckpoints.add(new EnableCheckpointResponse(locId, locName, distanceValue));
             } else {
-                // Break sớm vì list đã sorted nearest (các sau xa hơn)
+                // Break sớm vì list đã sorted nearest
                 break;
             }
         }
 
-        // Nếu không có eligible, throw exception (hoặc return empty tùy business)
+        // Nếu không có eligible, throw exception 
         if (enableCheckpoints.isEmpty()) {
             throw new RuntimeException("No eligible check-in locations within 100m.");
         }
@@ -96,14 +96,14 @@ public class CheckpointService {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        // Gọi enableCheckIn để lấy list eligible (dùng cùng lat/lng/userId)
+        // Gọi enableCheckIn để lấy list eligible
         List<EnableCheckpointResponse> eligibleList = enableCheckIn(request);
         System.err.println("Eligible locations: " + eligibleList.size());
         for (EnableCheckpointResponse e : eligibleList) {
             System.err.println(" - " + e.getLocationName() + " (" + e.getLocationId() + ") at " + e.getDistanceValue() + "m");
         }
 
-        // Verify locationId có trong eligible list không
+        // Verify locationId có trong eligible list
         String locationId = request.getLocationId();
         boolean isEligible = eligibleList.stream()
                 .anyMatch(eligible -> eligible.getLocationId().equals(locationId));
