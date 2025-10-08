@@ -2,12 +2,10 @@ package com.example.myapplication;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,12 +32,11 @@ public class MapActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Init Mapbox with Goong API key
+        // Khởi tạo Mapbox với Goong API key
         Mapbox.getInstance(this, getString(R.string.goong_api_key));
 
         setContentView(R.layout.activity_map);
         mapView = findViewById(R.id.mapView);
-
         mapView.onCreate(savedInstanceState);
 
         // Load Goong map style
@@ -60,30 +57,28 @@ public class MapActivity extends AppCompatActivity {
         View bottomSheet = findViewById(R.id.bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        // Set initial state
+        // Thiết lập trạng thái ban đầu
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(200);
 
-        // Add callback for state changes
+        // Callback khi trạng thái BottomSheet thay đổi
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                // Handle state changes if needed
+                // Xử lý nếu cần
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                // Handle slide changes if needed
+                // Xử lý khi slide nếu cần
             }
         });
 
-        // Close button
+        // Nút đóng BottomSheet
         ImageView btnClose = findViewById(R.id.btnCloseExplore);
-        btnClose.setOnClickListener(v -> {
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        });
+        btnClose.setOnClickListener(v -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED));
 
-        // Setup RecyclerViews with sample data
+        // Thiết lập RecyclerViews với dữ liệu mẫu
         setupIconicPlaces();
         setupTopVisited();
         setupPopularNearYou();
@@ -92,66 +87,62 @@ public class MapActivity extends AppCompatActivity {
 
     private void setupIconicPlaces() {
         RecyclerView rvIconicPlaces = findViewById(R.id.rvIconicPlaces);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        rvIconicPlaces.setLayoutManager(layoutManager);
+        rvIconicPlaces.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         List<Place> places = new ArrayList<>();
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.hoguom));
-        places.add(new Place("Temple of Literature", "description bla bla bla bla bla bla", "4.2 km", R.drawable.hoguom));
-        places.add(new Place("Old Quarter", "description bla bla bla bla bla bla", "2.8 km", R.drawable.hoguom));
-        places.add(new Place("Ho Chi Minh Mausoleum", "description bla bla bla bla bla bla", "5.1 km", R.drawable.hoguom));
-        places.add(new Place("West Lake", "description bla bla bla bla bla bla", "6.3 km", R.drawable.hoguom));
+        places.add(new Place("Hoan Kiem lake", "Description...", "3.6 km", R.drawable.hoguom));
+        places.add(new Place("Temple of Literature", "Description...", "4.2 km", R.drawable.hoguom));
+        places.add(new Place("Old Quarter", "Description...", "2.8 km", R.drawable.hoguom));
+        places.add(new Place("Ho Chi Minh Mausoleum", "Description...", "5.1 km", R.drawable.hoguom));
+        places.add(new Place("West Lake", "Description...", "6.3 km", R.drawable.hoguom));
 
-        PlaceAdapter adapter = new PlaceAdapter(places);
-        rvIconicPlaces.setAdapter(adapter);
+        rvIconicPlaces.setAdapter(new PlaceAdapter(places));
     }
 
     private void setupTopVisited() {
         RecyclerView rvTopVisited = findViewById(R.id.rvTopVisited);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        rvTopVisited.setLayoutManager(layoutManager);
+        rvTopVisited.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         List<Place> places = new ArrayList<>();
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.hoguom));
-        places.add(new Place("Dong Xuan Market", "description bla bla bla bla bla bla", "2.5 km", R.drawable.hoguom));
-        places.add(new Place("Long Bien Bridge", "description bla bla bla bla bla bla", "3.9 km", R.drawable.hoguom));
-        places.add(new Place("Thang Long Imperial Citadel", "description bla bla bla bla bla bla", "4.7 km", R.drawable.hoguom));
-        places.add(new Place("Vietnam Museum of Ethnology", "description bla bla bla bla bla bla", "7.2 km", R.drawable.hoguom));
+        places.add(new Place("Hoan Kiem lake", "Description...", "3.6 km", R.drawable.hoguom));
+        places.add(new Place("Dong Xuan Market", "Description...", "2.5 km", R.drawable.hoguom));
+        places.add(new Place("Long Bien Bridge", "Description...", "3.9 km", R.drawable.hoguom));
+        places.add(new Place("Thang Long Imperial Citadel", "Description...", "4.7 km", R.drawable.hoguom));
+        places.add(new Place("Vietnam Museum of Ethnology", "Description...", "7.2 km", R.drawable.hoguom));
 
-        PlaceAdapter adapter = new PlaceAdapter(places);
-        rvTopVisited.setAdapter(adapter);
+        rvTopVisited.setAdapter(new PlaceAdapter(places));
     }
 
     private void setupPopularNearYou() {
         RecyclerView rvPopularNearYou = findViewById(R.id.rvPopularNearYou);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        rvPopularNearYou.setLayoutManager(layoutManager);
+        rvPopularNearYou.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         List<Place> places = new ArrayList<>();
-        places.add(new Place("Hoan Kiem lake", "description bla bla bla bla bla bla", "3.6 km", R.drawable.hoguom));
-        places.add(new Place("St. Joseph's Cathedral", "description bla bla bla bla bla bla", "1.8 km", R.drawable.hoguom));
-        places.add(new Place("Hanoi Opera House", "description bla bla bla bla bla bla", "2.3 km", R.drawable.hoguom));
-        places.add(new Place("Train Street", "description bla bla bla bla bla bla", "1.5 km", R.drawable.hoguom));
-        places.add(new Place("Tran Quoc Pagoda", "description bla bla bla bla bla bla", "5.8 km", R.drawable.hoguom));
+        places.add(new Place("Hoan Kiem lake", "Description...", "3.6 km", R.drawable.hoguom));
+        places.add(new Place("St. Joseph's Cathedral", "Description...", "1.8 km", R.drawable.hoguom));
+        places.add(new Place("Hanoi Opera House", "Description...", "2.3 km", R.drawable.hoguom));
+        places.add(new Place("Train Street", "Description...", "1.5 km", R.drawable.hoguom));
+        places.add(new Place("Tran Quoc Pagoda", "Description...", "5.8 km", R.drawable.hoguom));
 
-        PlaceAdapter adapter = new PlaceAdapter(places);
-        rvPopularNearYou.setAdapter(adapter);
+        rvPopularNearYou.setAdapter(new PlaceAdapter(places));
     }
 
     private void setupSuggestedRoutes() {
         RecyclerView rvSuggestedRoutes = findViewById(R.id.rvSuggestedRoutes);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        rvSuggestedRoutes.setLayoutManager(layoutManager);
+        rvSuggestedRoutes.setLayoutManager(new LinearLayoutManager(this));
 
         List<Route> routes = new ArrayList<>();
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
-        routes.add(new Route("Hoan Kiem lake - Hanoi Old Q...", "description bla bla bla bla bla bla", "6.36 km", "20m 36s", R.drawable.hoguom));
+        for (int i = 0; i < 5; i++) {
+            routes.add(new Route(
+                    "Hoan Kiem lake - Hanoi Old Q...",
+                    "Description...",
+                    "6.36 km",
+                    "20m 36s",
+                    R.drawable.hoguom
+            ));
+        }
 
-        RouteAdapter adapter = new RouteAdapter(routes);
-        rvSuggestedRoutes.setAdapter(adapter);
+        rvSuggestedRoutes.setAdapter(new RouteAdapter(routes));
     }
 
     // lifecycle
