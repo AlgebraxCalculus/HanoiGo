@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="hanoigo_text_light_yellow">#FFD700</color>
+    <color name="main_app_color">#081A2B</color>
 
     <!-- Chip colors -->
     <color name="chip_background">#1A3A3A</color>

@@ -8,6 +8,7 @@ import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.service.UserService;
 import com.example.hanoiGo.util.JwtUtil;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,12 +63,37 @@ public class UserController {
     public ApiResponse<UserResponse> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
         String username = jwtUtil.getUsernameFromToken(token);
-
         UserResponse user = userService.getCurrentUser(username);
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .message("Lấy thông tin user thành công")
                 .result(user)
+                .build();
+    }
+
+    // Lấy thông tin tất cả user có thứ tự xếp hạng
+    @GetMapping("/get")
+    public ApiResponse<List<UserResponse>> getAllUsers(
+        @RequestParam (value = "orderByPoints", required = false) boolean orderByPoints) {
+        List<UserResponse> users = userService.getAllUsers(orderByPoints);
+        String message = orderByPoints ? "Lấy thông tin tất cả user theo thứ tự điểm số thành công" : "Lấy thông tin tất cả user thành công";
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(1000)
+                .message(message)
+                .result(users)
+                .build();
+    }
+
+    // Lấy rank của user hiện tại
+    @GetMapping("/my-rank")
+    public ApiResponse<Integer> getMyRank(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
+        String username = jwtUtil.getUsernameFromToken(token);
+        Integer rank = userService.getMyRank(username);
+        return ApiResponse.<Integer>builder()
+                .code(1000)
+                .message("Lấy rank của user thành công")
+                .result(rank)
                 .build();
     }
 
