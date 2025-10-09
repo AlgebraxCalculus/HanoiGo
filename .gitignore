@@ -35,4 +35,5 @@ google-services.json
 
 # Firebase admin key
 /backend/src/main/resources/hanoi-go-firebase-adminsdk.json
+
 /backend/target
