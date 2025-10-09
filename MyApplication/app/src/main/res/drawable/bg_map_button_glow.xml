@@ -1,0 +1,47 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Lớp blur/glow bên ngoài (lớn nhất) -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#4009A1FF"/>
+            <size android:width="83dp" android:height="83dp"/>
+        </shape>
+    </item>
+
+    <!-- Lớp blur/glow giữa -->
+    <item
+        android:top="2dp"
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp">
+        <shape android:shape="oval">
+            <solid android:color="#6009A1FF"/>
+            <size android:width="79dp" android:height="79dp"/>
+        </shape>
+    </item>
+
+    <!-- Viền sáng -->
+    <item
+        android:top="4dp"
+        android:bottom="4dp"
+        android:left="4dp"
+        android:right="4dp">
+        <shape android:shape="oval">
+            <solid android:color="#09A1FF"/>
+            <size android:width="75dp" android:height="75dp"/>
+        </shape>
+    </item>
+
+    <!-- Nền chính button -->
+    <item
+        android:top="6dp"
+        android:bottom="6dp"
+        android:left="6dp"
+        android:right="6dp">
+        <shape android:shape="oval">
+            <solid android:color="#001A2E"/>
+            <size android:width="71dp" android:height="71dp"/>
+        </shape>
+    </item>
+
+</layer-list>
