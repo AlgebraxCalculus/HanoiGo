@@ -353,7 +353,7 @@
                     android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewPlaces"
+                    android:id="@+id/recyclerViewIconic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -393,105 +393,15 @@
                     android:textSize="20dp"
                     android:textStyle="bold" />
 
-                <HorizontalScrollView
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewTop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:overScrollMode="never"
                     android:scrollbars="none">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="300dp"
-                            android:layout_height="200dp"
-                            android:background="@drawable/bg_card_rounded"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/hoguom" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="92dp"
-                                android:background="@drawable/bg_place_card"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Hoan Kiem lake"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="description bla bla bla bla bla bla bla"
-                                    android:textColor="#E6FFFFFF"
-                                    android:textSize="14sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="2.9 km"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="10sp"
-                                    android:layout_marginTop="15dp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="300dp"
-                            android:layout_height="200dp"
-                            android:background="@drawable/bg_card_rounded"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/hoguom" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="92dp"
-                                android:background="@drawable/bg_place_card"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Hoan Kiem lake"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="description bla bla bla bla bla bla bla"
-                                    android:textColor="#E6FFFFFF"
-                                    android:textSize="14sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="2.9 km"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="10sp"
-                                    android:layout_marginTop="15dp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-                </HorizontalScrollView>
+                </androidx.recyclerview.widget.RecyclerView>
             </LinearLayout>
 
             <LinearLayout
@@ -519,111 +429,20 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Top most visited places this week"
+                    android:text="Popular near you"
                     android:textColor="@color/black"
                     android:textSize="20dp"
                     android:textStyle="bold" />
 
-                <HorizontalScrollView
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewPopular"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:overScrollMode="never"
                     android:scrollbars="none">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="300dp"
-                            android:layout_height="200dp"
-                            android:background="@drawable/bg_card_rounded"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/hoguom" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="92dp"
-                                android:background="@drawable/bg_place_card"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Hoan Kiem lake"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="description bla bla bla bla bla bla bla"
-                                    android:textColor="#E6FFFFFF"
-                                    android:textSize="14sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="2.9 km"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="10sp"
-                                    android:layout_marginTop="15dp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="300dp"
-                            android:layout_height="200dp"
-                            android:background="@drawable/bg_card_rounded"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/hoguom" />
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="92dp"
-                                android:background="@drawable/bg_place_card"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Hoan Kiem lake"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="description bla bla bla bla bla bla bla"
-                                    android:textColor="#E6FFFFFF"
-                                    android:textSize="14sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="2.9 km"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="10sp"
-                                    android:layout_marginTop="15dp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-                </HorizontalScrollView>
+                </androidx.recyclerview.widget.RecyclerView>
             </LinearLayout>
 
             <LinearLayout
@@ -674,144 +493,15 @@
                     android:textSize="16sp"
                     android:layout_marginBottom="12dp"/>
 
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerAchievements"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
+                    android:clipChildren="false"
+                    android:layout_marginBottom="12dp" />
 
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_gold_medal_24"
-                        android:layout_marginEnd="8dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="God Of Travel"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Make it to the top 10 of the leaderboard"
-                            android:textColor="#B3FFFFFF"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rank SS"
-                        android:padding="6dp"
-                        android:shadowColor="#000000"
-                        android:shadowDx="0"
-                        android:shadowDy="0"
-                        android:shadowRadius="2"
-                        android:fontFamily="sans-serif-medium"
-                        android:background="@drawable/bg_chip_orange"
-                        android:textColor="@android:color/white"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_gold_medal_24"
-                        android:layout_marginEnd="8dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Aura Farmer"
-                            android:textColor="@android:color/white"
-                            android:textStyle="bold"
-                            android:textSize="14sp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Your review post gets 50 likes"
-                            android:textColor="#B3FFFFFF"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rank S+"
-                        android:gravity="center_vertical"
-                        android:padding="6dp"
-                        android:background="@drawable/bg_card_red_orange"
-                        android:textColor="@android:color/white"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:src="@drawable/ic_gold_medal_24"
-                        android:layout_marginEnd="8dp"/>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Home is where the heart is"
-                            android:textColor="@android:color/white"
-                            android:textStyle="bold"
-                            android:textSize="14sp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Checkin 25 tourist destination"
-                            android:textColor="#B3FFFFFF"
-                            android:textSize="12sp"/>
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rank S  "
-                        android:padding="6dp"
-                        android:background="@drawable/bg_chip_purple"
-                        android:textColor="@android:color/white"
-                        android:textSize="12sp"/>
-                </LinearLayout>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

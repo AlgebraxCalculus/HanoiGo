@@ -29,14 +29,14 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/txtDescription"
+            android:id="@+id/txtPlaceDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#E6FFFFFF"
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/txtDistance"
+            android:id="@+id/txtPlaceDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"

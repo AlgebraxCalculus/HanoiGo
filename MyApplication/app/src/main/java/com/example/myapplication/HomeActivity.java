@@ -6,36 +6,86 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.adapter.PlaceAdapter;
+import com.example.myapplication.adapter.AchievementAdapter;
+import com.example.myapplication.adapter.HomePlaceAdapter;
+import com.example.myapplication.model.Achievement;
 import com.example.myapplication.model.Place;
-import com.example.myapplication.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
+    private RecyclerView recyclerViewIconic;
+    private RecyclerView recyclerViewTopVisited;
+    private RecyclerView recyclerViewPopular;
 
-    private RecyclerView recyclerViewPlaces;
-    private PlaceAdapter placeAdapter;
-    private List<Place> placeList;
+    private HomePlaceAdapter adapterIconic;
+    private HomePlaceAdapter adapterTopVisited;
+    private HomePlaceAdapter adapterPopular;
+
+    private List<Place> listIconic;
+    private List<Place> listTopVisited;
+    private List<Place> listPopular;
+
+    private RecyclerView recyclerAchievements;
+    private AchievementAdapter achievementAdapter;
+    private List<Achievement> achievementList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        recyclerViewPlaces = findViewById(R.id.recyclerViewPlaces);
+        recyclerViewIconic = findViewById(R.id.recyclerViewIconic);
+        recyclerViewTopVisited = findViewById(R.id.recyclerViewTop);
+        recyclerViewPopular = findViewById(R.id.recyclerViewPopular);
 
-        recyclerViewPlaces.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        );
+        recyclerViewIconic.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewTopVisited.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewPopular.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        placeList = new ArrayList<>();
-        placeList.add(new Place("Hoan Kiem Lake", "Beautiful lake in Hanoi center", "2.9 km", R.drawable.hoguom));
-        placeList.add(new Place("Temple of Literature", "Ancient university in Hanoi", "4.2 km", R.drawable.hoguom));
-        placeList.add(new Place("Old Quarter", "Historic area with narrow streets", "1.2 km", R.drawable.hoguom));
+        recyclerAchievements = findViewById(R.id.recyclerAchievements);
+        recyclerAchievements.setLayoutManager(new LinearLayoutManager(this));
 
-        placeAdapter = new PlaceAdapter(placeList);
-        recyclerViewPlaces.setAdapter(placeAdapter);
+        setupDummyData();
+        setupAchievementData();
+
+        adapterIconic = new HomePlaceAdapter(listIconic);
+        adapterTopVisited = new HomePlaceAdapter(listTopVisited);
+        adapterPopular = new HomePlaceAdapter(listPopular);
+        achievementAdapter = new AchievementAdapter(this, achievementList);
+
+        recyclerViewIconic.setAdapter(adapterIconic);
+        recyclerViewTopVisited.setAdapter(adapterTopVisited);
+        recyclerViewPopular.setAdapter(adapterPopular);
+        recyclerAchievements.setAdapter(achievementAdapter);
+    }
+
+    private void setupDummyData() {
+        listIconic = new ArrayList<>();
+        listTopVisited = new ArrayList<>();
+        listPopular = new ArrayList<>();
+
+        listIconic.add(new Place("Hoan Kiem Lake", "Beautiful lake in Hanoi", "2.9 km", R.drawable.hoguom));
+        listIconic.add(new Place("Temple of Literature", "Ancient university", "4.2 km", R.drawable.hoguom));
+        listIconic.add(new Place("Old Quarter", "Historic area", "1.5 km", R.drawable.hoguom));
+
+        listTopVisited.add(new Place("West Lake", "Scenic lake area", "5.3 km", R.drawable.hoguom));
+        listTopVisited.add(new Place("Ho Chi Minh Mausoleum", "Historical landmark", "3.8 km", R.drawable.hoguom));
+        listTopVisited.add(new Place("Vietnam Museum of Ethnology", "Cultural experience", "6.1 km", R.drawable.hoguom));
+
+        listPopular.add(new Place("Dong Xuan Market", "Traditional shopping area", "1.8 km", R.drawable.hoguom));
+        listPopular.add(new Place("Hanoi Opera House", "French colonial architecture", "2.3 km", R.drawable.hoguom));
+        listPopular.add(new Place("Long Bien Bridge", "Historic bridge over Red River", "3.1 km", R.drawable.hoguom));
+    }
+
+    // 🔹 Dữ liệu mẫu cho Achievements
+    private void setupAchievementData() {
+        achievementList = new ArrayList<>();
+        achievementList.add(new Achievement("Chiến thần", "Lọt vào top 10 bảng xếp hạng", "RANK SS", R.drawable.ic_medal));
+        achievementList.add(new Achievement("Aura farmer", "Bài review đạt 50 lượt like", "RANK S+", R.drawable.ic_medal));
     }
 }
