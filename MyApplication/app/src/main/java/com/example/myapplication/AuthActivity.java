@@ -323,6 +323,7 @@ public class AuthActivity extends AppCompatActivity {
             });
         });
 
+        //btn resendOtp
         tvResendOtp.setOnClickListener(v -> {
             String email = ((EditText)findViewById(R.id.edtForgotEmail)).getText().toString();
 

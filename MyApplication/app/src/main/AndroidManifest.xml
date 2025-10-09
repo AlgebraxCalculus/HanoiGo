@@ -34,6 +34,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Activity footer -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+        </activity>
+
         <!-- Activity trang chủ -->
         <activity
             android:name=".HomeActivity"
