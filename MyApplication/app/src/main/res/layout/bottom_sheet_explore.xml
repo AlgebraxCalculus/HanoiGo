@@ -96,18 +96,19 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <!-- Top most visited places this week -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="12dp"
-            android:text="Top most visited places this week"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
 
-        <androidx.recyclerview.widget.RecyclerView
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="12dp"
+                android:text="Top most visited places this week"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTopVisited"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
