@@ -503,6 +503,17 @@
                     android:layout_marginBottom="12dp" />
 
                 <TextView
+                    android:id="@+id/tvNoAchievements"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="You don't have any achievements yet"
+                    android:textColor="#BBBBBB"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:padding="16dp"
+                    android:visibility="gone" />
+
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -529,179 +540,16 @@
                     android:textSize="16sp"
                     android:textColor="@android:color/white"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginTop="12dp">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerTop3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal"
+                    android:overScrollMode="never"
+                    android:scrollbars="none" />
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
 
-                            <FrameLayout
-                                android:layout_width="72dp"
-                                android:layout_height="72dp">
-
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:background="@drawable/bg_circle_rank_2"
-                                    android:scaleType="centerCrop"/>
-
-                                <TextView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
-                                    android:layout_gravity="bottom|center_horizontal"
-                                    android:background="@drawable/bg_circle_number_2"
-                                    android:gravity="center"
-                                    android:text="2"
-                                    android:textColor="@android:color/black"
-                                    android:textStyle="bold"/>
-                            </FrameLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="TheGundamSlayer"
-                                android:textColor="@android:color/white"
-                                android:textSize="12sp"/>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:layout_marginTop="5dp">
-
-                                <ImageView
-                                    android:layout_width="20dp"
-                                    android:layout_height="20dp"
-                                    android:src="@drawable/ic_point_user"
-                                    android:layout_marginEnd="5dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="1136"
-                                    android:textColor="@android:color/white"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <FrameLayout
-                                android:layout_width="88dp"
-                                android:layout_height="88dp">
-
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:background="@drawable/bg_circle_rank_1"
-                                    android:scaleType="centerCrop"/>
-
-                                <TextView
-                                    android:layout_width="26dp"
-                                    android:layout_height="26dp"
-                                    android:layout_gravity="bottom|center_horizontal"
-                                    android:background="@drawable/bg_circle_number_1"
-                                    android:gravity="center"
-                                    android:text="1"
-                                    android:textColor="@android:color/black"
-                                    android:textStyle="bold"/>
-                            </FrameLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="TheHanoiEnjoyer"
-                                android:textColor="@android:color/white"
-                                android:textSize="12sp"/>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:layout_marginTop="5dp">
-
-                                <ImageView
-                                    android:layout_width="20dp"
-                                    android:layout_height="20dp"
-                                    android:src="@drawable/ic_point_user"
-                                    android:layout_marginEnd="5dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="1234"
-                                    android:textColor="@android:color/white"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <FrameLayout
-                                android:layout_width="72dp"
-                                android:layout_height="72dp">
-
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:background="@drawable/bg_circle_rank_3"
-                                    android:scaleType="centerCrop"/>
-
-                                <TextView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
-                                    android:layout_gravity="bottom|center_horizontal"
-                                    android:background="@drawable/bg_circle_number_3"
-                                    android:gravity="center"
-                                    android:text="3"
-                                    android:textColor="@android:color/black"
-                                    android:textStyle="bold"/>
-                            </FrameLayout>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Kim ri cha"
-                                android:textColor="@android:color/white"
-                                android:textSize="12sp"/>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:layout_marginTop="5dp">
-
-                                <ImageView
-                                    android:layout_width="20dp"
-                                    android:layout_height="20dp"
-                                    android:src="@drawable/ic_point_user"
-                                    android:layout_marginEnd="5dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="1037"
-                                    android:textColor="@android:color/white"/>
-                            </LinearLayout>
-                        </LinearLayout>
-                    </LinearLayout>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

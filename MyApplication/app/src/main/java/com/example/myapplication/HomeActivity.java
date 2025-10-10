@@ -8,13 +8,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapter.AchievementAdapter;
 import com.example.myapplication.adapter.HomePlaceAdapter;
+import com.example.myapplication.adapter.LeaderboardTopAdapter;
 import com.example.myapplication.model.Achievement;
+import com.example.myapplication.model.LeaderboardItem;
 import com.example.myapplication.model.Place;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
+
     private RecyclerView recyclerViewIconic;
     private RecyclerView recyclerViewTopVisited;
     private RecyclerView recyclerViewPopular;
@@ -31,11 +34,16 @@ public class HomeActivity extends AppCompatActivity {
     private AchievementAdapter achievementAdapter;
     private List<Achievement> achievementList;
 
+    private RecyclerView recyclerTop3;
+    private LeaderboardTopAdapter topAdapter;
+    private List<LeaderboardItem> top3List;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // --- Place sections ---
         recyclerViewIconic = findViewById(R.id.recyclerViewIconic);
         recyclerViewTopVisited = findViewById(R.id.recyclerViewTop);
         recyclerViewPopular = findViewById(R.id.recyclerViewPopular);
@@ -47,21 +55,32 @@ public class HomeActivity extends AppCompatActivity {
         recyclerViewPopular.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        recyclerAchievements = findViewById(R.id.recyclerAchievements);
-        recyclerAchievements.setLayoutManager(new LinearLayoutManager(this));
-
         setupDummyData();
-        setupAchievementData();
 
         adapterIconic = new HomePlaceAdapter(listIconic);
         adapterTopVisited = new HomePlaceAdapter(listTopVisited);
         adapterPopular = new HomePlaceAdapter(listPopular);
-        achievementAdapter = new AchievementAdapter(this, achievementList);
 
         recyclerViewIconic.setAdapter(adapterIconic);
         recyclerViewTopVisited.setAdapter(adapterTopVisited);
         recyclerViewPopular.setAdapter(adapterPopular);
+
+        // --- Achievements section ---
+        recyclerAchievements = findViewById(R.id.recyclerAchievements);
+        recyclerAchievements.setLayoutManager(new LinearLayoutManager(this));
+
+        setupAchievementData();
+        achievementAdapter = new AchievementAdapter(this, achievementList);
         recyclerAchievements.setAdapter(achievementAdapter);
+
+        // --- Leaderboard Top 3 section ---
+        recyclerTop3 = findViewById(R.id.recyclerTop3);
+        recyclerTop3.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        setupTop3Data();
+
+        topAdapter = new LeaderboardTopAdapter(this, top3List);
+        recyclerTop3.setAdapter(topAdapter);
     }
 
     private void setupDummyData() {
@@ -82,10 +101,16 @@ public class HomeActivity extends AppCompatActivity {
         listPopular.add(new Place("Long Bien Bridge", "Historic bridge over Red River", "3.1 km", R.drawable.hoguom));
     }
 
-    // 🔹 Dữ liệu mẫu cho Achievements
     private void setupAchievementData() {
         achievementList = new ArrayList<>();
         achievementList.add(new Achievement("Chiến thần", "Lọt vào top 10 bảng xếp hạng", "RANK SS", R.drawable.ic_medal));
         achievementList.add(new Achievement("Aura farmer", "Bài review đạt 50 lượt like", "RANK S+", R.drawable.ic_medal));
+    }
+
+    private void setupTop3Data() {
+        top3List = new ArrayList<>();
+        top3List.add(new LeaderboardItem(2, "User2", 1136, R.drawable.ic_user));
+        top3List.add(new LeaderboardItem(1, "User1", 1234, R.drawable.ic_user));
+        top3List.add(new LeaderboardItem(3, "User3", 1080, R.drawable.ic_user));
     }
 }
