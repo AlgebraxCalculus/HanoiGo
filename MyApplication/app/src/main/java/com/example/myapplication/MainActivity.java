@@ -2,6 +2,8 @@ package com.example.myapplication;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.view.View;
 
 
@@ -21,5 +23,11 @@ public class MainActivity extends AppCompatActivity{
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
+
+        if (savedInstanceState == null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, new HomeFragment());
+            transaction.commit();
+        }
     }
 }

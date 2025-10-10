@@ -28,7 +28,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
     @Override
     public LeaderboardViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_rank_card, parent, false);
+                .inflate(R.layout.item_leaderboard, parent, false);
         return new LeaderboardViewHolder(view);
     }
 
@@ -41,9 +41,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         holder.tvPoints.setText(String.valueOf(item.getScore()));
         holder.imgAvatar.setImageResource(item.getAvatarRes());
 
-        // 🔹 Nếu đây là người dùng hiện tại → tô nền xanh nhạt
         if (item.getRank() == currentUserRank) {
-            holder.itemView.setBackgroundResource(R.drawable.bg_current_rank_item);
+            holder.itemView.setBackgroundResource(R.drawable.bg_rank_highlight);
         } else {
             holder.itemView.setBackgroundResource(android.R.color.transparent);
         }
