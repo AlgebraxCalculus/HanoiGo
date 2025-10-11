@@ -4,14 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.LinearLayout; // 🔹 Thêm import
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.R;
 import com.example.myapplication.adapter.AchievementAdapter;
 import com.example.myapplication.adapter.HomePlaceAdapter;
 import com.example.myapplication.adapter.LeaderboardAdapter;
@@ -41,6 +40,9 @@ public class HomeFragment extends Fragment {
     private AchievementAdapter achievementAdapter;
     private List<Achievement> achievementList;
 
+    // 🔹 Thêm layout hiển thị khi không có thành tích
+    private LinearLayout layoutNoAchievements;
+
     private RecyclerView recyclerTop3;
     private LeaderboardTopAdapter topAdapter;
     private List<LeaderboardItem> top3List;
@@ -49,9 +51,7 @@ public class HomeFragment extends Fragment {
     private LeaderboardAdapter leaderboardAdapter;
     private List<LeaderboardItem> leaderboardList;
 
-    public HomeFragment() {
-
-    }
+    public HomeFragment() {}
 
     @Nullable
     @Override
@@ -85,10 +85,20 @@ public class HomeFragment extends Fragment {
 
         // --- Achievements section ---
         recyclerAchievements = view.findViewById(R.id.recyclerAchievements);
+        layoutNoAchievements = view.findViewById(R.id.layoutNoAchievements);
         recyclerAchievements.setLayoutManager(new LinearLayoutManager(requireContext()));
+
         setupAchievementData();
         achievementAdapter = new AchievementAdapter(requireContext(), achievementList);
         recyclerAchievements.setAdapter(achievementAdapter);
+
+        if (achievementList == null || achievementList.isEmpty()) {
+            recyclerAchievements.setVisibility(View.GONE);
+            layoutNoAchievements.setVisibility(View.VISIBLE);
+        } else {
+            recyclerAchievements.setVisibility(View.VISIBLE);
+            layoutNoAchievements.setVisibility(View.GONE);
+        }
 
         // --- Leaderboard Top 3 section ---
         recyclerTop3 = view.findViewById(R.id.recyclerTop3);
@@ -107,7 +117,6 @@ public class HomeFragment extends Fragment {
 
         return view;
     }
-
 
     private void setupPlaceData() {
         listIconic = new ArrayList<>();
@@ -129,8 +138,9 @@ public class HomeFragment extends Fragment {
 
     private void setupAchievementData() {
         achievementList = new ArrayList<>();
-        achievementList.add(new Achievement("Chiến thần", "Lọt vào top 10 bảng xếp hạng", "RANK SS", R.drawable.ic_medal));
-        achievementList.add(new Achievement("Aura farmer", "Bài review đạt 50 lượt like", "RANK S+", R.drawable.ic_medal));
+        // 🔹 Bỏ comment 2 dòng dưới để test hiển thị có dữ liệu
+         achievementList.add(new Achievement("Chiến thần", "Lọt vào top 10 bảng xếp hạng", "RANK SS", R.drawable.ic_medal));
+        // achievementList.add(new Achievement("Aura farmer", "Bài review đạt 50 lượt like", "RANK S+", R.drawable.ic_medal));
     }
 
     private void setupTop3Data() {
