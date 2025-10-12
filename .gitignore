@@ -37,3 +37,4 @@ google-services.json
 /backend/src/main/resources/hanoi-go-firebase-adminsdk.json
 
 /backend/target
+/backend/target/generated-sources
