@@ -3,9 +3,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:backgroundTint="@android:color/transparent">
 
-    <!-- Nội dung chính của app ở đây -->
+    <!-- Container cho Map Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/footerContainer"
+        android:layout_marginBottom="-80dp" />
 
     <!-- Footer bar - CỐ ĐỊNH Ở ĐÁY -->
     <FrameLayout

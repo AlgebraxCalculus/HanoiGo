@@ -26,6 +26,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        // Mapbox repo
         maven {
             url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
             authentication {
@@ -36,8 +38,12 @@ dependencyResolutionManagement {
                 password = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").get()
             }
         }
+
+        // JitPack repo
+        maven { url = uri("https://jitpack.io") }
     }
 }
+
 
 rootProject.name = "My Application"
 include(":app")

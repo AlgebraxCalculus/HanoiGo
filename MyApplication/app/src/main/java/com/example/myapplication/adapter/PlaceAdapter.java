@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.model.Place;
 
@@ -17,9 +18,15 @@ import java.util.List;
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder> {
 
     private List<Place> places;
+    private OnPlaceClickListener listener;
 
-    public PlaceAdapter(List<Place> places) {
+    public interface OnPlaceClickListener {
+        void onPlaceClick(Place place);
+    }
+
+    public PlaceAdapter(List<Place> places, OnPlaceClickListener listener) {
         this.places = places;
+        this.listener = listener;
     }
 
     @NonNull
@@ -33,15 +40,29 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
     @Override
     public void onBindViewHolder(@NonNull PlaceViewHolder holder, int position) {
         Place place = places.get(position);
+
         holder.tvPlaceName.setText(place.getName());
         holder.tvPlaceDescription.setText(place.getDescription());
         holder.tvPlaceDistance.setText(place.getDistance());
-        holder.ivPlaceImage.setImageResource(place.getImageResId());
+        if (place.getImageUrls() != null && !place.getImageUrls().isEmpty()) {
+            String firstImageUrl = place.getImageUrls().get(0);
+
+            // Cần import và sử dụng thư viện Glide
+            Glide.with(holder.ivPlaceImage.getContext())
+                    .load(firstImageUrl)
+                    .into(holder.ivPlaceImage);
+        }
+        // 🟢 Gắn sự kiện click vào toàn bộ item
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onPlaceClick(place);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return places.size();
+        return places != null ? places.size() : 0;
     }
 
     static class PlaceViewHolder extends RecyclerView.ViewHolder {

@@ -5,7 +5,6 @@
     <!-- Search -->
     <string name="hint_search">Search here…</string>
     <string name="desc_search_icon">Search icon</string>
-    <string name="desc_action_icon">Action button</string>
 
     <!-- Tags -->
     <string name="tag_iconic">★ Iconic</string>
@@ -18,5 +17,13 @@
     <string name="desc_menu_icon">Menu icon</string>
     <string name="saved_title">Saved</string>
     <string name="new_list">New list</string>
+
+    <!-- Reviews -->
+    <string name="hint_review_search">Search review by author</string>
+    <string name="tag_most_approved">Most approved</string>
+    <string name="tag_newest">Newest</string>
+    <string name="tag_highest_rate">Highest rate</string>
+    <string name="tag_lowest_rate">Lowest rate</string>
+    <string name = "review_text_sample">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea kahdsbjasbchak</string>
 
 </resources>
