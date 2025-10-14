@@ -120,30 +120,6 @@
                 android:layout_marginStart="9dp"
                 android:layout_marginBottom="2dp"/>
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:gravity="center_vertical"
-                android:layout_marginStart="9dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_bike"
-                    android:layout_marginEnd="4dp"
-                    app:tint="#AAAAAA" />
-
-                <TextView
-                    android:id="@+id/placeTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="20 minutes"
-                    android:textColor="#AAAAAA"
-                    android:textSize="13sp"/>
-            </LinearLayout>
-
             <!-- Nút hành động -->
             <LinearLayout
                 android:layout_width="wrap_content"

@@ -57,10 +57,10 @@ public class CheckpointService {
 
         for (LocationListResponse locResponse : locationListResponses) {
             LocationResponse locationRes = locResponse.getLocationResponse();
-            String locName = locationRes.getName();
+            String locAddress = locationRes.getAddress();
             int distanceValue = locResponse.getDistanceValue();  
 
-            String locId = locationDetailRepository.findIdByName(locName).orElse(null);
+            String locId = locationDetailRepository.findIdByAddress(locAddress).orElse(null);
 
             if (locId == null) {
                 continue;  // Skip nếu không có ID
@@ -74,7 +74,7 @@ public class CheckpointService {
 
             // Filter chỉ <= 100m
             if (distanceValue <= 100) {
-                enableCheckpoints.add(new EnableCheckpointResponse(locId, locName, distanceValue));
+                enableCheckpoints.add(new EnableCheckpointResponse(locId, locAddress, distanceValue));
             } else {
                 // Break sớm vì list đã sorted nearest
                 break;
@@ -101,7 +101,7 @@ public class CheckpointService {
         List<EnableCheckpointResponse> eligibleList = enableCheckIn(request);
         System.err.println("Eligible locations: " + eligibleList.size());
         for (EnableCheckpointResponse e : eligibleList) {
-            System.err.println(" - " + e.getLocationName() + " (" + e.getLocationId() + ") at " + e.getDistanceValue() + "m");
+            System.err.println(" - " + e.getLocationAddress() + " (" + e.getLocationId() + ") at " + e.getDistanceValue() + "m");
         }
 
         // Verify locationId có trong eligible list
@@ -135,17 +135,17 @@ public class CheckpointService {
         UserResponse updatedUserResponse = userService.getUserById(request.getUserId());
 
         LocationResponse locationRes = new LocationResponse();
-        locationRes.setName(loc.getName()); 
+        locationRes.setAddress(loc.getAddress());
         
         CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, updatedUserResponse);
 
         // Push data lên Firestore
-        firebaseService.pushCheckinData(userEntity.getId(), loc.getName());
+        firebaseService.pushCheckinData(userEntity.getId(), loc.getAddress());
 
         // Gửi notification qua FCM
         String title = "Check-in Successful!";
-        String body = "Location: " + loc.getName() + " (+3 points)";
-        String userFcmToken = userEntity.getFcmToken(); 
+        String body = "Location: " + loc.getAddress() + " (+3 points)";
+        String userFcmToken = userEntity.getFcmToken();
 
         if (userFcmToken != null && !userFcmToken.isEmpty()) {
             firebaseService.sendNotification(userFcmToken, title, body);

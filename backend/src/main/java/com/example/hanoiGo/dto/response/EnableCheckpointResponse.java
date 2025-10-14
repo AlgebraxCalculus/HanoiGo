@@ -7,6 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 public class EnableCheckpointResponse {
     private String locationId;
-    private String locationName;
+    private String locationAddress;
     private int distanceValue; 
 }

@@ -1,12 +1,11 @@
-package com.example.myapplication;
+package com.example.myapplication.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout; // 🔹 Thêm import
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,10 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.myapplication.MainActivity;
+import com.example.myapplication.R;
 import com.example.myapplication.adapter.AchievementAdapter;
 import com.example.myapplication.adapter.LeaderboardAdapter;
 import com.example.myapplication.api.LocationApi;
-import com.example.myapplication.api.ResetPassApi;
 import com.example.myapplication.api.UserApi;
 import com.example.myapplication.model.Achievement;
 import com.example.myapplication.model.LeaderboardItem;
@@ -31,7 +31,9 @@ import com.example.myapplication.adapter.PlaceAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -67,10 +69,6 @@ public class HomeFragment extends Fragment {
     String jwtToken = "";
     double userLat = 0, userLng = 0;
 
-
-
-    public HomeFragment() {}
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -96,10 +94,6 @@ public class HomeFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        //lat_lng nhà tao
-        userLat = 21.005147582587608;
-        userLng = 105.86326519584026;
-
 
         // --- mapper thành phần UI section ---
          tvUsername = view.findViewById(R.id.tvUserName);
@@ -125,8 +119,6 @@ public class HomeFragment extends Fragment {
                 .load(avatar)
                 .into(imgUserAvatar);
 
-
-
         // --- Place sections ---
         recyclerViewIconic = view.findViewById(R.id.recyclerViewIconic);
         recyclerViewTopVisited = view.findViewById(R.id.recyclerViewTop);
@@ -138,8 +130,6 @@ public class HomeFragment extends Fragment {
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         recyclerViewPopularNearU.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-
-        setupPlaceData();
 
         // --- Achievements section ---
         recyclerAchievements = view.findViewById(R.id.recyclerAchievements);
@@ -155,6 +145,20 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    public void updateUserLocation(double lat, double lng) {
+        if (lat == 0.0 && lng == 0.0) {
+            System.out.println("updateUserLocation(): invalid coordinates (0,0) → ignored");
+            return;
+        }
+
+        this.userLat = lat;
+        this.userLng = lng;
+        System.out.println("HomeFragment → updateUserLocation(): lat=" + lat + ", lng=" + lng);
+
+        // Gọi lại load danh sách địa điểm gần user
+        setupPlaceData();
+    }
+
     private void setupPlaceData() {
         listIconic = new ArrayList<>();
         listTopVisited = new ArrayList<>();
@@ -164,15 +168,30 @@ public class HomeFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"Iconic", false, false, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                for(JSONObject a : data){
+                Map<Place, String> placeToAddress = new HashMap<>();
+                for (JSONObject a : data) {
                     try {
-                        listIconic.add(new Place(a.getJSONObject("locationResponse").getString("name"), a.getJSONObject("locationResponse").getString("description"), a.getString("distanceText"), a.getJSONObject("locationResponse").getString("defaultPicture")));
-                    }catch (JSONException e){
+                        JSONObject location = a.getJSONObject("locationResponse");
+                        Place place = new Place(
+                                location.getString("name"),
+                                location.getString("description"),
+                                a.getString("distanceText"),
+                                location.getString("defaultPicture")
+                        );
+                        listIconic.add(place);
+
+                        // Lưu tạm address vào map
+                        placeToAddress.put(place, location.getString("address"));
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                for (Place place : listIconic) {
+                    String address = placeToAddress.get(place);
+                    place.setAddress(address);
+                }
                 requireActivity().runOnUiThread(() -> {
-                    adapterIconic = new PlaceAdapter(listIconic);
+                    adapterIconic = new PlaceAdapter(listIconic, place -> openPlaceDetail(place));
                     recyclerViewIconic.setAdapter(adapterIconic);
                 });
             }
@@ -191,15 +210,30 @@ public class HomeFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"", true, false, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                for(JSONObject a : data){
+                Map<Place, String> placeToAddress = new HashMap<>();
+                for (JSONObject a : data) {
                     try {
-                        listTopVisited.add(new Place(a.getJSONObject("locationResponse").getString("name"), a.getJSONObject("locationResponse").getString("description"), a.getString("distanceText"), a.getJSONObject("locationResponse").getString("defaultPicture")));
-                    }catch (JSONException e){
+                        JSONObject location = a.getJSONObject("locationResponse");
+                        Place place = new Place(
+                                location.getString("name"),
+                                location.getString("description"),
+                                a.getString("distanceText"),
+                                location.getString("defaultPicture")
+                        );
+                        listTopVisited.add(place);
+
+                        // Lưu tạm address vào map
+                        placeToAddress.put(place, location.getString("address"));
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                for (Place place : listTopVisited) {
+                    String address = placeToAddress.get(place);
+                    place.setAddress(address);
+                }
                 requireActivity().runOnUiThread(() -> {
-                    adapterTopVisited = new PlaceAdapter(listTopVisited);
+                    adapterTopVisited = new PlaceAdapter(listTopVisited, place -> openPlaceDetail(place));
                     recyclerViewTopVisited.setAdapter(adapterTopVisited);
                 });
             }
@@ -218,15 +252,30 @@ public class HomeFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"", false, true, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                for(JSONObject a : data){
+                Map<Place, String> placeToAddress = new HashMap<>();
+                for (JSONObject a : data) {
                     try {
-                        listPopularNearU.add(new Place(a.getJSONObject("locationResponse").getString("name"), a.getJSONObject("locationResponse").getString("description"), a.getString("distanceText"), a.getJSONObject("locationResponse").getString("defaultPicture")));
-                    }catch (JSONException e){
+                        JSONObject location = a.getJSONObject("locationResponse");
+                        Place place = new Place(
+                                location.getString("name"),
+                                location.getString("description"),
+                                a.getString("distanceText"),
+                                location.getString("defaultPicture")
+                        );
+                        listPopularNearU.add(place);
+
+                        // Lưu tạm address vào map
+                        placeToAddress.put(place, location.getString("address"));
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                for (Place place : listPopularNearU) {
+                    String address = placeToAddress.get(place);
+                    place.setAddress(address);
+                }
                 requireActivity().runOnUiThread(() -> {
-                    adapterPopularNearU = new PlaceAdapter(listPopularNearU);
+                    adapterPopularNearU = new PlaceAdapter(listPopularNearU, place -> openPlaceDetail(place));
                     recyclerViewPopularNearU.setAdapter(adapterPopularNearU);
                 });
             }
@@ -374,5 +423,12 @@ public class HomeFragment extends Fragment {
                 });
             }
         });
+    }
+
+    private void openPlaceDetail(Place place) {
+        // Gọi activity chứa fragment này
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).openPlaceDetailFromHome(place);
+        }
     }
 }

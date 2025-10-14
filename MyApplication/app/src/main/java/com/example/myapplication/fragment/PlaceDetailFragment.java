@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -20,22 +19,28 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.ImageAdapter;
 import com.example.myapplication.adapter.ReviewAdapter;
+import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlaceDetailFragment extends Fragment {
 
     private CoordinatorLayout placeDetailContainer;
     private BottomSheetBehavior<View> bottomSheetBehavior;
-
-    private TextView placeTitle, tvRatingNumber, tvRatingMeta, placeAddress, placeTime;
+    private TextView placeTitle, tvRatingNumber, tvRatingMeta, placeAddress, overallDescription, locationText;
     private RatingBar ratingBar;
     private MaterialButton btnDirections, btnSave, btnWriteReview;
     private EditText searchBar;
@@ -49,7 +54,6 @@ public class PlaceDetailFragment extends Fragment {
     public PlaceDetailFragment() {}
 
     public static PlaceDetailFragment newInstance(Place place) {
-        //Đóng gói dữ liệu place vào bundle và truyền vào fragment
         PlaceDetailFragment fragment = new PlaceDetailFragment();
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
@@ -66,27 +70,17 @@ public class PlaceDetailFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_place_detail, container, false);
 
-        // Ánh xạ RecyclerView
+        // --- Ánh xạ views ---
         rvPlacePhotos = view.findViewById(R.id.rvPlacePhotos);
-
-        // Lấy dữ liệu từ bundle
-        if (getArguments() != null) {
-            placeData = (Place) getArguments().getSerializable("placeData");
-        }
-
-        // Setup ảnh
-        if (placeData != null && placeData.getImageUrls() != null && !placeData.getImageUrls().isEmpty()) {
-            setupPlacePhotos(placeData.getImageUrls());
-        }
-
-        // Ánh xạ các view khác
+        rvReviews = view.findViewById(R.id.rvReviews);
         placeDetailContainer = view.findViewById(R.id.placeDetailContainer);
         placeTitle = view.findViewById(R.id.placeTitle);
         tvRatingNumber = view.findViewById(R.id.tvRatingNumber);
         tvRatingMeta = view.findViewById(R.id.tvRatingMeta);
         ratingBar = view.findViewById(R.id.ratingBar);
         placeAddress = view.findViewById(R.id.placeAddress);
-        placeTime = view.findViewById(R.id.placeTime);
+        overallDescription = view.findViewById(R.id.overallDescription);
+        locationText = view.findViewById(R.id.locationText);
         btnDirections = view.findViewById(R.id.btnDirections);
         btnSave = view.findViewById(R.id.btnSave);
         btnWriteReview = view.findViewById(R.id.btnWriteReview);
@@ -95,75 +89,148 @@ public class PlaceDetailFragment extends Fragment {
         btnClose = view.findViewById(R.id.btnCloseExplore);
         tagContainer = view.findViewById(R.id.tagContainer);
 
-
-        // Thiết lập bottom sheet
+        // --- Bottom sheet setup ---
         View scrollView = view.findViewById(R.id.bottomSheetPlaceDetail);
         bottomSheetBehavior = BottomSheetBehavior.from(scrollView);
         bottomSheetBehavior.setPeekHeight(900);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        // Gắn sự kiện
         btnClose.setOnClickListener(v -> closeFragment());
         setupActions();
-
-        rvReviews = view.findViewById(R.id.rvReviews);
         setupReviews();
+
+        // --- Lấy dữ liệu place từ bundle ---
+        if (getArguments() != null) {
+            placeData = (Place) getArguments().getSerializable("placeData");
+            if (placeData != null) {
+                if (placeData.getId() != null) {
+                    // Nếu có ID sẵn -> fetch trực tiếp
+                    fetchPlaceDetail(placeData.getId());
+                } else if (placeData.getName() != null) {
+                    // Nếu không có ID -> gọi API lấy ID theo address
+                    fetchLocationIdThenDetail(placeData.getAddress());
+                } else {
+                    Toast.makeText(getContext(), "Không có thông tin địa điểm", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
 
         return view;
     }
 
+    // Nếu không có ID, gọi API lấy ID theo địa chỉ rồi fetch detail
+    private void fetchLocationIdThenDetail(String address) {
+        LocationApi.GetLocationIdByAddress(address, requireContext(), new LocationApi.LocationIdCallback() {
+            @Override
+            public void onSuccess(String locationId) {
+                placeData.setId(locationId);
+                fetchPlaceDetail(locationId);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Lấy ID thất bại: " + errorMessage, Toast.LENGTH_SHORT).show()
+                );
+            }
+        });
+    }
+
+    // Gọi API chi tiết địa điểm
+    private void fetchPlaceDetail(String locationId) {
+        LocationApi.GetLocationByDetail(locationId, requireContext(), new LocationApi.LocationDetailCallback() {
+            @Override
+            public void onSuccess(JSONObject result) {
+                requireActivity().runOnUiThread(() -> {
+                    try {
+                        // Đọc và log tọa độ
+                        String latStr = result.optString("latitude", "0");
+                        String lngStr = result.optString("longitude", "0");
+                        System.out.println("✅ fetchPlaceDetail() → lat=" + latStr + ", lng=" + lngStr);
+                        double lat = 0, lng = 0;
+                        try {
+                            lat = Double.parseDouble(latStr);
+                            lng = Double.parseDouble(lngStr);
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+
+                        // Nếu có tọa độ hợp lệ → show marker trên map
+                        if (lat != 0 && lng != 0) {
+                            Fragment parent = getParentFragment();
+                            if (parent instanceof MapFragment) {
+                                ((MapFragment) parent).showMarker(lat, lng, result.optString("name", "Unknown Place"));
+                            }
+                        }
+                        // --- Gán dữ liệu vào UI ---
+                        placeTitle.setText(result.optString("name", "Không có tên"));
+                        placeAddress.setText(result.optString("address", "Không có địa chỉ"));
+                        List<String> imageUrls = new ArrayList<>();
+                        String defaultPic = result.optString("defaultPicture", "");
+                        if (!TextUtils.isEmpty(defaultPic)) imageUrls.add(defaultPic);
+
+                        if (result.has("images")) {
+                            JSONArray images = result.getJSONArray("images");
+                            for (int i = 0; i < images.length(); i++) imageUrls.add(images.getString(i));
+                        }
+
+                        if (!imageUrls.isEmpty()) setupPlacePhotos(imageUrls);
+
+                        // Overall description và location text
+                        overallDescription.setText(result.optString("description", "Chưa có mô tả"));
+                        locationText.setText(result.optString("address", "Chưa có thông tin vị trí"));
+
+                    } catch (JSONException e) {
+                        Toast.makeText(getContext(), "Lỗi đọc dữ liệu chi tiết", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Lỗi khi tải chi tiết: " + errorMessage, Toast.LENGTH_SHORT).show()
+                );
+            }
+        });
+    }
+
+    // Setup ảnh scroll ngang
+    private void setupPlacePhotos(List<String> imageUrls) {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(
+                getContext(), LinearLayoutManager.HORIZONTAL, false
+        );
+        rvPlacePhotos.setLayoutManager(layoutManager);
+        rvPlacePhotos.setAdapter(new ImageAdapter(requireContext(), imageUrls));
+    }
+
+    //  Setup reviews (giữ nguyên mẫu)
     private void setupReviews() {
         List<Review> reviews = List.of(
-                new Review(
-                        "Minh Đỗ",
-                        "Local Guide • 24 reviews",
+                new Review("Minh Đỗ", "Local Guide • 24 reviews",
                         "Quán có không gian đẹp, đồ uống ổn, phục vụ nhiệt tình. Mình thích nhất là phần trang trí và nhạc nhẹ nhàng.",
-                        "2 days ago",
-                        4.5f,
-                        32,
-                        new int[]{R.drawable.review_sample_img1, R.drawable.review_sample_img2, R.drawable.review_sample_img3}
-                ),
-                new Review(
-                        "Anh Phạm",
-                        "Traveler",
+                        "2 days ago", 4.5f, 32,
+                        new int[]{R.drawable.review_sample_img1, R.drawable.review_sample_img2, R.drawable.review_sample_img3}),
+                new Review("Anh Phạm", "Traveler",
                         "Rất hài lòng, đồ ăn ngon, chỗ ngồi thoải mái. Giá hơi cao nhưng xứng đáng.",
-                        "1 week ago",
-                        5f,
-                        21,
-                        new int[]{R.drawable.review_sample_img4}
-                ),
-                new Review(
-                        "Hà Lê",
-                        "Food Blogger",
+                        "1 week ago", 5f, 21,
+                        new int[]{R.drawable.review_sample_img4}),
+                new Review("Hà Lê", "Food Blogger",
                         "Không gian hơi ồn, nhưng đồ uống ngon, nhân viên thân thiện.",
-                        "3 weeks ago",
-                        3.5f,
-                        10,
-                        new int[]{}
-                )
+                        "3 weeks ago", 3.5f, 10,
+                        new int[]{})
         );
 
         rvReviews.setLayoutManager(new LinearLayoutManager(getContext()));
-        ReviewAdapter reviewAdapter = new ReviewAdapter(requireContext(), reviews);
-        rvReviews.setAdapter(reviewAdapter);
-    }
-
-    private void setupPlacePhotos(List<String> imageUrls) {
-        // 1. Tạo LayoutManager
-        LinearLayoutManager layoutManager = new LinearLayoutManager(
-                getContext(),
-                LinearLayoutManager.HORIZONTAL,
-                false
-        );
-        rvPlacePhotos.setLayoutManager(layoutManager);
-
-        // 2. Tạo Adapter và gán
-        ImageAdapter adapter = new ImageAdapter(requireContext(), imageUrls);
-        rvPlacePhotos.setAdapter(adapter);
+        rvReviews.setAdapter(new ReviewAdapter(requireContext(), reviews));
     }
 
     private void closeFragment() {
-        getParentFragmentManager().popBackStack();
+        Fragment parent = getParentFragment();
+        if (parent instanceof MapFragment) {
+            ((MapFragment) parent).onPlaceDetailClosed();  // 👉 gọi để bật lại footer + các nút
+            parent.getChildFragmentManager().popBackStack();  // 👉 quay lại ExploreFragment
+        }
     }
 
     private void setupActions() {

@@ -67,4 +67,16 @@ public class LocationController {
                 .result(locationList)
                 .build();
     }
+
+    // Lấy locationId theo address
+    @GetMapping("/get-id-by-address")
+    public ApiResponse<String> getLocationIdByAddress(
+        @RequestParam(value = "address") String address) {
+        String locationId = locationService.getLocationIdByAddress(address);
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("Lấy locationId theo address thành công")
+                .result(locationId)
+                .build();
+    }
 }

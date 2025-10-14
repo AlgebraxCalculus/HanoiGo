@@ -1,76 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/imgMain"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
-    android:gravity="center"
-    android:padding="8dp">
-
-    <!-- ẢNH TO BÊN TRÁI -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="0dp"
-        android:layout_height="250dp"
-        android:layout_weight="1.5"
-        android:layout_marginEnd="8dp"
-        app:cardCornerRadius="30dp"
-        app:cardElevation="0dp"
-        android:clipChildren="true"
-        android:clipToPadding="true">
-
-        <ImageView
-            android:id="@+id/imgMain"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:contentDescription="Main place image" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- CỘT 2 ẢNH NHỎ BÊN PHẢI -->
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:weightSum="2">
-
-        <!-- Ảnh nhỏ trên -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginBottom="4dp"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="0dp"
-            android:clipChildren="true"
-            android:clipToPadding="true">
-
-            <ImageView
-                android:id="@+id/imgSub1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="Sub image 1" />
-        </androidx.cardview.widget.CardView>
-
-        <!-- Ảnh nhỏ dưới -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="0dp"
-            android:clipChildren="true"
-            android:clipToPadding="true">
-
-            <ImageView
-                android:id="@+id/imgSub2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="Sub image 2" />
-        </androidx.cardview.widget.CardView>
-
-    </LinearLayout>
-</LinearLayout>
+    android:layout_gravity="center"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:adjustViewBounds="true"
+    android:scaleType="centerCrop"
+    android:background="@drawable/bg_rounded_image"
+    android:clipToOutline="true" />

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,30 +13,53 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.PlaceAdapter;
 import com.example.myapplication.adapter.RouteAdapter;
+import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Route;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExploreFragment extends Fragment {
 
     private BottomSheetBehavior<View> bottomSheetBehavior;
+
+    private RecyclerView rvIconicPlaces;
+    private RecyclerView rvTopVisited;
+    private RecyclerView rvPopularNearYou;
+
+    private List<Place> listIconic;
+    private List<Place> listTopVisited;
+    private List<Place> listPopularNearU;
+
+    private PlaceAdapter adapterIconic;
+    private PlaceAdapter adapterTopVisited;
+    private PlaceAdapter adapterPopularNearU;
+
+    private double userLat = 21.005147582587608;
+    private double userLng = 105.86326519584026;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
-        // Setup Bottom Sheet
         setupBottomSheet(view);
+        setupPlaceData();
+        setupSuggestedRoutes(view);
+
         return view;
     }
 
@@ -48,81 +72,145 @@ public class ExploreFragment extends Fragment {
         ImageView btnClose = view.findViewById(R.id.btnCloseExplore);
         btnClose.setOnClickListener(v -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED));
 
-        setupIconicPlaces(view);
-        setupTopVisited(view);
-        setupPopularNearYou(view);
-        setupSuggestedRoutes(view);
+        rvIconicPlaces = view.findViewById(R.id.rvIconicPlaces);
+        rvTopVisited = view.findViewById(R.id.rvTopVisited);
+        rvPopularNearYou = view.findViewById(R.id.rvPopularNearYou);
+
+        rvIconicPlaces.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvTopVisited.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvPopularNearYou.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
     }
 
-    // ======= RecyclerViews setup =======
-    private void setupIconicPlaces(View view) {
-        RecyclerView rv = view.findViewById(R.id.rvIconicPlaces);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        List<Place> list = new ArrayList<>();
+    private void setupPlaceData() {
+        listIconic = new ArrayList<>();
+        listTopVisited = new ArrayList<>();
+        listPopularNearU = new ArrayList<>();
 
-        // 1. Hoan Kiem Lake
-        List<String> hoanKiemImages = new ArrayList<>();
-        hoanKiemImages.add("https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg");
-        hoanKiemImages.add("https://res.cloudinary.com/dsm1uhecl/image/upload/v1759654177/lang_bac_a5tcsy.jpg");
-        hoanKiemImages.add("https://res.cloudinary.com/dsm1uhecl/image/upload/v1759654176/Nh%C3%A0_H%C3%A1t_L%E1%BB%9Bn_H%C3%A0_N%E1%BB%99i_njilod.jpg");
-        list.add(new Place(
-                "Hoan Kiem Lake",
-                "Lake featuring a temple on a small island reached via a wooden bridge and a tower on another island.",
-                "3.6 km",
-                hoanKiemImages,
-                21.028511, 105.854444
-        ));
+        //setUp listIconic
+        LocationApi.GetLocationList(userLat, userLng,"Iconic", false, false, getContext(), new LocationApi.LocationApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> data) {
+                Map<Place, String> placeToAddress = new HashMap<>();
+                for (JSONObject a : data) {
+                    try {
+                        JSONObject location = a.getJSONObject("locationResponse");
+                        Place place = new Place(
+                                location.getString("name"),
+                                location.getString("description"),
+                                a.getString("distanceText"),
+                                location.getString("defaultPicture")
+                        );
+                        listIconic.add(place);
 
-// 2. Temple of Literature
-        List<String> vanMieuImages = new ArrayList<>();
-        vanMieuImages.add("https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"); // URL Cổng chính
+                        // Lưu tạm address vào map
+                        placeToAddress.put(place, location.getString("address"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (Place place : listIconic) {
+                    String address = placeToAddress.get(place);
+                    place.setAddress(address);
+                }
+                requireActivity().runOnUiThread(() -> {
+                    adapterIconic = new PlaceAdapter(listIconic, place -> openPlaceDetail(place));
+                    rvIconicPlaces.setAdapter(adapterIconic);
+                });
+            }
 
-        list.add(new Place(
-                "Temple of Literature",
-                "The first national university in Vietnam, known for its well-preserved traditional Vietnamese architecture.",
-                "4.2 km",
-                vanMieuImages,
-                21.028511, 105.854444
-        ));
-        rv.setAdapter(new PlaceAdapter(list, place -> openPlaceDetail(place)));
-    }
+            @Override
+            public void onFailure(String errorMessage) {
+                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
 
-    private void setupTopVisited(View view) {
-        RecyclerView rv = view.findViewById(R.id.rvTopVisited);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        List<Place> list = new ArrayList<>();
+        //setUp listTopVisited
+        LocationApi.GetLocationList(userLat, userLng,"", true, false, getContext(), new LocationApi.LocationApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> data) {
+                Map<Place, String> placeToAddress = new HashMap<>();
+                for (JSONObject a : data) {
+                    try {
+                        JSONObject location = a.getJSONObject("locationResponse");
+                        Place place = new Place(
+                                location.getString("name"),
+                                location.getString("description"),
+                                a.getString("distanceText"),
+                                location.getString("defaultPicture")
+                        );
+                        listTopVisited.add(place);
 
-        List<String> dongXuanImages = new ArrayList<>();
-        dongXuanImages.add("https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg");
+                        // Lưu tạm address vào map
+                        placeToAddress.put(place, location.getString("address"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (Place place : listTopVisited) {
+                    String address = placeToAddress.get(place);
+                    place.setAddress(address);
+                }
+                requireActivity().runOnUiThread(() -> {
+                    adapterTopVisited = new PlaceAdapter(listTopVisited, place -> openPlaceDetail(place));
+                    rvTopVisited.setAdapter(adapterTopVisited);
+                });
+            }
 
-        list.add(new Place(
-                "Dong Xuan Market",
-                "A large indoor market in the heart of the Old Quarter.",
-                "2.5 km",
-                dongXuanImages,
-                21.028511, 105.854444
-        ));
+            @Override
+            public void onFailure(String errorMessage) {
+                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
 
-        rv.setAdapter(new PlaceAdapter(list, place -> openPlaceDetail(place)));
-    }
+        //setUp listPopularNearU
+        LocationApi.GetLocationList(userLat, userLng,"", false, true, getContext(), new LocationApi.LocationApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> data) {
+                Map<Place, String> placeToAddress = new HashMap<>();
+                for (JSONObject a : data) {
+                    try {
+                        JSONObject location = a.getJSONObject("locationResponse");
+                        Place place = new Place(
+                                location.getString("name"),
+                                location.getString("description"),
+                                a.getString("distanceText"),
+                                location.getString("defaultPicture")
+                        );
+                        listPopularNearU.add(place);
 
-    private void setupPopularNearYou(View view) {
-        RecyclerView rv = view.findViewById(R.id.rvPopularNearYou);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        List<Place> list = new ArrayList<>();
+                        // Lưu tạm address vào map
+                        placeToAddress.put(place, location.getString("address"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for (Place place : listPopularNearU) {
+                    String address = placeToAddress.get(place);
+                    place.setAddress(address);
+                }
+                requireActivity().runOnUiThread(() -> {
+                    adapterPopularNearU = new PlaceAdapter(listPopularNearU, place -> openPlaceDetail(place));
+                    rvPopularNearYou.setAdapter(adapterPopularNearU);
+                });
+            }
 
-        List<String> operaHouseImages = new ArrayList<>();
-        operaHouseImages.add("https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg");
-
-        list.add(new Place(
-                "Opera House",
-                "A beautiful French colonial architectural landmark built in 1911.",
-                "2.3 km",
-                operaHouseImages,
-                21.028511, 105.854444
-        ));
-
-        rv.setAdapter(new PlaceAdapter(list, place -> openPlaceDetail(place)));
+            @Override
+            public void onFailure(String errorMessage) {
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
     }
 
     private void setupSuggestedRoutes(View view) {
@@ -130,7 +218,7 @@ public class ExploreFragment extends Fragment {
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
         List<Route> routes = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            routes.add(new Route("Route " + (i+1), "Sample description", "6.3 km", "20m 36s", R.drawable.hoguom));
+            routes.add(new Route("Route " + (i + 1), "Sample description", "6.3 km", "20m 36s", R.drawable.hoguom));
         }
         rv.setAdapter(new RouteAdapter(routes));
     }

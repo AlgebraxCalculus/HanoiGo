@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class CheckpointResponse {
-    private String locationName;
+    private String locationAddress;
     private LocalDateTime checkedInTime;
     private String userName;
     private int userPoint;
