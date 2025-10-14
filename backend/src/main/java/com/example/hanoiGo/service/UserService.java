@@ -85,7 +85,10 @@ import java.util.List;
      public List<UserResponse> getAllUsers(boolean orderByPoints) {
         List<User> users = userRepository.findAll();
         if (orderByPoints) {
-            users.sort(Comparator.comparingInt(User::getPoints).reversed());
+            users.sort(
+            Comparator.comparingInt(User::getPoints).reversed() // Ưu tiên điểm giảm dần
+                      .thenComparing(User::getUsername, String.CASE_INSENSITIVE_ORDER) // Nếu điểm bằng, sort theo tên tăng dần
+            );
         }
         return userMapper.toUserResponseList(users);
      }

@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 
 import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
@@ -44,6 +45,9 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         holder.tvPlaceName.setText(place.getName());
         holder.tvPlaceDescription.setText(place.getDescription());
         holder.tvPlaceDistance.setText(place.getDistance());
+        Glide.with(holder.itemView.getContext())
+                .load(place.getPictureURL())
+                .into(holder.ivPlaceImage);
         if (place.getImageUrls() != null && !place.getImageUrls().isEmpty()) {
             String firstImageUrl = place.getImageUrls().get(0);
 

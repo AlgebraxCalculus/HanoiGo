@@ -43,6 +43,10 @@
             android:exported="true">
         </activity>
 
+        <!-- Activity trang chủ -->
+
+
+
         <!-- Mapbox/Goong API Key -->
         <meta-data
             android:name="com.mapbox.maps.token"
