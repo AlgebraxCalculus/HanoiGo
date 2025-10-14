@@ -41,22 +41,8 @@
         </activity>
 
         <!-- Activity trang chủ -->
-        <activity
-            android:name=".HomeActivity"
-            android:exported="true">
-        </activity>
 
-        <!-- Activity bản đồ -->
-        <activity
-            android:name=".MapActivity"
-            android:exported="true">
-        </activity>
 
-        <!-- MapSavedActivity -->
-        <activity
-            android:name=".MapSavedActivity"
-            android:exported="true">
-        </activity>
 
         <!-- Mapbox/Goong API Key -->
         <meta-data

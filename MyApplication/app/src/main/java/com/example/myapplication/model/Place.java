@@ -4,13 +4,13 @@ public class Place {
     private String name;
     private String description;
     private String distance;
-    private int imageResId;
+    private String pictureURL;
 
-    public Place(String name, String description, String distance, int imageResId) {
+    public Place(String name, String description, String distance, String pictureURL) {
         this.name = name;
         this.description = description;
         this.distance = distance;
-        this.imageResId = imageResId;
+        this.pictureURL = pictureURL;
     }
 
     public String getName() {
@@ -25,7 +25,7 @@ public class Place {
         return distance;
     }
 
-    public int getImageResId() {
-        return imageResId;
+    public String getPictureURL() {
+        return pictureURL;
     }
 }
