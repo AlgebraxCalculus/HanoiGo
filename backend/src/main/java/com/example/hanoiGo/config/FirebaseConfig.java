@@ -1,6 +1,7 @@
 package com.example.hanoiGo.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,7 +29,7 @@ public class FirebaseConfig {
                 
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setDatabaseUrl("https://hanoi-go-default-rtdb.asia-southeast1.firebasedatabase.app")
+                        .setDatabaseUrl("https://firestore.googleapis.com/v1/projects/auth-login-5c761/databases/(default)/documents")
                         .build();
                 FirebaseApp.initializeApp(options);
                 
@@ -48,11 +49,5 @@ public class FirebaseConfig {
     @Bean
     public FirebaseMessaging firebaseMessaging() {
         return FirebaseMessaging.getInstance();
-    }
-
-    // Nếu bạn dùng Firebase Realtime Database:
-    @Bean
-    public FirebaseDatabase firebaseDatabase() {
-        return FirebaseDatabase.getInstance();
     }
 }

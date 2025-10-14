@@ -140,8 +140,8 @@ public class CheckpointService {
         CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, updatedUserResponse);
 
         // Push data lên Firestore
-        firebaseService.pushCheckinData(userEntity.getId(), loc.getName(), userEntity.getPoints());
-        
+        firebaseService.pushCheckinData(userEntity.getId(), loc.getName());
+
         // Gửi notification qua FCM
         String title = "Check-in Successful!";
         String body = "Location: " + loc.getName() + " (+3 points)";

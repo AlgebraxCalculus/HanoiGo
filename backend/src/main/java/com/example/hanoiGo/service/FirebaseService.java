@@ -98,16 +98,14 @@ public class FirebaseService {
         }
     }
 
-    public void pushCheckinData(UUID userId, String locationName, int points) {
+    public void pushCheckinData(UUID userId, String locationName) {
         try {
             Firestore db = FirestoreClient.getFirestore();
 
             Map<String, Object> data = new HashMap<>();
-            data.put("userId", userId);
+            data.put("userId", userId.toString());
             data.put("location", locationName);
-            data.put("points", points);
             data.put("timestamp", LocalDateTime.now().toString());
-
             db.collection("checkins").add(data);
             System.out.println("Check-in data pushed to Firestore!");
         } catch (Exception e) {
