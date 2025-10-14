@@ -34,6 +34,7 @@ public class CheckpointService {
     private final LocationService locationService;
     private final UserService userService;
     private final CheckpointMapper checkpointMapper;
+    private final FirebaseService firebaseService;
 
     // Method 1: enableCheckIn - Lấy list eligible locations (tận dụng distanceValue từ getListLocation)
     public List<EnableCheckpointResponse> enableCheckIn(CheckpointRequest request) {
@@ -138,6 +139,19 @@ public class CheckpointService {
         
         CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, updatedUserResponse);
 
+        // Push data lên Firestore
+        firebaseService.pushCheckinData(userEntity.getId(), loc.getName(), userEntity.getPoints());
+        
+        // Gửi notification qua FCM
+        String title = "Check-in Successful!";
+        String body = "Location: " + loc.getName() + " (+3 points)";
+        String userFcmToken = userEntity.getFcmToken(); 
+
+        if (userFcmToken != null && !userFcmToken.isEmpty()) {
+            firebaseService.sendNotification(userFcmToken, title, body);
+        } else {
+            System.err.println("User does not have an FCM token — skipping notification.");
+        }
         return resp;
     }
 }
