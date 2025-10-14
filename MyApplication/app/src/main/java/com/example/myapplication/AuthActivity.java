@@ -39,6 +39,18 @@ public class AuthActivity extends AppCompatActivity {
                                     runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login successful!", Toast.LENGTH_SHORT).show());
                                     System.out.println("JWT token:" + jwtToken);
                                     System.out.println("user information: " + userObj.toString());
+
+                                    // 👉 Chuyển sang MainActivity
+                                    Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+
+                                    // (Tùy chọn) truyền dữ liệu sang MainActivity
+                                    intent.putExtra("jwtToken", jwtToken);
+                                    intent.putExtra("user", userObj.toString());
+
+                                    // Xóa AuthActivity khỏi stack để không quay lại bằng nút Back
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+                                    startActivity(intent);
                                 }
 
                                 @Override
@@ -231,6 +243,18 @@ public class AuthActivity extends AppCompatActivity {
                         runOnUiThread(() -> Toast.makeText(AuthActivity.this, "Login successful!", Toast.LENGTH_SHORT).show());
                         System.out.println("JWT token:" + jwtToken);
                         System.out.println("user information: " + userObj.toString());
+
+                        // 👉 Chuyển sang MainActivity
+                        Intent intent = new Intent(AuthActivity.this, MainActivity.class);
+
+                        // (Tùy chọn) truyền dữ liệu sang MainActivity
+                        intent.putExtra("jwtToken", jwtToken);
+                        intent.putExtra("user", userObj.toString());
+
+                        // Xóa AuthActivity khỏi stack để không quay lại bằng nút Back
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+                        startActivity(intent);
                     }
 
                     @Override

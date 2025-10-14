@@ -71,7 +71,7 @@ public class LocationService {
         if(tag != null && !tag.isEmpty()) {
             ok = "1";
             for(String lcIds : locationIds) {
-                if(!getTagListByLocationID(lcIds).contains(tag)){
+                if(!getTagListByLocationID(lcIds).contains(tag)) {
                     locationIds.remove(lcIds);
                 }
             }

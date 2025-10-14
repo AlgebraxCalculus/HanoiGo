@@ -6,12 +6,18 @@
     android:layout_height="match_parent">
 
     <!-- Nội dung chính của app ở đây -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/footerContainer"
+        android:layout_marginBottom="-90dp" />
 
     <!-- Footer bar - CỐ ĐỊNH Ở ĐÁY -->
     <FrameLayout
         android:id="@+id/footerContainer"
         android:layout_width="match_parent"
-        android:layout_height="78dp"
+        android:layout_height="90dp"
         android:layout_alignParentBottom="true">
 
         <!-- View nền sóng -->
@@ -20,7 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY"
-            android:src="@drawable/wave_footer" />
+            android:src="@drawable/wave_footer"
+            />
 
         <!-- Footer nội dung trên nền sóng -->
         <LinearLayout
@@ -124,8 +131,7 @@
             app:cardElevation="0dp"
             app:cardBackgroundColor="#001A2E"
             android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:focusable="true">
 
             <ImageView
                 android:layout_width="40dp"
