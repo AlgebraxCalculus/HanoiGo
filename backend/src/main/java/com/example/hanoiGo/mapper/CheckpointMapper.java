@@ -11,7 +11,7 @@ import com.example.hanoiGo.model.Checkpoint;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CheckpointMapper {
-    @Mapping(target = "locationName", source = "locationResponse.name")
+    @Mapping(target = "locationAddress", source = "locationResponse.address")
     @Mapping(target = "userName", source = "userResponse.username")
     @Mapping(target = "checkedInTime", source = "checkpoint.checkedInTime")
     @Mapping(target = "userPoint", source = "userResponse.points")

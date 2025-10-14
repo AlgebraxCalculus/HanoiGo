@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,12 +71,8 @@ public class LocationService {
         // TH: lọc theo tag hoặc mostVisited
         if(tag != null && !tag.isEmpty()) {
             ok = "1";
-            for(String lcIds : locationIds) {
-                if(!getTagListByLocationID(lcIds).contains(tag)) {
-                    locationIds.remove(lcIds);
-                }
-            }
-        }else if(mostVisited != null && mostVisited){
+            locationIds.removeIf(lcId -> !getTagListByLocationID(lcId).contains(tag));
+        } else if(mostVisited != null && mostVisited){
             ok = "1";
             locationIds.sort((id1, id2) -> {
                 Integer count1 = locationDetailRepository.findWeeklyCheckinCountsById(id1);
@@ -148,5 +145,11 @@ public class LocationService {
             locationList = locationList.subList(0, limit);
         }
         return locationList;
+    }
+
+    // Lấy locationId theo address
+    public String getLocationIdByAddress(String address) {
+        Optional<String> id = locationDetailRepository.findIdByAddress(address);
+        return id.orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
     }
   }

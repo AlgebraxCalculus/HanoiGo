@@ -17,10 +17,16 @@ import java.util.List;
 
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder> {
 
-    private List<Place> places;
+    public interface OnItemClickListener {
+        void onItemClick(Place place);
+    }
 
-    public PlaceAdapter(List<Place> places) {
+    private List<Place> places;
+    private OnItemClickListener listener;
+
+    public PlaceAdapter(List<Place> places, OnItemClickListener listener) {
         this.places = places;
+        this.listener = listener;
     }
 
     @NonNull
@@ -40,6 +46,13 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         Glide.with(holder.itemView.getContext())
                 .load(place.getPictureURL())
                 .into(holder.ivPlaceImage);
+
+        // Set click listener cho từng item
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(place);
+            }
+        });
     }
 
     @Override

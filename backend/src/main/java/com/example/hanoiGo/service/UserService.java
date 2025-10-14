@@ -2,6 +2,7 @@ package com.example.hanoiGo.service;
 
 import com.example.hanoiGo.dto.request.LoginRequest;
 import com.example.hanoiGo.dto.request.RegisterRequest;
+import com.example.hanoiGo.dto.request.UpdateFcmTokenRequest;
 import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.exception.AppException;
@@ -162,4 +163,29 @@ import java.util.List;
             String token = jwtUtil.generateToken(user.getUsername(), user.getId());
             return new LoginResponse(token, userMapper.toUserResponse(user));
      }
+
+     public void updateFcmToken(UpdateFcmTokenRequest request) {
+        User user = null;
+        // Ưu tiên xác định theo Firebase UID
+        if (request.getFirebaseUid() != null && !request.getFirebaseUid().isEmpty()) {
+            user = userRepository.findByFirebaseUid(request.getFirebaseUid())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        } 
+        // Nếu không có Firebase UID thì tìm theo userId
+        else if (request.getUserId() != null && !request.getUserId().isEmpty()) {
+            try {
+                UUID uuid = UUID.fromString(request.getUserId());
+                user = userRepository.findUserById(uuid)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            } catch (IllegalArgumentException e) {
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            }
+        } 
+        else {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+        // Cập nhật FCM token
+        user.setFcmToken(request.getFcmToken());
+        userRepository.save(user);
+    }
 }

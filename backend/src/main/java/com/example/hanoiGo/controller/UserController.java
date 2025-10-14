@@ -3,6 +3,7 @@ package com.example.hanoiGo.controller;
 import com.example.hanoiGo.dto.request.FirebaseLoginRequest;
 import com.example.hanoiGo.dto.request.LoginRequest;
 import com.example.hanoiGo.dto.request.RegisterRequest;
+import com.example.hanoiGo.dto.request.UpdateFcmTokenRequest;
 import com.example.hanoiGo.dto.response.ApiResponse;
 import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
@@ -94,6 +95,17 @@ public class UserController {
                 .code(1000)
                 .message("Lấy rank của user thành công")
                 .result(rank)
+                .build();
+    }
+
+    // Cập nhật FCM token
+    @PostMapping("/update-fcm-token")
+    public ApiResponse<String> updateFcmToken(@RequestBody UpdateFcmTokenRequest request) {
+        userService.updateFcmToken(request);
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("Cập nhật FCM token thành công")
+                .result("ok")
                 .build();
     }
 
