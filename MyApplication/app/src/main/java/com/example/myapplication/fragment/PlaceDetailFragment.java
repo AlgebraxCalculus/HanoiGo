@@ -89,6 +89,27 @@ public class PlaceDetailFragment extends Fragment {
         btnClose = view.findViewById(R.id.btnCloseExplore);
         tagContainer = view.findViewById(R.id.tagContainer);
 
+        // --- Thiết lập dữ liệu tĩnh rating
+        View ratingBar5 = view.findViewById(R.id.ratingBar5);
+        TextView star5 = ratingBar5.findViewById(R.id.starNumber);
+        star5.setText("5");
+
+        View ratingBar4 = view.findViewById(R.id.ratingBar4);
+        TextView star4 = ratingBar4.findViewById(R.id.starNumber);
+        star4.setText("4");
+
+        View ratingBar3 = view.findViewById(R.id.ratingBar3);
+        TextView star3 = ratingBar3.findViewById(R.id.starNumber);
+        star3.setText("3");
+
+        View ratingBar2 = view.findViewById(R.id.ratingBar2);
+        TextView star2 = ratingBar2.findViewById(R.id.starNumber);
+        star2.setText("2");
+
+        View ratingBar1 = view.findViewById(R.id.ratingBar1);
+        TextView star1 = ratingBar1.findViewById(R.id.starNumber);
+        star1.setText("1");
+
         // --- Bottom sheet setup ---
         View scrollView = view.findViewById(R.id.bottomSheetPlaceDetail);
         bottomSheetBehavior = BottomSheetBehavior.from(scrollView);
@@ -104,10 +125,8 @@ public class PlaceDetailFragment extends Fragment {
             placeData = (Place) getArguments().getSerializable("placeData");
             if (placeData != null) {
                 if (placeData.getId() != null) {
-                    // Nếu có ID sẵn -> fetch trực tiếp
                     fetchPlaceDetail(placeData.getId());
                 } else if (placeData.getName() != null) {
-                    // Nếu không có ID -> gọi API lấy ID theo address
                     fetchLocationIdThenDetail(placeData.getAddress());
                 } else {
                     Toast.makeText(getContext(), "Không có thông tin địa điểm", Toast.LENGTH_SHORT).show();
@@ -117,8 +136,6 @@ public class PlaceDetailFragment extends Fragment {
 
         return view;
     }
-
-    // Nếu không có ID, gọi API lấy ID theo địa chỉ rồi fetch detail
     private void fetchLocationIdThenDetail(String address) {
         LocationApi.GetLocationIdByAddress(address, requireContext(), new LocationApi.LocationIdCallback() {
             @Override
@@ -146,7 +163,7 @@ public class PlaceDetailFragment extends Fragment {
                         // Đọc và log tọa độ
                         String latStr = result.optString("latitude", "0");
                         String lngStr = result.optString("longitude", "0");
-                        System.out.println("✅ fetchPlaceDetail() → lat=" + latStr + ", lng=" + lngStr);
+                        System.out.println("fetchPlaceDetail() → lat=" + latStr + ", lng=" + lngStr);
                         double lat = 0, lng = 0;
                         try {
                             lat = Double.parseDouble(latStr);
@@ -155,14 +172,12 @@ public class PlaceDetailFragment extends Fragment {
                             e.printStackTrace();
                         }
 
-                        // Nếu có tọa độ hợp lệ → show marker trên map
                         if (lat != 0 && lng != 0) {
                             Fragment parent = getParentFragment();
                             if (parent instanceof MapFragment) {
                                 ((MapFragment) parent).showMarker(lat, lng, result.optString("name", "Unknown Place"));
                             }
                         }
-                        // --- Gán dữ liệu vào UI ---
                         placeTitle.setText(result.optString("name", "Không có tên"));
                         placeAddress.setText(result.optString("address", "Không có địa chỉ"));
                         List<String> imageUrls = new ArrayList<>();
@@ -195,7 +210,7 @@ public class PlaceDetailFragment extends Fragment {
         });
     }
 
-    // Setup ảnh scroll ngang
+    // Setup scroll photo
     private void setupPlacePhotos(List<String> imageUrls) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(
                 getContext(), LinearLayoutManager.HORIZONTAL, false
@@ -203,8 +218,6 @@ public class PlaceDetailFragment extends Fragment {
         rvPlacePhotos.setLayoutManager(layoutManager);
         rvPlacePhotos.setAdapter(new ImageAdapter(requireContext(), imageUrls));
     }
-
-    //  Setup reviews (giữ nguyên mẫu)
     private void setupReviews() {
         List<Review> reviews = List.of(
                 new Review("Minh Đỗ", "Local Guide • 24 reviews",
@@ -228,8 +241,8 @@ public class PlaceDetailFragment extends Fragment {
     private void closeFragment() {
         Fragment parent = getParentFragment();
         if (parent instanceof MapFragment) {
-            ((MapFragment) parent).onPlaceDetailClosed();  // 👉 gọi để bật lại footer + các nút
-            parent.getChildFragmentManager().popBackStack();  // 👉 quay lại ExploreFragment
+            ((MapFragment) parent).onPlaceDetailClosed();
+            parent.getChildFragmentManager().popBackStack();  // quay lại ExploreFragment
         }
     }
 

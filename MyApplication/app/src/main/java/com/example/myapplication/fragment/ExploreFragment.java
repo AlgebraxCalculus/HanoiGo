@@ -45,8 +45,7 @@ public class ExploreFragment extends Fragment {
     private PlaceAdapter adapterTopVisited;
     private PlaceAdapter adapterPopularNearU;
 
-    private double userLat = 21.005147582587608;
-    private double userLng = 105.86326519584026;
+    double userLat = 0, userLng = 0;
 
     @Nullable
     @Override
@@ -57,9 +56,7 @@ public class ExploreFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         setupBottomSheet(view);
-        setupPlaceData();
         setupSuggestedRoutes(view);
-
         return view;
     }
 
@@ -79,6 +76,12 @@ public class ExploreFragment extends Fragment {
         rvIconicPlaces.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         rvTopVisited.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         rvPopularNearYou.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+    }
+
+    public void updateUserLocation(double lat, double lng) {
+        this.userLat = lat;
+        this.userLng = lng;
+        setupPlaceData();
     }
 
     private void setupPlaceData() {
@@ -120,7 +123,7 @@ public class ExploreFragment extends Fragment {
 
             @Override
             public void onFailure(String errorMessage) {
-                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                if (isAdded()) { 
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
                     );
@@ -162,7 +165,7 @@ public class ExploreFragment extends Fragment {
 
             @Override
             public void onFailure(String errorMessage) {
-                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                if (isAdded()) {
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
                     );
@@ -185,8 +188,6 @@ public class ExploreFragment extends Fragment {
                                 location.getString("defaultPicture")
                         );
                         listPopularNearU.add(place);
-
-                        // Lưu tạm address vào map
                         placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();

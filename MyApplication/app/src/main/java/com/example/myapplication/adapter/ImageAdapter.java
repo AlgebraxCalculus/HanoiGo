@@ -44,7 +44,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
         String url = imageUrls.get(position);
 
-        // --- Thiết lập kích thước ảnh (VD: hình chữ nhật 350dp x 180dp) ---
+        // Thiết lập kích thước ảnh
         int imageWidth = (int) (350 * context.getResources().getDisplayMetrics().density);
         int imageHeight = (int) (180 * context.getResources().getDisplayMetrics().density);
 
@@ -52,18 +52,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
         params.width = imageWidth;
         params.height = imageHeight;
         holder.imgMain.setLayoutParams(params);
-
-        // --- Bo góc ảnh ---
         holder.imgMain.setBackgroundResource(R.drawable.bg_rounded_image);
         holder.imgMain.setClipToOutline(true);
-
-        // --- Load ảnh với Glide
         Glide.with(context)
                 .load(url)
                 .centerCrop()
                 .into(holder.imgMain);
 
-        // --- Click ảnh → full screen ---
+        // Click ảnh full screen
         holder.imgMain.setOnClickListener(v -> {
             Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
             ImageView iv = new ImageView(context);

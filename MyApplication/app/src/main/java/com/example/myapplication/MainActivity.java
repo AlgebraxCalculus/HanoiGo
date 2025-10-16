@@ -45,16 +45,16 @@ public class MainActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
 
-        // ====== NHẬN DỮ LIỆU TỪ LOGIN ======
+        // Nhận dữ liệu từ Login
         String jwtToken = getIntent().getStringExtra("jwtToken");
         String userJson = getIntent().getStringExtra("user");
 
-        // ====== KHỞI TẠO BUNDLE DÙNG CHUNG ======
+        // Khởi tạo Bundle
         Bundle sharedBundle = new Bundle();
         sharedBundle.putString("jwtToken", jwtToken);
         sharedBundle.putString("user", userJson);
 
-        // ====== KHỞI TẠO FRAGMENTS ======
+        // Khởi tạo Fragment
         homeFragment = new HomeFragment();
         mapFragment = new MapFragment();
 
@@ -62,7 +62,10 @@ public class MainActivity extends AppCompatActivity {
         homeFragment.setArguments(sharedBundle);
         mapFragment.setArguments(sharedBundle);
 
-        // ====== THÊM CẢ HAI FRAGMENT VÀO CONTAINER ======
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        checkLocationPermissionAndGetLocation();
+
+        // Thêm Fragment vào Activity
         if (savedInstanceState == null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.add(R.id.fragment_container, homeFragment, "HOME");
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             activeFragment = homeFragment;
         }
 
-        // ====== XỬ LÝ NÚT FLOAT MAP ======
+        //
         View btnMapFloat = findViewById(R.id.btnMapFloat);
         if (btnMapFloat != null) {
             btnMapFloat.setOnClickListener(v -> switchFragment(mapFragment));
@@ -83,10 +86,6 @@ public class MainActivity extends AppCompatActivity {
         if (btnHomepage != null) {
             btnHomepage.setOnClickListener(v -> switchFragment(homeFragment));
         }
-
-        // ====== KHỞI TẠO LOCATION CLIENT ======
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        checkLocationPermissionAndGetLocation();
     }
 
     // ====== HÀM XIN QUYỀN VỊ TRÍ ======
