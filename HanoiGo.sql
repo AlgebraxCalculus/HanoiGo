@@ -29,6 +29,8 @@ CREATE TABLE users (
     points INT DEFAULT 0,
 	fcm_token text
 );
+
+
 -- =========================
 -- Tags
 -- =========================
@@ -473,3 +475,9 @@ select * from checkpoints;
 select * from location_tags;
 select * from achievements;
 select * from users;
+
+
+delete from
+delete from user_achievements
+update users u
+set points = 0 where u.username = 'SIUUUUUUUU'

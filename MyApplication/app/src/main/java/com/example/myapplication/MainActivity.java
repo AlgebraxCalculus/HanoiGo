@@ -1,8 +1,11 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,9 +17,11 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapplication.fragment.HomeFragment;
 import com.example.myapplication.fragment.MapFragment;
+import com.example.myapplication.api.FirebaseMessagingApi;
 import com.example.myapplication.model.Place;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,9 +50,39 @@ public class MainActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         );
 
+        // ====== POST NOTIFICATIONS PERMISSION ======
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
+
         // ====== NHẬN DỮ LIỆU TỪ LOGIN ======
         String jwtToken = getIntent().getStringExtra("jwtToken");
         String userJson = getIntent().getStringExtra("user");
+
+        SharedPreferences prefs = this.getSharedPreferences("user_prefs", MODE_PRIVATE);
+        prefs.edit().putString("jwt_token", jwtToken).apply();
+
+        // ====== LẤY TOKEN FCM THỦ CÔNG SAU KHI LOGIN ======
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("FCM", "Fetching FCM registration token failed", task.getException());
+                        return;
+                    }
+
+                    // Lấy token thủ công
+                    String token = task.getResult();
+                    Log.d("FCM", "Manual fetched token: " + token);
+
+                    if (jwtToken != null && !jwtToken.isEmpty()) {
+                        FirebaseMessagingApi service = new FirebaseMessagingApi();
+                        service.sendTokenToServer(jwtToken, token);
+                    }
+                });
+
 
         // ====== KHỞI TẠO BUNDLE DÙNG CHUNG ======
         Bundle sharedBundle = new Bundle();

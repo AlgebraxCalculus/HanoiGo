@@ -164,18 +164,17 @@ import java.util.List;
             return new LoginResponse(token, userMapper.toUserResponse(user));
      }
 
-     public void updateFcmToken(UpdateFcmTokenRequest request) {
+     public void updateFcmToken(UpdateFcmTokenRequest request, String username) {
         User user = null;
         // Ưu tiên xác định theo Firebase UID
         if (request.getFirebaseUid() != null && !request.getFirebaseUid().isEmpty()) {
             user = userRepository.findByFirebaseUid(request.getFirebaseUid())
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         } 
-        // Nếu không có Firebase UID thì tìm theo userId
-        else if (request.getUserId() != null && !request.getUserId().isEmpty()) {
+        // Nếu không có Firebase UID thì tìm theo JWT token
+        else if (username != null && !username.isEmpty()) {
             try {
-                UUID uuid = UUID.fromString(request.getUserId());
-                user = userRepository.findUserById(uuid)
+                user = userRepository.findByUsername(username)
                         .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             } catch (IllegalArgumentException e) {
                 throw new AppException(ErrorCode.USER_NOT_EXISTED);
