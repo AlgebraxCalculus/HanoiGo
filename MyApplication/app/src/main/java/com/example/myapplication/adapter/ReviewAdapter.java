@@ -39,7 +39,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     public void onBindViewHolder(@NonNull ReviewViewHolder holder, int position) {
         Review review = reviewList.get(position);
 
-        // --- Gán dữ liệu cơ bản ---
         holder.tvUserName.setText(review.getName());
         holder.tvSubtitle.setText(review.getSubtitle());
         holder.tvTime.setText(review.getTime());
@@ -51,7 +50,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
         holder.tvReviewContent.setCollapsedTextColor(R.color.blue);
         holder.tvReviewContent.setExpandedTextColor(R.color.blue);
         holder.tvReviewContent.setTrimLines(2);
-        // --- Ẩn/hiện phần ảnh ---
         holder.imageGrid.removeAllViews();
 
         int[] imageResIds = review.getImageResIds();
@@ -63,10 +61,9 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
             for (int i = 0; i < maxImages; i++) {
                 ImageView img = new ImageView(context);
-                // --- Tỷ lệ hình chữ nhật ---
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-                int imageWidth = (int) (150 * context.getResources().getDisplayMetrics().density);   // ~150dp
-                int imageHeight = (int) (100 * context.getResources().getDisplayMetrics().density);  // ~100dp
+                int imageWidth = (int) (150 * context.getResources().getDisplayMetrics().density);   //150dp
+                int imageHeight = (int) (100 * context.getResources().getDisplayMetrics().density);  //100dp
                 params.width = imageWidth;
                 params.height = imageHeight;
                 params.setMargins(8, 8, 8, 8);
@@ -90,8 +87,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
     public int getItemCount() {
         return reviewList.size();
     }
-
-    // --- ViewHolder ---
     public static class ReviewViewHolder extends RecyclerView.ViewHolder {
         TextView tvUserName, tvSubtitle, tvTime, tvLikeCount;
         ReadMoreTextView tvReviewContent;

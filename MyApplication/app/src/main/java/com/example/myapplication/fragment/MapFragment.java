@@ -38,7 +38,6 @@ public class MapFragment extends Fragment {
     private ImageView imgAvatar;
     private String avatar = "";
     private String jwtToken = "";
-    private boolean hasZoomedToUser = false;
 
     @Nullable
     @Override
@@ -86,23 +85,22 @@ public class MapFragment extends Fragment {
             map = mapboxMap;
             String styleUrl = "https://tiles.goong.io/assets/goong_map_web.json?api_key=" + getString(R.string.goong_map_key);
             map.setStyle(new Style.Builder().fromUri(styleUrl), style -> {
-                // Khi style sẵn sàng thì hiển thị vị trí user nếu đã có
+
                 if (userLocation != null) {
                     showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here");
                 }
             });
         });
 
-        // --- FRAGMENTS CHILD ---
+        // Child fragment
         ExploreFragment exploreFragment = new ExploreFragment();
         Bundle childArgs = new Bundle();
         childArgs.putString("jwtToken", jwtToken);
         childArgs.putString("username", username);
         childArgs.putString("avatar", avatar);
-        exploreFragment.setArguments(childArgs);
         loadChildFragment(exploreFragment);
 
-        // --- BUTTONS ---
+        // Button
         btnBookmark = view.findViewById(R.id.btnBookmark);
         btnCompass = view.findViewById(R.id.btnCompass);
         btnNavigate = view.findViewById(R.id.btnNavigate);
@@ -188,6 +186,12 @@ public class MapFragment extends Fragment {
         // Nếu map đã sẵn sàng thì hiển thị marker luôn
         if (map != null) {
             showMarker(lat, lng, "You are here");
+        }
+
+        // Gửi vị trí xuống ExploreFragment
+        Fragment child = getChildFragmentManager().findFragmentById(R.id.childFragmentContainer);
+        if (child instanceof ExploreFragment) {
+            ((ExploreFragment) child).updateUserLocation(lat, lng);
         }
     }
 
