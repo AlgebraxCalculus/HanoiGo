@@ -20,7 +20,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LocationApi {
-    private static final String LOCATION_URL = "http://192.168.1.4:8080/api/locations";
+    private static final String LOCATION_URL = "http://192.168.100.135:8080/api/locations";
     public static void GetLocationList(double lat, double lng, String tag, boolean topVisited, boolean popularNearU, Context context, LocationApi.LocationApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 

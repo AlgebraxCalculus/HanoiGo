@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation("com.google.android.gms:play-services-auth:21.4.0")
+    implementation("com.google.firebase:firebase-messaging:24.0.0")
 
     // Networking & Image
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -58,6 +59,7 @@ dependencies {
 
     // UI components
     implementation("io.github.chaosleung:pinview:1.4.4")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Testing
     testImplementation(libs.junit)

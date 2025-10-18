@@ -1,11 +1,13 @@
 package com.example.myapplication.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,6 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 
 import com.bumptech.glide.Glide;
 import com.example.myapplication.MainActivity;
@@ -76,23 +80,28 @@ public class HomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        super.onCreate(savedInstanceState);
+
+        // --- swipe refresh section ---
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        ScrollView scrollView = view.findViewById(R.id.scrollView);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            System.out.println("User pulled to refresh");
+            reloadData();
+            new Handler().postDelayed(() -> {
+                swipeRefreshLayout.setRefreshing(false);
+            }, 1000);
+        });
+
+        // 👇 Chỉ cho phép refresh nếu đang ở đỉnh trang
+        swipeRefreshLayout.setEnabled(false);
+        scrollView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            swipeRefreshLayout.setEnabled(scrollY == 0);
+        });
 
         // --- lấy thông tin nhận được từ AuthAct
-
-        super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             jwtToken = getArguments().getString("jwtToken");
-            String userJson = getArguments().getString("user");
-
-            try {
-                JSONObject userObj = new JSONObject(userJson);
-                username = userObj.getString("username");
-                avatar = userObj.getString("profilePicture");
-                points = userObj.getString("points");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
 
         // --- mapper thành phần UI section ---
@@ -112,13 +121,6 @@ public class HomeFragment extends Fragment {
          imgTop2Avatar = view.findViewById(R.id.imgTop2Avatar);
          imgTop3Avatar = view.findViewById(R.id.imgTop3Avatar);
 
-        // --- CardStats section ---
-        tvUsername.setText(username);
-        tvPoints.setText(points);
-        Glide.with(this)
-                .load(avatar)
-                .into(imgUserAvatar);
-
         // --- Place sections ---
         recyclerViewIconic = view.findViewById(R.id.recyclerViewIconic);
         recyclerViewTopVisited = view.findViewById(R.id.recyclerViewTop);
@@ -135,14 +137,29 @@ public class HomeFragment extends Fragment {
         recyclerAchievements = view.findViewById(R.id.recyclerAchievements);
         layoutNoAchievements = view.findViewById(R.id.layoutNoAchievements);
         recyclerAchievements.setLayoutManager(new LinearLayoutManager(requireContext()));
-        setupAchievementData(jwtToken);
+//        setupAchievementData(jwtToken);
 
         // --- Full Leaderboard section ---
         recyclerLeaderboard = view.findViewById(R.id.recyclerViewLeaderboard);
         recyclerLeaderboard.setLayoutManager(new LinearLayoutManager(requireContext()));
-        setupLeaderboardData();
+//        setupLeaderboardData();
 
+        reloadData();
         return view;
+    }
+
+    private void reloadData() {
+        setupUserData(() -> {
+            setupAchievementData(jwtToken);
+            setupLeaderboardData();
+
+            //chỉ khi cập nhật xong user location mới setupPlaceData
+            if (userLat != 0 && userLng != 0){
+                setupPlaceData();
+            }else{
+                System.out.println("reloadData(): userLat/lng not ready yet, skip place setup");
+            }
+        });
     }
 
     public void updateUserLocation(double lat, double lng) {
@@ -155,8 +172,51 @@ public class HomeFragment extends Fragment {
         this.userLng = lng;
         System.out.println("HomeFragment → updateUserLocation(): lat=" + lat + ", lng=" + lng);
 
-        // Gọi lại load danh sách địa điểm gần user
-        setupPlaceData();
+        // Chỉ gọi setupPlaceData() lần đầu khi fragment mới được load
+        if (listIconic == null || listIconic.isEmpty()) {
+            setupPlaceData();
+        }
+    }
+
+    private void setupUserData(Runnable onComplete){
+        UserApi.getMe(jwtToken, getContext(), new UserApi.UserApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> dataList) {
+
+            }
+
+            @Override
+            public void onSuccess(JSONObject userObj) {
+                try {
+                    username = userObj.getString("username");
+                    points = userObj.getString("points");
+                    avatar = userObj.getString("profilePicture");
+                    requireActivity().runOnUiThread(() -> {
+                        tvUsername.setText(username);
+                        tvPoints.setText(points);
+                        Glide.with(requireContext())
+                                .load(avatar)
+                                .into(imgUserAvatar);
+
+                        if (onComplete != null) onComplete.run();
+                    });
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                if (isAdded()) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "fetch user data failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        if (onComplete != null) onComplete.run();
+                    });
+                }
+            }
+        });
     }
 
     private void setupPlaceData() {
@@ -198,7 +258,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(String errorMessage) {
-                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                if (isAdded()) {
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
                     );
@@ -347,7 +407,7 @@ public class HomeFragment extends Fragment {
             public void onSuccess(ArrayList<JSONObject> data) {
                 int num = 1;
                 int my_rank = -1;
-
+                System.out.println("username: "+ username);
                 for (JSONObject a : data) {
                     try {
                         if (a.getString("username").equals(username)) my_rank = num;
