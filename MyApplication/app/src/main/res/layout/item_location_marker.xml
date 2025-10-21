@@ -11,14 +11,14 @@
 
         <ImageView
             android:id="@+id/ivEmoji"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_tag_iconic"
             android:layout_gravity="center"/>
     </FrameLayout>
 
     <TextView
-        android:id="@+id/tvName"
+        android:id="@+id/tvLocationMarkerName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Place Name"

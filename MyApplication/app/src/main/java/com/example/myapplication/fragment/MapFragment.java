@@ -52,6 +52,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.myapplication.api.LocationApi;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.Property;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 
 public class MapFragment extends Fragment {
 
@@ -67,6 +70,7 @@ public class MapFragment extends Fragment {
     private String jwtToken = "";
 
     private LinearLayout tagContainer;
+    private String currentSelectedTag = null;
 
     private RecyclerView rvSearchSuggestions;
 
@@ -286,7 +290,7 @@ public class MapFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         View markerView = inflater.inflate(R.layout.item_location_marker, null);
 
-        TextView tvName = markerView.findViewById(R.id.tvName);
+        TextView tvName = markerView.findViewById(R.id.tvLocationMarkerName);
         tvName.setText(placeData.optJSONObject("locationResponse").optString("name"));
 
         ImageView iv = markerView.findViewById(R.id.ivEmoji);
@@ -323,25 +327,52 @@ public class MapFragment extends Fragment {
                 TextView tagView = (TextView) child;
 
                 tagView.setOnClickListener(v -> {
-                    // Reset màu tất cả tag
-                    for (int j = 0; j < tagContainer.getChildCount(); j++) {
-                        View other = tagContainer.getChildAt(j);
-                        if (other instanceof TextView) {
-                            other.setBackgroundResource(R.drawable.bg_tag_unselected);
+                    String selectedTag = tagView.getText().toString()
+                            .replaceAll("[^\\p{L}\\p{N}\\s]", "")
+                            .trim();
+
+                    // Nếu bấm cùng 1 tag 2 lần → hủy chọn và reset map
+                    if (selectedTag.equals(currentSelectedTag)) {
+                        currentSelectedTag = null;
+
+                        // Reset tất cả tag về unselected
+                        for (int j = 0; j < tagContainer.getChildCount(); j++) {
+                            View other = tagContainer.getChildAt(j);
+                            if (other instanceof TextView) {
+                                other.setBackgroundResource(R.drawable.bg_tag); // thống nhất
+                            }
                         }
+                        resetMapToUserLocation();
+                        return;
                     }
 
-                    // Đổi màu tag đang chọn
+                    // Đánh dấu tag hiện tại
                     tagView.setBackgroundResource(R.drawable.bg_tag_selected);
+                    currentSelectedTag = selectedTag;
 
-                    String selectedTag = tagView.getText().toString();
-                    // Xóa emoji khỏi tag
-                    selectedTag = selectedTag.replaceAll("[^\\p{L}\\p{N}\\s]", "");
-                    selectedTag = selectedTag.trim();
                     Log.d("TAG_SELECTED", "Clicked tag: " + selectedTag);
                     loadLocationsByTag(selectedTag);
                 });
             }
+        }
+    }
+
+    private void resetMapToUserLocation() {
+        if (map == null) return;
+
+        // Xóa toàn bộ marker trừ userMarker
+        List<Marker> toRemove = new ArrayList<>();
+        for (Marker m : map.getMarkers()) {
+            if (!m.equals(userMarker)) toRemove.add(m);
+        }
+        for (Marker m : toRemove) {
+            map.removeMarker(m);
+            markerMap.remove(m);
+        }
+
+        // Zoom về vị trí user
+        if (userLocation != null) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
         }
     }
 
