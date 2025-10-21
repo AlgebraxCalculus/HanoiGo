@@ -517,7 +517,10 @@ public class MapFragment extends Fragment {
             ));
         });
 
+        rvSearchSuggestions.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvSearchSuggestions.setAdapter(suggestionAdapter);
+        rvSearchSuggestions.setNestedScrollingEnabled(true);
+        rvSearchSuggestions.setHasFixedSize(false);
 
         textWatcher = new TextWatcher() {
             @Override
@@ -528,7 +531,7 @@ public class MapFragment extends Fragment {
                 String keyword = s.toString().trim();
                 ivClear.setVisibility(keyword.isEmpty() ? View.GONE : View.VISIBLE);
 
-                if (keyword.length() >= 2) {
+                if (!keyword.isEmpty()) {
                     tagContainer.setVisibility(View.GONE);
 
                     LocationApi.SearchAutocomplete(keyword, getContext(), new LocationApi.LocationApiCallback() {

@@ -94,16 +94,22 @@
             android:visibility="gone"
             app:cardBackgroundColor="@android:color/white">
 
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="325dp"
+                android:paddingVertical="4dp">
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvSearchSuggestions"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingVertical="4dp"
-                android:paddingHorizontal="0dp"
+                android:layout_height="match_parent"
+                android:overScrollMode="always"
+                android:scrollbars="vertical"
                 android:background="@android:color/transparent"/>
-        </androidx.cardview.widget.CardView>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
-        <!-- Tag filter -->
+    <!-- Tag filter -->
         <HorizontalScrollView
             android:id="@+id/tagScrollView"
             android:layout_width="match_parent"
