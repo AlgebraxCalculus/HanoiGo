@@ -47,6 +47,6 @@ public class User {
     @Column(name = "fcm_token")
     private String fcmToken;
     
-    @Column(name = "profile_picture")
+    @Column(name = "profile_picture", columnDefinition = "TEXT")
     private String profilePicture;
 }

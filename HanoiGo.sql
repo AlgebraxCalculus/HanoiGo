@@ -109,7 +109,7 @@ CREATE TABLE achievements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    tier VARCHAR(10),
+    tier VARCHAR(10)
 );
 
 -- =========================
@@ -124,14 +124,23 @@ CREATE TABLE user_achievements (
 );
 
 -- =========================
+-- Bookmark Lists
+-- =========================
+CREATE TABLE bookmark_lists (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL
+);
+
+-- =========================
 -- Bookmarks
 -- =========================
 CREATE TABLE bookmarks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    location_id TEXT REFERENCES location_detail (id) ON DELETE CASCADE,
+    bookmark_list_id UUID REFERENCES bookmark_lists(id) ON DELETE CASCADE,
+    location_id TEXT REFERENCES location_detail(id) ON DELETE CASCADE,
     bookmarked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, location_id) -- prevent duplicate bookmark
+    UNIQUE (bookmark_list_id, location_id) -- prevent duplicate bookmark
 );
 
 -- =========================
@@ -146,7 +155,7 @@ CREATE TABLE password_reset_token (
 	verified BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-select * from password_reset_token
+select * from password_reset_token;
 
 
 --===============

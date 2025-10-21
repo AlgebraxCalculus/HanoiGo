@@ -14,10 +14,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
         "/api/users/**",
-        "/api/auth/**",  
+        "/api/auth/**",
         "/api/achievements/**",
         "/api/locations/**",
-        "/api/checkpoints/**"
+        "/api/checkpoints/**",
+        "/api/bookmarks/**",
+        "/api/bookmark-lists/**"
     };
     @Bean
     public PasswordEncoder passwordEncoder() {

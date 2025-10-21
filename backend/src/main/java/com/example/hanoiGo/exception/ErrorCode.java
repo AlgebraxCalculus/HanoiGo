@@ -19,7 +19,12 @@ public enum ErrorCode {
     INVALID_TOKEN(1009, "Invalid token", HttpStatus.BAD_REQUEST),
     LOCATION_NOT_EXISTED(2001, "Location not existed", HttpStatus.NOT_FOUND),
     API_FAIL_RESPONSE(2002, "Fail to get response from external API", HttpStatus.SERVICE_UNAVAILABLE),
-    CHECKPOINT_EXISTED(2003, "User has already checked in at this location", HttpStatus.BAD_REQUEST)
+    CHECKPOINT_EXISTED(2003, "User has already checked in at this location", HttpStatus.BAD_REQUEST),
+    BOOKMARK_ALREADY_EXISTS(2004, "Bookmark already exists", HttpStatus.BAD_REQUEST),
+    BOOKMARK_NOT_FOUND(2005, "Bookmark not found", HttpStatus.NOT_FOUND),
+    BOOKMARK_LIST_NOT_FOUND(2006, "Bookmark list not found", HttpStatus.NOT_FOUND),
+    BOOKMARK_LIST_ALREADY_EXISTS(2007, "Bookmark list already exists", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED(9998, "Unauthorized", HttpStatus.FORBIDDEN)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

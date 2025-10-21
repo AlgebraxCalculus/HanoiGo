@@ -124,18 +124,19 @@ import java.util.List;
 
      public UserResponse register(RegisterRequest request) {
         //  Kiểm tra username, email đã tồn tại chưa
-         if (userRepository.existsByUsername(request.getUsername())) {
-             throw new AppException(ErrorCode.USERNAME_EXISTED);
-         }
-         if (userRepository.existsByEmail(request.getEmail())) {
-             throw new AppException(ErrorCode.EMAIL_EXISTED);
-         }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
+        }
 
-         // Tạo user mới
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        // Tạo user mới
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setProfilePicture("https://res.cloudinary.com/dsm1uhecl/image/upload/v1758534990/%C6%A0_K%C3%8CA_VI%E1%BB%86T_NAM___AROUND_VIETNAM_ILLUSTRATION_-_Sunmire_Vu_sjajtt.jpg?fbclid=IwY2xjawNHBytleHRuA2FlbQIxMABicmlkETE3NVRVZmZuZFdPcENBNGlMAR48_f--ldiLXXT8eL7O_UisEgFrJN9mGT3GGCFfxZDH8_sxmZrnoPOJcc2f5Q_aem_3vjyyKyXnp39d9OtThXiIg");
-        
+        user.setProfilePicture("https://res.cloudinary.com/dsm1uhecl/image/upload/v1758534990/%C6%A0_K%C3%8CA_VI%E1%BB%86T_NAM___AROUND_VIETNAM_ILLUSTRATION_-_Sunmire_Vu_sjajtt.jpg");
+
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
