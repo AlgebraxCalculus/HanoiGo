@@ -125,15 +125,23 @@ CREATE TABLE user_achievements (
     UNIQUE(user_id, achievement_id) -- prevent duplicate achievement
 );
 
+-- Bookmark Lists
+-- =========================
+CREATE TABLE bookmark_lists (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL
+);
+
 -- =========================
 -- Bookmarks
 -- =========================
 CREATE TABLE bookmarks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    location_id TEXT REFERENCES location_detail (id) ON DELETE CASCADE,
+    bookmark_list_id UUID REFERENCES bookmark_lists(id) ON DELETE CASCADE,
+    location_id TEXT REFERENCES location_detail(id) ON DELETE CASCADE,
     bookmarked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, location_id) -- prevent duplicate bookmark
+    UNIQUE (bookmark_list_id, location_id) -- prevent duplicate bookmark
 );
 
 -- =========================
@@ -480,4 +488,19 @@ select * from users;
 delete from
 delete from user_achievements
 update users u
-set points = 0 where u.username = 'SIUUUUUUUU'
+set points = 0 where u.username = 'SIUUUUUUUU';
+
+ALTER TABLE bookmarks 
+DROP CONSTRAINT IF EXISTS bookmarks_user_id_location_id_key;
+
+ALTER TABLE bookmarks 
+DROP CONSTRAINT IF EXISTS bookmarks_user_id_fkey,
+DROP COLUMN IF EXISTS user_id;
+
+ALTER TABLE bookmarks 
+ADD COLUMN bookmark_list_id UUID REFERENCES bookmark_lists(id) ON DELETE CASCADE;
+
+ALTER TABLE bookmarks 
+ADD CONSTRAINT bookmarks_unique_list_location UNIQUE (bookmark_list_id, location_id);
+
+select * from bookmarks;

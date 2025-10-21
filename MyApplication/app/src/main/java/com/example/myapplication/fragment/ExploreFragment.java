@@ -81,7 +81,7 @@ public class ExploreFragment extends Fragment {
     public void updateUserLocation(double lat, double lng) {
         this.userLat = lat;
         this.userLng = lng;
-        setupPlaceData();
+//        setupPlaceData();
     }
 
     private void setupPlaceData() {
@@ -93,7 +93,6 @@ public class ExploreFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"Iconic", false, false, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                Map<Place, String> placeToAddress = new HashMap<>();
                 for (JSONObject a : data) {
                     try {
                         JSONObject location = a.getJSONObject("locationResponse");
@@ -101,19 +100,13 @@ public class ExploreFragment extends Fragment {
                                 location.getString("name"),
                                 location.getString("description"),
                                 a.getString("distanceText"),
-                                location.getString("defaultPicture")
+                                location.getString("defaultPicture"),
+                                location.getString("address")
                         );
                         listIconic.add(place);
-
-                        // Lưu tạm address vào map
-                        placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                for (Place place : listIconic) {
-                    String address = placeToAddress.get(place);
-                    place.setAddress(address);
                 }
                 requireActivity().runOnUiThread(() -> {
                     adapterIconic = new PlaceAdapter(listIconic, place -> openPlaceDetail(place));
@@ -135,7 +128,6 @@ public class ExploreFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"", true, false, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                Map<Place, String> placeToAddress = new HashMap<>();
                 for (JSONObject a : data) {
                     try {
                         JSONObject location = a.getJSONObject("locationResponse");
@@ -143,19 +135,13 @@ public class ExploreFragment extends Fragment {
                                 location.getString("name"),
                                 location.getString("description"),
                                 a.getString("distanceText"),
-                                location.getString("defaultPicture")
+                                location.getString("defaultPicture"),
+                                location.getString("address")
                         );
                         listTopVisited.add(place);
-
-                        // Lưu tạm address vào map
-                        placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                for (Place place : listTopVisited) {
-                    String address = placeToAddress.get(place);
-                    place.setAddress(address);
                 }
                 requireActivity().runOnUiThread(() -> {
                     adapterTopVisited = new PlaceAdapter(listTopVisited, place -> openPlaceDetail(place));
@@ -177,7 +163,6 @@ public class ExploreFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"", false, true, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                Map<Place, String> placeToAddress = new HashMap<>();
                 for (JSONObject a : data) {
                     try {
                         JSONObject location = a.getJSONObject("locationResponse");
@@ -185,17 +170,13 @@ public class ExploreFragment extends Fragment {
                                 location.getString("name"),
                                 location.getString("description"),
                                 a.getString("distanceText"),
-                                location.getString("defaultPicture")
+                                location.getString("defaultPicture"),
+                                location.getString("address")
                         );
                         listPopularNearU.add(place);
-                        placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                for (Place place : listPopularNearU) {
-                    String address = placeToAddress.get(place);
-                    place.setAddress(address);
                 }
                 requireActivity().runOnUiThread(() -> {
                     adapterPopularNearU = new PlaceAdapter(listPopularNearU, place -> openPlaceDetail(place));

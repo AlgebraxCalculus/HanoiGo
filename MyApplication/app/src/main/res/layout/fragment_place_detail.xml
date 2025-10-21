@@ -100,14 +100,14 @@
                     android:indeterminateTint="@color/gold"
                     android:progressBackgroundTint="#FFFFFF" />
 
-                <!-- Số review + khoảng cách (màu xám) -->
-                <TextView
-                    android:id="@+id/tvRatingMeta"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="(10) • 1,5 km"
-                    android:textSize="13sp"
-                    android:textColor="#BBBBBB"/>
+                    <!-- Số review -->
+                    <TextView
+                        android:id="@+id/tvReviewCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(10)"
+                        android:textSize="13sp"
+                        android:textColor="#BBBBBB"/>
             </LinearLayout>
 
             <TextView

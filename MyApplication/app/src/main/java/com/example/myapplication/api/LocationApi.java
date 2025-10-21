@@ -20,7 +20,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LocationApi {
-    private static final String LOCATION_URL = "http://192.168.100.135:8080/api/locations";
+    private static final String LOCATION_URL = "http://192.168.50.50:8080/api/locations";
     public static void GetLocationList(double lat, double lng, String tag, boolean topVisited, boolean popularNearU, Context context, LocationApi.LocationApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
@@ -77,12 +77,12 @@ public class LocationApi {
         }
     }
 
-    public static void GetLocationByDetail(String locationId, Context context, LocationDetailCallback callback) {
+    public static void GetLocationByDetail(String address, Context context, LocationDetailCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = HttpUrl.parse(LOCATION_URL + "/get-detail-by-id")
+        HttpUrl url = HttpUrl.parse(LOCATION_URL + "/get-detail-by-address")
                 .newBuilder()
-                .addQueryParameter("locationId", locationId)
+                .addQueryParameter("address", address)
                 .build();
 
         Request request = new Request.Builder()
@@ -115,12 +115,12 @@ public class LocationApi {
         });
     }
 
-    public static void GetLocationIdByAddress(String address, Context context, LocationIdCallback callback) {
+    public static void SearchAutocomplete(String keyword, Context context, LocationApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
-        HttpUrl url = HttpUrl.parse(LOCATION_URL + "/get-id-by-address")
+        HttpUrl url = HttpUrl.parse(LOCATION_URL + "/search-autocomplete")
                 .newBuilder()
-                .addQueryParameter("address", address)
+                .addQueryParameter("keyword", keyword)
                 .build();
 
         Request request = new Request.Builder()
@@ -128,7 +128,7 @@ public class LocationApi {
                 .get()
                 .build();
 
-        System.out.println("GET ID URL: " + url);
+        System.out.println("AUTOCOMPLETE URL: " + url);
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -138,18 +138,16 @@ public class LocationApi {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful()) {
                     try {
-                        JSONObject json = new JSONObject(response.body().string());
-                        if (json.getInt("code") == 1000) {
-                            Log.d("API_RESPONSE", json.toString());
-                            String locationId = json.getString("result");
-                            callback.onSuccess(locationId);
-                        } else {
-                            callback.onFailure("Backend error: " + json.getString("message"));
+                        ArrayList<JSONObject> resultList = new ArrayList<>();
+                        JSONArray respJson = new JSONObject(response.body().string()).getJSONArray("result");
+                        for (int i = 0; i < respJson.length(); i++) {
+                            resultList.add(respJson.getJSONObject(i));
                         }
+                        callback.onSuccess(resultList);
                     } catch (JSONException e) {
-                        callback.onFailure("Failed to parse JSON: " + e.getMessage());
+                        callback.onFailure("Failed to parse autocomplete result");
                     }
                 } else {
                     callback.onFailure("Error: " + response.code());
@@ -157,6 +155,7 @@ public class LocationApi {
             }
         });
     }
+
 
     // Callback interface
     public interface LocationApiCallback {
@@ -166,11 +165,6 @@ public class LocationApi {
 
     public interface LocationDetailCallback {
         void onSuccess(JSONObject locationDetail);
-        void onFailure(String errorMessage);
-    }
-
-    public interface LocationIdCallback {
-        void onSuccess(String locationId);
         void onFailure(String errorMessage);
     }
 }

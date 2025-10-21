@@ -217,19 +217,6 @@ public class FirebaseService {
         }
     }
 
-    public void pushCheckinData(UUID userId, String locationName) {
-        try {
-            Map<String, Object> data = new HashMap<>();
-            data.put("userId", userId.toString());
-            data.put("location", locationName);
-            data.put("timestamp", LocalDateTime.now().toString());
-            db.collection("checkins").add(data);
-            System.out.println("Check-in data pushed to Firestore!");
-        } catch (Exception e) {
-            System.err.println("Failed to push check-in data to Firebase: " + e.getMessage());
-        }
-    }
-
     public void pushUserStatsData(UUID userId, String field, int newValue) {
         try {
             Map<String, Object> data = new HashMap<>();
