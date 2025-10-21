@@ -45,8 +45,7 @@ public class ExploreFragment extends Fragment {
     private PlaceAdapter adapterTopVisited;
     private PlaceAdapter adapterPopularNearU;
 
-    private double userLat = 21.005147582587608;
-    private double userLng = 105.86326519584026;
+    double userLat = 0, userLng = 0;
 
     @Nullable
     @Override
@@ -57,9 +56,7 @@ public class ExploreFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         setupBottomSheet(view);
-        setupPlaceData();
         setupSuggestedRoutes(view);
-
         return view;
     }
 
@@ -81,6 +78,12 @@ public class ExploreFragment extends Fragment {
         rvPopularNearYou.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
     }
 
+    public void updateUserLocation(double lat, double lng) {
+        this.userLat = lat;
+        this.userLng = lng;
+//        setupPlaceData();
+    }
+
     private void setupPlaceData() {
         listIconic = new ArrayList<>();
         listTopVisited = new ArrayList<>();
@@ -90,7 +93,6 @@ public class ExploreFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"Iconic", false, false, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                Map<Place, String> placeToAddress = new HashMap<>();
                 for (JSONObject a : data) {
                     try {
                         JSONObject location = a.getJSONObject("locationResponse");
@@ -98,19 +100,13 @@ public class ExploreFragment extends Fragment {
                                 location.getString("name"),
                                 location.getString("description"),
                                 a.getString("distanceText"),
-                                location.getString("defaultPicture")
+                                location.getString("defaultPicture"),
+                                location.getString("address")
                         );
                         listIconic.add(place);
-
-                        // Lưu tạm address vào map
-                        placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                for (Place place : listIconic) {
-                    String address = placeToAddress.get(place);
-                    place.setAddress(address);
                 }
                 requireActivity().runOnUiThread(() -> {
                     adapterIconic = new PlaceAdapter(listIconic, place -> openPlaceDetail(place));
@@ -120,7 +116,7 @@ public class ExploreFragment extends Fragment {
 
             @Override
             public void onFailure(String errorMessage) {
-                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                if (isAdded()) { 
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
                     );
@@ -132,7 +128,6 @@ public class ExploreFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"", true, false, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                Map<Place, String> placeToAddress = new HashMap<>();
                 for (JSONObject a : data) {
                     try {
                         JSONObject location = a.getJSONObject("locationResponse");
@@ -140,19 +135,13 @@ public class ExploreFragment extends Fragment {
                                 location.getString("name"),
                                 location.getString("description"),
                                 a.getString("distanceText"),
-                                location.getString("defaultPicture")
+                                location.getString("defaultPicture"),
+                                location.getString("address")
                         );
                         listTopVisited.add(place);
-
-                        // Lưu tạm address vào map
-                        placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                for (Place place : listTopVisited) {
-                    String address = placeToAddress.get(place);
-                    place.setAddress(address);
                 }
                 requireActivity().runOnUiThread(() -> {
                     adapterTopVisited = new PlaceAdapter(listTopVisited, place -> openPlaceDetail(place));
@@ -162,7 +151,7 @@ public class ExploreFragment extends Fragment {
 
             @Override
             public void onFailure(String errorMessage) {
-                if (isAdded()) { // tránh crash nếu fragment đã bị remove
+                if (isAdded()) {
                     requireActivity().runOnUiThread(() ->
                             Toast.makeText(requireContext(), "fetch location list failed: " + errorMessage, Toast.LENGTH_SHORT).show()
                     );
@@ -174,7 +163,6 @@ public class ExploreFragment extends Fragment {
         LocationApi.GetLocationList(userLat, userLng,"", false, true, getContext(), new LocationApi.LocationApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
-                Map<Place, String> placeToAddress = new HashMap<>();
                 for (JSONObject a : data) {
                     try {
                         JSONObject location = a.getJSONObject("locationResponse");
@@ -182,19 +170,13 @@ public class ExploreFragment extends Fragment {
                                 location.getString("name"),
                                 location.getString("description"),
                                 a.getString("distanceText"),
-                                location.getString("defaultPicture")
+                                location.getString("defaultPicture"),
+                                location.getString("address")
                         );
                         listPopularNearU.add(place);
-
-                        // Lưu tạm address vào map
-                        placeToAddress.put(place, location.getString("address"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                for (Place place : listPopularNearU) {
-                    String address = placeToAddress.get(place);
-                    place.setAddress(address);
                 }
                 requireActivity().runOnUiThread(() -> {
                     adapterPopularNearU = new PlaceAdapter(listPopularNearU, place -> openPlaceDetail(place));

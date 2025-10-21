@@ -16,7 +16,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ResetPassApi {
-    private static final String BASE_URL = "http://192.168.1.4:8080/api/auth";
+    private static final String BASE_URL = "http://192.168.50.50:8080/api/auth";
 
     public static void forgotPassword(String email, Context context, ResetPassApi.ResetPassApiCallback callback) {
         OkHttpClient client = new OkHttpClient();

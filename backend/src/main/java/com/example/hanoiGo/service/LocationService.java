@@ -148,8 +148,37 @@ public class LocationService {
     }
 
     // Lấy locationId theo address
-    public String getLocationIdByAddress(String address) {
-        Optional<String> id = locationDetailRepository.findIdByAddress(address);
-        return id.orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
+    public LocationResponse getLocationDetailByAddress(String address) {
+        LocationDetail locationDetail = locationDetailRepository.findByAddress(address)
+                .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
+
+        // Map entity sang DTO
+        LocationResponse locationResponse = locationMapper.toLocationResponse(locationDetail);
+
+        // Lấy tags từ DB
+        locationResponse.setTags(getTagListByLocationID(locationDetail.getId()));
+
+        return locationResponse;
     }
+
+    public List<LocationResponse> searchAutocompleteByAddress(String keyword) {
+        List<LocationResponse> resultList = new ArrayList<>();
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return resultList;
+        }
+
+        // Tìm danh sách location có address chứa keyword
+        List<LocationDetail> locations = locationDetailRepository
+                .findTop10ByAddressIgnoreCaseContaining(keyword.trim());
+
+        for (LocationDetail location : locations) {
+            LocationResponse dto = locationMapper.toLocationResponse(location);
+            dto.setTags(getTagListByLocationID(location.getId()));
+            resultList.add(dto);
+        }
+
+        return resultList;
+    }
+
   }

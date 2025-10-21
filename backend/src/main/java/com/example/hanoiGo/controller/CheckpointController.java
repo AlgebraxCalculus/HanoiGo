@@ -5,10 +5,12 @@ package com.example.hanoiGo.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.hanoiGo.dto.request.CheckpointRequest;
@@ -29,9 +31,10 @@ public class CheckpointController {
     private final CheckpointService checkpointService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping("/enable-checkin")
+    @GetMapping("/enable-checkin")
     public ApiResponse<List<EnableCheckpointResponse>> enableCheckIn(
-            @Valid @RequestBody CheckpointRequest request,
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude,    
             @RequestHeader("Authorization") String authHeader) {
 
         // Lấy token từ header "Bearer <token>"
@@ -40,11 +43,8 @@ public class CheckpointController {
         // Lấy userId từ token
         UUID userId = jwtUtil.extractUserId(token);
 
-        // Gán userId vào request 
-        request.setUserId(userId);
-
         // Gọi service enable check-in
-        List<EnableCheckpointResponse> response = checkpointService.enableCheckIn(request);
+        List<EnableCheckpointResponse> response = checkpointService.enableCheckIn(userId, latitude, longitude);
 
         // Trả về kết quả API
         return ApiResponse.<List<EnableCheckpointResponse>>builder()

@@ -29,6 +29,8 @@ CREATE TABLE users (
     points INT DEFAULT 0,
 	fcm_token text
 );
+
+
 -- =========================
 -- Tags
 -- =========================
@@ -121,6 +123,14 @@ CREATE TABLE user_achievements (
     achievement_id UUID REFERENCES achievements(id) ON DELETE CASCADE,
     earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, achievement_id) -- prevent duplicate achievement
+);
+
+-- Bookmark Lists
+-- =========================
+CREATE TABLE bookmark_lists (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL
 );
 
 -- =========================
@@ -482,3 +492,24 @@ select * from checkpoints;
 select * from location_tags;
 select * from achievements;
 select * from users;
+
+
+delete from
+delete from user_achievements
+update users u
+set points = 0 where u.username = 'SIUUUUUUUU';
+
+ALTER TABLE bookmarks 
+DROP CONSTRAINT IF EXISTS bookmarks_user_id_location_id_key;
+
+ALTER TABLE bookmarks 
+DROP CONSTRAINT IF EXISTS bookmarks_user_id_fkey,
+DROP COLUMN IF EXISTS user_id;
+
+ALTER TABLE bookmarks 
+ADD COLUMN bookmark_list_id UUID REFERENCES bookmark_lists(id) ON DELETE CASCADE;
+
+ALTER TABLE bookmarks 
+ADD CONSTRAINT bookmarks_unique_list_location UNIQUE (bookmark_list_id, location_id);
+
+select * from bookmarks;

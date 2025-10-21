@@ -4,12 +4,16 @@ import com.example.hanoiGo.dto.request.FirebaseLoginRequest;
 import com.example.hanoiGo.dto.request.LoginRequest;
 import com.example.hanoiGo.dto.request.RegisterRequest;
 import com.example.hanoiGo.dto.request.UpdateFcmTokenRequest;
+import com.example.hanoiGo.dto.request.UpdateUserStatsRequest;
 import com.example.hanoiGo.dto.response.ApiResponse;
 import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.service.UserService;
+import com.example.hanoiGo.service.FirebaseService;
 import com.example.hanoiGo.util.JwtUtil;
+
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final FirebaseService firebaseService;
 
      // Đăng ký user
     @PostMapping("/register")
@@ -100,11 +105,25 @@ public class UserController {
 
     // Cập nhật FCM token
     @PostMapping("/update-fcm-token")
-    public ApiResponse<String> updateFcmToken(@RequestBody UpdateFcmTokenRequest request) {
-        userService.updateFcmToken(request);
+    public ApiResponse<String> updateFcmToken(@RequestBody UpdateFcmTokenRequest request, @RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
+        String username = jwtUtil.getUsernameFromToken(token);
+        System.out.println("Updating FCM token for user: " + username);
+        userService.updateFcmToken(request, username);
         return ApiResponse.<String>builder()
                 .code(1000)
                 .message("Cập nhật FCM token thành công")
+                .result("ok")
+                .build();
+    }
+
+    @PostMapping("/update-userStats")
+    public ApiResponse<String> pushUserStatsData(@RequestBody UpdateUserStatsRequest request) {
+        // System.out.println("Updating FCM token for user: " + userId);
+        firebaseService.pushUserStatsData(UUID.fromString(request.getUserId()), request.getField(), request.getNewValue());
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("Cập nhật UserStats thành công")
                 .result("ok")
                 .build();
     }
