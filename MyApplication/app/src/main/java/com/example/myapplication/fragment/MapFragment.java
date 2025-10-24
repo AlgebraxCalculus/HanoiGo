@@ -2,7 +2,13 @@ package com.example.myapplication.fragment;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,7 +34,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
-import com.example.myapplication.adapter.PlaceAdapter;
 import com.example.myapplication.adapter.SearchSuggestionAdapter;
 import com.example.myapplication.model.Place;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -38,6 +43,7 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -52,9 +58,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.myapplication.api.LocationApi;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.layers.Property;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 
 public class MapFragment extends Fragment {
 
@@ -68,16 +71,12 @@ public class MapFragment extends Fragment {
     private ImageView imgAvatar;
     private String avatar = "";
     private String jwtToken = "";
-
     private LinearLayout tagContainer;
     private String currentSelectedTag = null;
-
     private RecyclerView rvSearchSuggestions;
 
     private CardView searchSuggestionsCard;
     private TextWatcher textWatcher;
-
-
     private static final Map<String, Integer> iconMap = new HashMap<String, Integer>() {{
         put("Iconic", R.drawable.ic_tag_iconic);
         put("Cuisine", R.drawable.ic_tag_cuisine);
@@ -280,45 +279,101 @@ public class MapFragment extends Fragment {
 
     private void showLocationMarkerWithEmoji(double lat, double lng, String type, JSONObject placeData) {
         if (map == null) return;
-
         LatLng position = new LatLng(lat, lng);
-
-        // Lấy drawable emoji
-        int emojiRes = iconMap.getOrDefault(type, R.drawable.ic_tag_iconic);
-
-        // --- Inflate layout marker ---
         LayoutInflater inflater = LayoutInflater.from(requireContext());
-        View markerView = inflater.inflate(R.layout.item_location_marker, null);
+        View iconView = inflater.inflate(R.layout.item_location_marker, null);
 
-        TextView tvName = markerView.findViewById(R.id.tvLocationMarkerName);
-        tvName.setText(placeData.optJSONObject("locationResponse").optString("name"));
-
-        ImageView iv = markerView.findViewById(R.id.ivEmoji);
+        int emojiRes = iconMap.getOrDefault(type, R.drawable.ic_tag_iconic);
+        ImageView iv = iconView.findViewById(R.id.ivEmoji);
         iv.setImageResource(emojiRes);
 
-        // Chuyển layout thành Bitmap
-        markerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        markerView.layout(0, 0, markerView.getMeasuredWidth(), markerView.getMeasuredHeight());
-        Bitmap bitmap = Bitmap.createBitmap(markerView.getMeasuredWidth(),
-                markerView.getMeasuredHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        markerView.draw(canvas);
+        // --- Đo layout và vẽ thành bitmap ---
+        int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        iconView.measure(spec, spec);
+        iconView.layout(0, 0, iconView.getMeasuredWidth(), iconView.getMeasuredHeight());
 
-        // Tạo icon từ bitmap
+        Bitmap iconBitmap = Bitmap.createBitmap(iconView.getMeasuredWidth(), iconView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas iconCanvas = new Canvas(iconBitmap);
+        iconView.draw(iconCanvas);
+
+        JSONObject locationResponse = placeData.optJSONObject("locationResponse");
+        String name = (locationResponse != null) ? locationResponse.optString("name", "") : "";
+
+        // --- Thiết lập Paint để vẽ text ---
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setColor(Color.parseColor("#1E90FF"));
+        textPaint.setTextSize(50f);
+        textPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setShadowLayer(5f, 0f, 0f, Color.WHITE);
+
+        // --- Xử lý text nhiều dòng ---
+        int maxTextWidth = 350;
+        List<String> lines = new ArrayList<>();
+        String[] words = name.split(" ");
+        StringBuilder line = new StringBuilder();
+        for (String word : words) {
+            String testLine = line.length() == 0 ? word : line + " " + word;
+            if (textPaint.measureText(testLine) > maxTextWidth) {
+                lines.add(line.toString());
+                line = new StringBuilder(word);
+            } else {
+                line = new StringBuilder(testLine);
+            }
+        }
+        if (line.length() > 0) lines.add(line.toString());
+
+        // --- Tính chiều cao tổng thể ---
+        Paint.FontMetrics fontMetrics = textPaint.getFontMetrics();
+        float lineHeight = fontMetrics.bottom - fontMetrics.top + 10;
+        int textHeight = (int) (lines.size() * lineHeight);
+        int textPadding = 20;
+        int iconTextSpacing = 20;
+        int totalWidth = Math.max(iconBitmap.getWidth(), maxTextWidth + textPadding * 2);
+        int totalHeight = iconBitmap.getHeight() + iconTextSpacing + textHeight + textPadding;
+
+        Bitmap combined = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(combined);
+
+        int iconX = (totalWidth - iconBitmap.getWidth()) / 2;
+        canvas.drawBitmap(iconBitmap, iconX, 0, null);
+
+        // Vẽ nền chữ
+        float textX = totalWidth / 2f;
+        float textYStart = iconBitmap.getHeight() + iconTextSpacing;
+        float bgLeft = textX - maxTextWidth / 2f - textPadding;
+        float bgTop = textYStart - textPadding;
+        float bgRight = textX + maxTextWidth / 2f + textPadding;
+        float bgBottom = textYStart + textHeight + textPadding;
+
+        // Vẽ hình chữ nhật bo góc làm nền
+        Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bgPaint.setColor(Color.WHITE);
+        bgPaint.setStyle(Paint.Style.FILL);
+        bgPaint.setShadowLayer(8f, 0f, 0f, Color.GRAY);
+        canvas.drawRoundRect(new RectF(bgLeft, bgTop, bgRight, bgBottom), 18f, 18f, bgPaint);
+
+        float y = textYStart - fontMetrics.top;
+        for (String l : lines) {
+            canvas.drawText(l, textX, y, textPaint);
+            y += lineHeight;
+        }
+
+        int scaledWidth = (int) (combined.getWidth() * 0.6);
+        int scaledHeight = (int) (combined.getHeight() * 0.6);
+        Bitmap finalBitmap = Bitmap.createScaledBitmap(combined, scaledWidth, scaledHeight, true);
+
         IconFactory iconFactory = IconFactory.getInstance(requireContext());
-        Icon icon = iconFactory.fromBitmap(bitmap);
+        Icon icon = iconFactory.fromBitmap(finalBitmap);
 
-        // Thêm marker vào map
         Marker marker = map.addMarker(new MarkerOptions()
                 .position(position)
-                .title(placeData.optString("name"))
                 .icon(icon)
-        );
+                .title(name));
 
-        // Lưu vào markerMap
         markerMap.put(marker, placeData);
     }
+
 
     private void setupTagClicks() {
         for (int i = 0; i < tagContainer.getChildCount(); i++) {
@@ -331,28 +386,34 @@ public class MapFragment extends Fragment {
                             .replaceAll("[^\\p{L}\\p{N}\\s]", "")
                             .trim();
 
-                    // Nếu bấm cùng 1 tag 2 lần → hủy chọn và reset map
+                    // Nếu bấm lại tag đang chọn -> bỏ chọn
                     if (selectedTag.equals(currentSelectedTag)) {
                         currentSelectedTag = null;
-
-                        // Reset tất cả tag về unselected
-                        for (int j = 0; j < tagContainer.getChildCount(); j++) {
-                            View other = tagContainer.getChildAt(j);
-                            if (other instanceof TextView) {
-                                other.setBackgroundResource(R.drawable.bg_tag); // thống nhất
-                            }
-                        }
+                        resetAllTagBackgrounds();
                         resetMapToUserLocation();
                         return;
                     }
 
-                    // Đánh dấu tag hiện tại
+                    // Bỏ chọn tất cả tag trước đó
+                    resetAllTagBackgrounds();
+
+                    // Chọn tag mới
                     tagView.setBackgroundResource(R.drawable.bg_tag_selected);
                     currentSelectedTag = selectedTag;
 
                     Log.d("TAG_SELECTED", "Clicked tag: " + selectedTag);
                     loadLocationsByTag(selectedTag);
                 });
+            }
+        }
+    }
+
+    // Reset toàn bộ background về mặc định
+    private void resetAllTagBackgrounds() {
+        for (int j = 0; j < tagContainer.getChildCount(); j++) {
+            View other = tagContainer.getChildAt(j);
+            if (other instanceof TextView) {
+                other.setBackgroundResource(R.drawable.bg_tag);
             }
         }
     }
@@ -455,14 +516,13 @@ public class MapFragment extends Fragment {
             }
         }
 
-        // Zoom bao hết tất cả marker
+        // Zoom marker
         if (!allPoints.isEmpty()) {
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(
-                    com.mapbox.mapboxsdk.geometry.LatLngBounds.from(
-                            getMaxLat(allPoints), getMaxLng(allPoints),
-                            getMinLat(allPoints), getMinLng(allPoints)
-                    ), 80
-            ));
+            LatLngBounds bounds = LatLngBounds.from(
+                    getMaxLat(allPoints), getMaxLng(allPoints),
+                    getMinLat(allPoints), getMinLng(allPoints)
+            );
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 80));
         }
     }
 
@@ -507,7 +567,6 @@ public class MapFragment extends Fragment {
             searchBar.setText(item.optString("name"));
             searchBar.addTextChangedListener(textWatcher);
 
-            // Mở chi tiết địa điểm
             openPlaceDetailFragment(new Place(
                     item.optString("name"),
                     item.optString("description"),

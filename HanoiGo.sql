@@ -513,3 +513,32 @@ ALTER TABLE bookmarks
 ADD CONSTRAINT bookmarks_unique_list_location UNIQUE (bookmark_list_id, location_id);
 
 select * from bookmarks;
+
+update location_detail
+set id = 'UfV-nJQKWWhivJMkomxR1GGKg7wqsCoz-ToJVWJttvsVNvVEZrEGA4E2CrhFkV5DESoadErUIvuN-vGRZmlCy3n28ZwCpUKaweMNKXpx5nCV5hmy8qlmMCnuuUSGcC-fc',
+address = 'Hồ Gươm (Hoàn Kiếm), 1-8 P. Lê Thái Tổ, Hàng Trống, Hoàn Kiếm, Hà Nội',
+latitude = 21.0284743, longitude = 105.8525795
+where name = 'Hồ Hoàn Kiếm'
+
+update location_detail
+set id = '0097oNoNX2pzu7ZbsGW0-ExhuzqwUILaV4VKXqgN5eVyqT1YnJKSfwyrVF-q46N7eLk1WZx4I8NNgnW4pFM82EqpTBMqpZZWbfrqVWJpqTPN_gJoMrAyKqH2oVyeaDeGa',
+address = 'Văn Miếu – Quốc Tử Giám, 58 P. Quốc Tử Giám, Văn Miếu, Đống Đa, Hà Nội',
+latitude = 21.0281175, longitude = 105.8356692
+where name = 'Văn Miếu - Quốc Tử Giám'
+
+update location_detail
+set id = 'sGFIk2ZOfmFBUxFkDgq86_33EdIODfBjcZ69zDbBgj8Rkxl1Bhk6Phn6_TjKDi49wUp1NQGbwn8WMoi0_aUm12bHGeB2ySJP6saNVQWdzg-qDmUYVtRWTg2SxTj6DFPjD',
+address = 'Nhà hát lớn Hà Nội, Tràng Tiền, Hoàn Kiếm, Hà Nội',
+latitude = 21.0281175, longitude = 105.8578516
+where name = 'Nhà hát lớn Hà Nội'
+
+select * from tags;
+
+delete from location_tags
+where location_id = 'qZ1XUh_vkxlmgWOpfni58F-ETqhJD5SZfLciTrJ6l_p63ztarA6YeWarVpOo0LU-ZrlOUbcOm91lnUINHgla-mk24aRSrUabQf7tNWZtrm_J-gV4NrQ2Lm3ypViabDODb';
+
+delete from location_tags
+where location_id = 'RS8urUk9d7Nixqk9tC01Zy2my-wKHYE3IZ5iEMbFNTslQxhl__01NgWCxg7HIslWEV3Jlo3OyYdCQxVpGsGGY-1fEmAY';
+
+delete from location_tags
+where location_id = 'PsBMrHjvdta7wiBEZHb0hrakdShXeaiOu7AZxtAZNhsK3mEtmP0ug2yOId2FXX6iqsIF9KWR1haa4mWEmeGa8g4GnfUNiiU9khqZQRGPbhoqwnEMQYRCWhoa0SztjEf3G';
