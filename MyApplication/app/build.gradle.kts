@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation("com.google.android.gms:play-services-auth:21.4.0")
+    implementation("com.google.firebase:firebase-messaging:24.0.0")
 
     // Networking & Image
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -58,9 +59,17 @@ dependencies {
 
     // UI components
     implementation("io.github.chaosleung:pinview:1.4.4")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    // TextViewMoreLess for expandable text views
+    implementation("com.github.colourmoon:readmore-textview:v1.0.2")
 }

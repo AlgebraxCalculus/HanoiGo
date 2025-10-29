@@ -2,6 +2,7 @@ package com.example.hanoiGo.service;
 
 import com.example.hanoiGo.dto.request.LoginRequest;
 import com.example.hanoiGo.dto.request.RegisterRequest;
+import com.example.hanoiGo.dto.request.UpdateFcmTokenRequest;
 import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.exception.AppException;
@@ -84,7 +85,10 @@ import java.util.List;
      public List<UserResponse> getAllUsers(boolean orderByPoints) {
         List<User> users = userRepository.findAll();
         if (orderByPoints) {
-            users.sort(Comparator.comparingInt(User::getPoints).reversed());
+            users.sort(
+            Comparator.comparingInt(User::getPoints).reversed() // Ưu tiên điểm giảm dần
+                      .thenComparing(User::getUsername, String.CASE_INSENSITIVE_ORDER) // Nếu điểm bằng, sort theo tên tăng dần
+            );
         }
         return userMapper.toUserResponseList(users);
      }
@@ -120,18 +124,19 @@ import java.util.List;
 
      public UserResponse register(RegisterRequest request) {
         //  Kiểm tra username, email đã tồn tại chưa
-         if (userRepository.existsByUsername(request.getUsername())) {
-             throw new AppException(ErrorCode.USERNAME_EXISTED);
-         }
-         if (userRepository.existsByEmail(request.getEmail())) {
-             throw new AppException(ErrorCode.EMAIL_EXISTED);
-         }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
+        }
 
-         // Tạo user mới
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        // Tạo user mới
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setProfilePicture("https://res.cloudinary.com/dsm1uhecl/image/upload/v1758534990/%C6%A0_K%C3%8CA_VI%E1%BB%86T_NAM___AROUND_VIETNAM_ILLUSTRATION_-_Sunmire_Vu_sjajtt.jpg?fbclid=IwY2xjawNHBytleHRuA2FlbQIxMABicmlkETE3NVRVZmZuZFdPcENBNGlMAR48_f--ldiLXXT8eL7O_UisEgFrJN9mGT3GGCFfxZDH8_sxmZrnoPOJcc2f5Q_aem_3vjyyKyXnp39d9OtThXiIg");
-        
+        user.setProfilePicture("https://res.cloudinary.com/dsm1uhecl/image/upload/v1758534990/%C6%A0_K%C3%8CA_VI%E1%BB%86T_NAM___AROUND_VIETNAM_ILLUSTRATION_-_Sunmire_Vu_sjajtt.jpg");
+
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
@@ -159,4 +164,28 @@ import java.util.List;
             String token = jwtUtil.generateToken(user.getUsername(), user.getId());
             return new LoginResponse(token, userMapper.toUserResponse(user));
      }
+
+     public void updateFcmToken(UpdateFcmTokenRequest request, String username) {
+        User user = null;
+        // Ưu tiên xác định theo Firebase UID
+        if (request.getFirebaseUid() != null && !request.getFirebaseUid().isEmpty()) {
+            user = userRepository.findByFirebaseUid(request.getFirebaseUid())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        } 
+        // Nếu không có Firebase UID thì tìm theo JWT token
+        else if (username != null && !username.isEmpty()) {
+            try {
+                user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            } catch (IllegalArgumentException e) {
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            }
+        } 
+        else {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+        // Cập nhật FCM token
+        user.setFcmToken(request.getFcmToken());
+        userRepository.save(user);
+    }
 }

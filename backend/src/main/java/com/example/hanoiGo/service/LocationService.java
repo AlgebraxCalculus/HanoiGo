@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,12 +71,8 @@ public class LocationService {
         // TH: lọc theo tag hoặc mostVisited
         if(tag != null && !tag.isEmpty()) {
             ok = "1";
-            for(String lcIds : locationIds) {
-                if(!getTagListByLocationID(lcIds).contains(tag)){
-                    locationIds.remove(lcIds);
-                }
-            }
-        }else if(mostVisited != null && mostVisited){
+            locationIds.removeIf(lcId -> !getTagListByLocationID(lcId).contains(tag));
+        } else if(mostVisited != null && mostVisited){
             ok = "1";
             locationIds.sort((id1, id2) -> {
                 Integer count1 = locationDetailRepository.findWeeklyCheckinCountsById(id1);
@@ -149,4 +146,39 @@ public class LocationService {
         }
         return locationList;
     }
+
+    // Lấy locationId theo address
+    public LocationResponse getLocationDetailByAddress(String address) {
+        LocationDetail locationDetail = locationDetailRepository.findByAddress(address)
+                .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
+
+        // Map entity sang DTO
+        LocationResponse locationResponse = locationMapper.toLocationResponse(locationDetail);
+
+        // Lấy tags từ DB
+        locationResponse.setTags(getTagListByLocationID(locationDetail.getId()));
+
+        return locationResponse;
+    }
+
+    public List<LocationResponse> searchAutocompleteByAddress(String keyword) {
+        List<LocationResponse> resultList = new ArrayList<>();
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return resultList;
+        }
+
+        // Tìm danh sách location có address chứa keyword
+        List<LocationDetail> locations = locationDetailRepository
+                .findTop10ByAddressIgnoreCaseContaining(keyword.trim());
+
+        for (LocationDetail location : locations) {
+            LocationResponse dto = locationMapper.toLocationResponse(location);
+            dto.setTags(getTagListByLocationID(location.getId()));
+            resultList.add(dto);
+        }
+
+        return resultList;
+    }
+
   }

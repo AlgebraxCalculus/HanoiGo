@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 
 import com.example.myapplication.R;
 import com.example.myapplication.model.Place;
@@ -16,10 +17,16 @@ import java.util.List;
 
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder> {
 
-    private List<Place> places;
+    public interface OnItemClickListener {
+        void onItemClick(Place place);
+    }
 
-    public PlaceAdapter(List<Place> places) {
+    private List<Place> places;
+    private OnItemClickListener listener;
+
+    public PlaceAdapter(List<Place> places, OnItemClickListener listener) {
         this.places = places;
+        this.listener = listener;
     }
 
     @NonNull
@@ -36,7 +43,16 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         holder.tvPlaceName.setText(place.getName());
         holder.tvPlaceDescription.setText(place.getDescription());
         holder.tvPlaceDistance.setText(place.getDistance());
-        holder.ivPlaceImage.setImageResource(place.getImageResId());
+        Glide.with(holder.itemView.getContext())
+                .load(place.getPictureURL())
+                .into(holder.ivPlaceImage);
+
+        // Set click listener cho từng item
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(place);
+            }
+        });
     }
 
     @Override

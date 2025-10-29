@@ -6,7 +6,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnableCheckpointResponse {
-    private String locationId;
-    private String locationName;
+    private LocationResponse location;
     private int distanceValue; 
 }

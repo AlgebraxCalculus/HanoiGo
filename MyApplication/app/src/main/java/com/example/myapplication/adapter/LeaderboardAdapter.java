@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.model.LeaderboardItem;
 
@@ -17,11 +18,9 @@ import java.util.List;
 public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder> {
 
     private List<LeaderboardItem> leaderboardList;
-    private int currentUserRank; // dùng để highlight người dùng hiện tại
 
-    public LeaderboardAdapter(List<LeaderboardItem> leaderboardList, int currentUserRank) {
+    public LeaderboardAdapter(List<LeaderboardItem> leaderboardList) {
         this.leaderboardList = leaderboardList;
-        this.currentUserRank = currentUserRank;
     }
 
     @NonNull
@@ -39,9 +38,12 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         holder.tvRankPosition.setText("#" + item.getRank());
         holder.tvUsername.setText(item.getName());
         holder.tvPoints.setText(String.valueOf(item.getScore()));
-        holder.imgAvatar.setImageResource(item.getAvatarRes());
+//        holder.imgAvatar.setImageResource(item.getAvatarRes());
+        Glide.with(holder.itemView.getContext())
+                .load(item.getAvatar())
+                .into(holder.imgAvatar);
 
-        if (item.getRank() == currentUserRank) {
+        if (position == 0) {
             holder.itemView.setBackgroundResource(R.drawable.bg_rank_highlight);
         } else {
             holder.itemView.setBackgroundResource(android.R.color.transparent);

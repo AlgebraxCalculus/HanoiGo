@@ -36,9 +36,9 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
 
         // Set tint white for non-heart icons, no tint for heart to keep red color
         if (savedList.getIconResId() == R.drawable.ic_heart) {
-            ImageViewCompat.setImageTintList(holder.listIcon, null); // No tint - keep original red color
+            ImageViewCompat.setImageTintList(holder.listIcon, null);
         } else {
-            ImageViewCompat.setImageTintList(holder.listIcon, ColorStateList.valueOf(Color.WHITE)); // White tint
+            ImageViewCompat.setImageTintList(holder.listIcon, ColorStateList.valueOf(Color.WHITE));
         }
 
         holder.listTitle.setText(savedList.getTitle());

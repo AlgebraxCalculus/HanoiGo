@@ -41,12 +41,16 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
         String level = item.getBadgeLevel().trim().toUpperCase();
 
-        if (level.equals("RANK SS") || level.equals("SS")) {
-            holder.tvBadge.setBackgroundResource(R.drawable.bg_chip_orange);
-        } else if (level.equals("RANK S+") || level.equals("S+")) {
-            holder.tvBadge.setBackgroundResource(R.drawable.bg_card_red_orange);
-        } else {
-            holder.tvBadge.setBackgroundResource(R.drawable.bg_chip_purple);
+        if (level.equals("TIER SSS") || level.equals("SSS")) {
+            holder.tvBadge.setBackgroundResource(R.drawable.bg_tier_sss);
+        }else if (level.equals("TIER SS") || level.equals("SS")) {
+            holder.tvBadge.setBackgroundResource(R.drawable.bg_tier_ss);
+        } else if (level.equals("TIER S+") || level.equals("S+")) {
+            holder.tvBadge.setBackgroundResource(R.drawable.bg_tier_splus);
+        } else if (level.equals("TIER S") || level.equals("S")) {
+            holder.tvBadge.setBackgroundResource(R.drawable.bg_tier_s);
+        } else{
+            holder.tvBadge.setBackgroundResource(R.drawable.bg_tier_a);
         }
     }
 

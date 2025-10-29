@@ -1,6 +1,12 @@
- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -64,6 +70,7 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -99,7 +106,7 @@
                         android:layout_height="wrap_content"
                         android:text="Welcome back"
                         android:textColor="@android:color/white"
-                        android:textSize="24sp"
+                        android:textSize="30sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -107,188 +114,215 @@
                         android:layout_height="wrap_content"
                         android:text="Ready for another amazing experience today?"
                         android:textColor="@android:color/white"
-                        android:textSize="14sp" />
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
 
-                    <LinearLayout
-                        android:id="@+id/cardStats"
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="100dp"
-                        android:background="@drawable/bg_card_rounded_dark"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_marginTop="20dp">
 
-                        <ImageView
-                            android:id="@+id/imgUserAvatar"
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
+                        <!-- Avatar nằm trên cùng -->
+                        <FrameLayout
+                            android:layout_width="96dp"
+                            android:layout_height="96dp"
                             android:layout_gravity="top|center_horizontal"
                             android:background="@drawable/bg_circle_with_border"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/ic_person_24" />
+                            android:padding="3dp"
+                            android:translationZ="1dp">
 
-                        <TextView
-                            android:id="@+id/tvUserName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:text="TheHanoiEnjoyer"
-                            android:textColor="@android:color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            <ImageView
+                                android:id="@+id/imgUserAvatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                android:background="@drawable/bg_circle"
+                                android:src="@drawable/avatar"/>
+                        </FrameLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="4dp"
-                            android:background="@drawable/bg_chip_gray"
-                            android:padding="6dp"
-                            android:text="Your highest achievement 🥇"
-                            android:textStyle="bold"
-                            android:textColor="@color/main_app_color"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="12dp"
-                            android:text="Overall statistics"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                        <!-- Card Stats nằm dưới, có marginTop để avatar chèn vào -->
 
                         <LinearLayout
+                            android:id="@+id/cardStats"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:orientation="horizontal"
-                            android:weightSum="3">
+                            android:layout_marginTop="55dp"
+                            android:background="@drawable/bg_card_rounded_dark"
+                            android:orientation="vertical"
+                            android:paddingTop="48dp"
+                            android:paddingBottom="16dp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp">
+
+                            <TextView
+                                android:id="@+id/tvUserName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="Đỗ Trung Quân"
+                                android:textColor="@android:color/white"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvTopAchievement"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="4dp"
+                                android:background="@drawable/bg_chip_gray"
+                                android:paddingStart="36dp"
+                                android:paddingEnd="36dp"
+                                android:text="Your highest achievement 🥇"
+                                android:textStyle="bold"
+                                android:textColor="@color/main_app_color"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="12dp"
+                                android:text="Overall statistics"
+                                android:textColor="@android:color/white"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
 
                             <LinearLayout
-                                android:layout_width="0dp"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="@drawable/bg_stat_box"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:gravity="center"
-                                    android:paddingBottom="10dp"
-                                    android:text="Rank"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
+                                android:layout_marginTop="12dp"
+                                android:orientation="horizontal"
+                                android:weightSum="3">
 
                                 <LinearLayout
-                                    android:layout_width="wrap_content"
+                                    android:layout_width="0dp"
                                     android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_stat_box"
                                     android:gravity="center"
-                                    android:orientation="horizontal">
-
-                                    <ImageView
-                                        android:layout_width="40dp"
-                                        android:layout_height="40dp"
-                                        android:layout_marginEnd="10dp"
-                                        android:src="@drawable/ic_rank" />
+                                    android:orientation="vertical"
+                                    android:padding="8dp">
 
                                     <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:gravity="center"
+                                        android:paddingBottom="5dp"
+                                        android:text="Rank"
+                                        android:textColor="@android:color/black"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold" />
+
+                                    <LinearLayout
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="29th"
-                                        android:textColor="@android:color/black"
-                                        android:textSize="18sp" />
+                                        android:gravity="center"
+                                        android:orientation="horizontal">
+
+                                        <ImageView
+                                            android:layout_width="38dp"
+                                            android:layout_height="38dp"
+                                            android:layout_marginEnd="10dp"
+                                            android:src="@drawable/ic_rank" />
+
+                                        <TextView
+                                            android:id="@+id/tvRankCount"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="29th"
+                                            android:textColor="@android:color/black"
+                                            android:textSize="20sp" />
+                                    </LinearLayout>
                                 </LinearLayout>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginEnd="8dp"
-                                android:layout_weight="1"
-                                android:background="@drawable/bg_stat_box"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:gravity="center"
-                                    android:paddingBottom="10dp"
-                                    android:text="Points"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
 
                                 <LinearLayout
-                                    android:layout_width="wrap_content"
+                                    android:layout_width="0dp"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_stat_box"
                                     android:gravity="center"
-                                    android:orientation="horizontal">
-
-                                    <ImageView
-                                        android:layout_width="40dp"
-                                        android:layout_height="40dp"
-                                        android:layout_marginEnd="10dp"
-                                        android:src="@drawable/ic_points" />
+                                    android:orientation="vertical"
+                                    android:padding="8dp">
 
                                     <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:gravity="center"
+                                        android:paddingBottom="5dp"
+                                        android:text="Points"
+                                        android:textColor="@android:color/black"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold" />
+
+                                    <LinearLayout
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="1219"
-                                        android:textColor="@android:color/black"
-                                        android:textSize="18sp" />
+                                        android:gravity="center"
+                                        android:orientation="horizontal">
+
+                                        <ImageView
+                                            android:layout_width="38dp"
+                                            android:layout_height="38dp"
+                                            android:layout_marginEnd="10dp"
+                                            android:src="@drawable/ic_points" />
+
+                                        <TextView
+                                            android:id="@+id/tvPointsCount"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="1219"
+                                            android:textColor="@android:color/black"
+                                            android:textSize="18sp" />
+                                    </LinearLayout>
                                 </LinearLayout>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:background="@drawable/bg_stat_box"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:gravity="center"
-                                    android:paddingBottom="10dp"
-                                    android:text="Achievement"
-                                    android:textColor="@android:color/black"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
 
                                 <LinearLayout
-                                    android:layout_width="wrap_content"
+                                    android:layout_width="0dp"
                                     android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_stat_box"
                                     android:gravity="center"
-                                    android:orientation="horizontal">
-
-                                    <ImageView
-                                        android:layout_width="40dp"
-                                        android:layout_height="40dp"
-                                        android:layout_marginEnd="12dp"
-                                        android:src="@drawable/ic_medal" />
+                                    android:orientation="vertical"
+                                    android:padding="8dp">
 
                                     <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:gravity="center"
+                                        android:paddingBottom="5dp"
+                                        android:text="Achievement"
+                                        android:textColor="@android:color/black"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold" />
+
+                                    <LinearLayout
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="29"
-                                        android:textColor="@android:color/black"
-                                        android:textSize="18sp" />
+                                        android:gravity="center"
+                                        android:orientation="horizontal">
+
+                                        <ImageView
+                                            android:layout_width="38dp"
+                                            android:layout_height="38dp"
+                                            android:layout_marginEnd="10dp"
+                                            android:src="@drawable/ic_medal" />
+
+                                        <TextView
+                                            android:id="@+id/tvAchievementCount"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="29"
+                                            android:textColor="@android:color/black"
+                                            android:textSize="20sp" />
+                                    </LinearLayout>
                                 </LinearLayout>
                             </LinearLayout>
                         </LinearLayout>
-                    </LinearLayout>
+                    </FrameLayout>
                 </LinearLayout>
             </FrameLayout>
 
@@ -334,6 +368,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
 
                     <View
@@ -355,7 +390,7 @@
                     android:id="@+id/recyclerViewIconic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="10dp"
                     android:overScrollMode="never"
                     android:scrollbars="none">
 
@@ -374,6 +409,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
 
                     <View
@@ -396,7 +432,7 @@
                     android:id="@+id/recyclerViewTop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="10dp"
                     android:overScrollMode="never"
                     android:scrollbars="none">
 
@@ -415,6 +451,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
 
                     <View
@@ -434,10 +471,10 @@
                     android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewPopular"
+                    android:id="@+id/recyclerViewPopularNearU"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="10dp"
                     android:overScrollMode="never"
                     android:scrollbars="none">
 
@@ -447,7 +484,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="30dp"
                 android:orientation="vertical"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp">
@@ -539,14 +576,20 @@
                     android:text="View all achievements"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"
-                    android:background="#002244"
+                    android:layout_marginBottom="-16dp"
+                    android:layout_marginStart="-16dp"
+                    android:layout_marginEnd="-16dp"
+                    android:background="@drawable/bottom_button_in_a_box"
                     android:drawablePadding="8dp"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_margin="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="150dp"
                 android:background="@drawable/bg_card_rounded_dark"
                 android:padding="16dp">
 
@@ -558,22 +601,267 @@
                     android:textSize="16sp"
                     android:textColor="@android:color/white"/>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerTop3"
+                <!-- TOP 3 USERS -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:orientation="horizontal"
-                    android:overScrollMode="never"
-                    android:scrollbars="none" />
+                    android:gravity="bottom"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="0dp">
 
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- RANK 2 (LEFT) -->
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Your current rank:"
-                        android:textColor="@android:color/white"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <FrameLayout
+                            android:layout_width="80dp"
+                            android:layout_height="80dp">
+
+                            <!-- Avatar circle -->
+                            <ImageView
+                                android:id="@+id/imgTop2Avatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                android:background="@drawable/bg_circle"
+                                android:src="@drawable/avatar"/>
+
+                            <!-- Ring overlay -->
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/bg_circle_rank_2"
+                                android:scaleType="fitXY"/>
+
+                            <!-- Rank badge -->
+                            <TextView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="-10dp"
+                                android:background="@drawable/bg_circle_number_2"
+                                android:gravity="center"
+                                android:text="2"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:textSize="14sp"/>
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvTop2Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:text="Đỗ Trung Quân"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold"
+                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_marginTop="4dp">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_points"/>
+
+                            <TextView
+                                android:id="@+id/tvTop2Points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="1136"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- RANK 1 (CENTER) -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <FrameLayout
+                            android:layout_width="100dp"
+                            android:layout_height="100dp">
+
+                            <!-- Avatar circle -->
+                            <ImageView
+                                android:id="@+id/imgTop1Avatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                android:background="@drawable/bg_circle"
+                                android:src="@drawable/avatar"/>
+
+                            <!-- Ring overlay -->
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/bg_circle_rank_1"
+                                android:scaleType="fitXY"/>
+
+                            <!-- Rank badge -->
+                            <TextView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="-10dp"
+                                android:background="@drawable/bg_circle_number_1"
+                                android:gravity="center"
+                                android:text="1"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:textSize="16sp"/>
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvTop1Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:text="Đỗ Trung Quân"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold"
+                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_marginTop="4dp">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_points"/>
+
+                            <TextView
+                                android:id="@+id/tvTop1Points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="1236"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- RANK 3 (RIGHT) -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <FrameLayout
+                            android:layout_width="80dp"
+                            android:layout_height="80dp">
+
+                            <!-- Avatar circle -->
+                            <ImageView
+                                android:id="@+id/imgTop3Avatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:clipToOutline="true"
+                                android:background="@drawable/bg_circle"
+                                android:src="@drawable/avatar"/>
+
+                            <!-- Ring overlay -->
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/bg_circle_rank_3"
+                                android:scaleType="fitXY"/>
+
+                            <!-- Rank badge -->
+                            <TextView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="bottom|center_horizontal"
+                                android:layout_marginBottom="-10dp"
+                                android:background="@drawable/bg_circle_number_3"
+                                android:gravity="center"
+                                android:text="3"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:textSize="14sp"/>
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvTop3Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:text="Đỗ Trung Quân"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold"
+                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:layout_marginTop="4dp">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_points"/>
+
+                            <TextView
+                                android:id="@+id/tvTop3Points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="1036"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="Your current rank:"
+                    android:textColor="@android:color/white"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewLeaderboard"
@@ -586,3 +874,4 @@
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

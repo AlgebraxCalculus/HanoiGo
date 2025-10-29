@@ -42,7 +42,11 @@ public class User {
     // Thêm các trường cho Firebase authentication
     @Column(name = "firebase_uid", unique = true)
     private String firebaseUid;
+
+    // Thêm trường cho fcmToken
+    @Column(name = "fcm_token")
+    private String fcmToken;
     
-    @Column(name = "profile_picture")
+    @Column(name = "profile_picture", columnDefinition = "TEXT")
     private String profilePicture;
 }

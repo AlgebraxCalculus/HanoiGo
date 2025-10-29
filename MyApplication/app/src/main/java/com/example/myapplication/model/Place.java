@@ -1,16 +1,31 @@
 package com.example.myapplication.model;
 
-public class Place {
+import java.io.Serializable;
+
+public class Place implements Serializable {
+    private String id;
     private String name;
     private String description;
     private String distance;
-    private int imageResId;
+    private String pictureURL;
+    private double latitude;
+    private double longitude;
 
-    public Place(String name, String description, String distance, int imageResId) {
+    private String address;
+
+    public Place(String name, String description, String distance, String pictureURL, String address) {
         this.name = name;
         this.description = description;
         this.distance = distance;
-        this.imageResId = imageResId;
+        this.pictureURL = pictureURL;
+        this.address = address;
+    }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -25,7 +40,31 @@ public class Place {
         return distance;
     }
 
-    public int getImageResId() {
-        return imageResId;
+    public String getPictureURL() {
+        return pictureURL;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

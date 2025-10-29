@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mapCoordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#001A2E">
+
+    <!-- MapView hiển thị bản đồ -->
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!-- Thanh tìm kiếm + tag filter -->
+    <LinearLayout
+        android:id="@+id/topContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="32dp"
+        android:paddingHorizontal="16dp"
+        android:layout_gravity="top">
+
+        <!-- Search bar -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/searchContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@android:color/transparent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
+                android:background="@drawable/bg_searchbar">
+
+                <ImageView
+                    android:id="@+id/searchIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/routing"
+                    android:contentDescription="@string/desc_search_icon" />
+
+                <EditText
+                    android:id="@+id/searchBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="@string/hint_search"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:paddingHorizontal="8dp"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/darker_gray"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/ivClear"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_clear"
+                    android:padding="8dp"
+                    android:visibility="gone"
+                    app:tint="@android:color/white" />
+
+                <ImageView
+                    android:id="@+id/imgAvatar"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/avatar"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/bg_round"
+                    android:clipToOutline="true"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/searchSuggestionsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@android:color/white">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="325dp"
+                android:paddingVertical="4dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSearchSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="always"
+                android:scrollbars="vertical"
+                android:background="@android:color/transparent"/>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Tag filter -->
+        <HorizontalScrollView
+            android:id="@+id/tagScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none"
+            android:overScrollMode="never">
+
+            <LinearLayout
+                android:id="@+id/tagContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="8dp">
+
+                <TextView style="@style/TagStyle" android:text="@string/tag_iconic" />
+                <TextView style="@style/TagStyle" android:layout_marginStart="8dp" android:text="@string/tag_cuisine" />
+                <TextView style="@style/TagStyle" android:layout_marginStart="8dp" android:text="@string/tag_entertaining" />
+                <TextView style="@style/TagStyle" android:layout_marginStart="8dp" android:text="@string/tag_culture" />
+            </LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <!-- Floating Buttons group (bên phải bản đồ) -->
+    <LinearLayout
+        android:id="@+id/mapButtonsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="200dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Bookmark button -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnBookmark"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="26dp"
+            app:cardBackgroundColor="#001A2E"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_bookmark"
+                app:tint="#FFFFFF" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Compass button -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnCompass"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="26dp"
+            app:cardBackgroundColor="#001A2E"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_compass"
+                app:tint="#FFFFFF" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Navigate button -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnNavigate"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:cardCornerRadius="26dp"
+            app:cardBackgroundColor="#001A2E"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_navigation"
+                app:tint="#FFFFFF" />
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <!-- Container chứa bottom sheet (Explore hoặc Bookmark) -->
+    <FrameLayout
+        android:id="@+id/childFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

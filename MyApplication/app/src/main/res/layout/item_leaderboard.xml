@@ -11,7 +11,7 @@
     <!-- Rank -->
     <TextView
         android:id="@+id/tvRankPosition"
-        android:layout_width="36dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
         android:textStyle="bold"
@@ -22,8 +22,11 @@
         android:id="@+id/imgAvatar"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:src="@drawable/bg_circle"
-        android:layout_marginEnd="8dp" />
+        android:scaleType="centerCrop"
+        android:clipToOutline="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/bg_circle"/>
 
     <!-- Name -->
     <TextView

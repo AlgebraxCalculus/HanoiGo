@@ -7,10 +7,12 @@ import com.example.hanoiGo.dto.response.CheckpointResponse;
 import com.example.hanoiGo.dto.response.EnableCheckpointResponse;
 import com.example.hanoiGo.dto.response.LocationListResponse;
 import com.example.hanoiGo.dto.response.LocationResponse;
+import com.example.hanoiGo.dto.response.ReviewResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.exception.AppException;
 import com.example.hanoiGo.exception.ErrorCode;
 import com.example.hanoiGo.mapper.CheckpointMapper;
+import com.example.hanoiGo.mapper.LocationMapper;
 import com.example.hanoiGo.model.Checkpoint;
 import com.example.hanoiGo.model.LocationDetail;
 import com.example.hanoiGo.model.User;
@@ -21,6 +23,7 @@ import com.example.hanoiGo.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,53 +37,47 @@ public class CheckpointService {
     private final LocationService locationService;
     private final UserService userService;
     private final CheckpointMapper checkpointMapper;
+    private final LocationMapper locationMapper;
+    private final FirebaseService firebaseService;
 
-    // Method 1: enableCheckIn - Lấy list eligible locations (tận dụng distanceValue từ getListLocation)
-    public List<EnableCheckpointResponse> enableCheckIn(CheckpointRequest request) {
+    // Get list of locations eligible for check-in
+    public List<EnableCheckpointResponse> enableCheckIn(UUID userId, Double userLatitude, Double userLongitude) {
         // Validate user
-        UserResponse userResponse = userService.getUserById(request.getUserId());
+        UserResponse userResponse = userService.getUserById(userId);
         if (userResponse == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
         List<LocationListResponse> locationListResponses = locationService.getListLocation(
-                request.getUserLatitude(), 
-                request.getUserLongitude(), 
+                userLatitude, 
+                userLongitude,
                 null,  // tag
                 false, // mostVisited
-                true,  // nearest (sorted tăng dần distance)
+                true,  // nearest
                 null   // limit 
         );
 
         List<EnableCheckpointResponse> enableCheckpoints = new ArrayList<>();
 
-        for (LocationListResponse locResponse : locationListResponses) {
-            LocationResponse locationRes = locResponse.getLocationResponse();
-            String locName = locationRes.getName();
-            int distanceValue = locResponse.getDistanceValue();  
+        for (LocationListResponse locRes : locationListResponses) {
+            LocationResponse location = locRes.getLocationResponse();
+            int distance = locRes.getDistanceValue();
+            if (distance > 100) break;
 
-            String locId = locationDetailRepository.findIdByName(locName).orElse(null);
+            LocationDetail detail = locationDetailRepository.findByAddress(location.getAddress()).orElse(null);
+            if (detail == null) continue;
 
-            if (locId == null) {
-                continue;  // Skip nếu không có ID
-            }
-
-            // Check user đã checkpoint chưa
-            boolean alreadyChecked = checkpointRepository.existsByUserIdAndLocationId(request.getUserId(), locId);
-            if (alreadyChecked) {
-                continue;  // Skip nếu đã check
-            }
-
-            // Filter chỉ <= 100m
-            if (distanceValue <= 100) {
-                enableCheckpoints.add(new EnableCheckpointResponse(locId, locName, distanceValue));
-            } else {
-                // Break sớm vì list đã sorted nearest
-                break;
+            boolean alreadyChecked = checkpointRepository.existsByUserIdAndLocationId(
+                    userId, detail.getId()
+            );
+            if (!alreadyChecked) {
+                enableCheckpoints.add(new EnableCheckpointResponse(
+                        locationMapper.toLocationResponse(detail), distance
+                ));
             }
         }
 
-        // Nếu không có eligible, throw exception 
+        // If no eligible locations found, throw exception
         if (enableCheckpoints.isEmpty()) {
             throw new RuntimeException("No eligible check-in locations within 100m.");
         }
@@ -88,56 +85,53 @@ public class CheckpointService {
         return enableCheckpoints;
     }
 
-    // Method 2: checkIn - Check-in cho location cụ thể
+    // Check in a detail location
     public CheckpointResponse checkIn(CheckpointRequest request) {
-        // Validate user
+        // Validate user (DTO)
         UserResponse userResponse = userService.getUserById(request.getUserId());
         if (userResponse == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        // Gọi enableCheckIn để lấy list eligible
-        List<EnableCheckpointResponse> eligibleList = enableCheckIn(request);
-        System.err.println("Eligible locations: " + eligibleList.size());
-        for (EnableCheckpointResponse e : eligibleList) {
-            System.err.println(" - " + e.getLocationName() + " (" + e.getLocationId() + ") at " + e.getDistanceValue() + "m");
-        }
+        // Load user entity
+        User userEntity = userRepository.findUserById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // Verify locationId có trong eligible list
-        String locationId = request.getLocationId();
-        boolean isEligible = eligibleList.stream()
-                .anyMatch(eligible -> eligible.getLocationId().equals(locationId));
-
-        if (!isEligible) {
-            throw new RuntimeException("Location is not eligible for check-in (too far or already checked).");
-        }
-
-        // Lấy location từ ID
-        LocationDetail loc = locationDetailRepository.findById(locationId)
+        // Load location detail by id from request
+        LocationDetail loc = locationDetailRepository.findById(request.getLocationId())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
+        // Add points for check-in
+        int addedPoints = 3;
+        int newPoints = (userEntity.getPoints() == null ? 0 : userEntity.getPoints()) + addedPoints;
+        userEntity.setPoints(newPoints);
+        userRepository.save(userEntity);
 
-        // Tạo checkpoint 
+        // Create and save checkpoint
         Checkpoint checkpoint = new Checkpoint();
-        checkpoint.setUser(userRepository.findUserById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
+        checkpoint.setUser(userEntity);
         checkpoint.setLocation(loc);
         checkpoint.setCheckedInTime(LocalDateTime.now());
         checkpointRepository.save(checkpoint);
 
-        // Tăng point
-        User userEntity = userRepository.findUserById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        userEntity.setPoints(userEntity.getPoints() + 3);
-        userRepository.save(userEntity);
+        // Push updated points to Firestore userStats and send FCM notification
+        try {
+            firebaseService.pushUserStatsData(userEntity.getId(), "points", newPoints);
+        } catch (Exception ex) {
+            System.err.println("Failed to push user stats to Firestore: " + ex.getMessage());
+        }
 
-        // Lấy updated user response
-        UserResponse updatedUserResponse = userService.getUserById(request.getUserId());
+        // Send FCM notification
+        String fcm = userEntity.getFcmToken();
+        if (fcm != null && !fcm.isBlank()) {
+            String title = "Check-in successful!";
+            String body = "You have checked in at " + loc.getAddress() + " and received +" + addedPoints + " points.";
+            firebaseService.sendNotification(fcm, title, body);
+        }
 
-        LocationResponse locationRes = new LocationResponse();
-        locationRes.setName(loc.getName()); 
-        
-        CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, updatedUserResponse);
-
+        // Build response objects
+        LocationResponse locationRes = locationMapper.toLocationResponse(loc);
+        ReviewResponse reviewRes = null; // no review on check-in
+        CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, reviewRes);
         return resp;
     }
 }

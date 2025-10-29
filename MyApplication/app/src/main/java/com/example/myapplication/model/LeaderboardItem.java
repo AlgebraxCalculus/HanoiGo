@@ -4,13 +4,13 @@ public class LeaderboardItem {
     private int rank;
     private String name;
     private int score;
-    private int avatarRes;
+    private String avatar;
 
-    public LeaderboardItem(int rank, String name, int score, int avatarRes){
+    public LeaderboardItem(int rank, String name, int score, String avatar){
         this.rank = rank;
         this.name = name;
         this.score = score;
-        this.avatarRes = avatarRes;
+        this.avatar = avatar;
     }
 
     public int getRank() {
@@ -25,8 +25,8 @@ public class LeaderboardItem {
         return score;
     }
 
-    public int getAvatarRes() {
-        return avatarRes;
+    public String getAvatar() {
+        return avatar;
     }
 }
 
