@@ -42,24 +42,27 @@ public class PlaceDetailFragment extends Fragment {
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private TextView placeTitle, placeAddress, overallDescription, locationText;
     private RatingBar ratingBar;
-    private MaterialButton btnDirections, btnSave, btnWriteReview;
+    private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckpoint;
     private EditText searchBar;
     private ImageView actionButton, btnClose;
     private LinearLayout tagContainer;
 
+    private ArrayList<JSONObject> availableCheckpoints;
     private Place placeData;
     private RecyclerView rvPlacePhotos;
     private RecyclerView rvReviews;
 
     public PlaceDetailFragment() {}
 
-    public static PlaceDetailFragment newInstance(Place place) {
+    public static PlaceDetailFragment newInstance(Place place, ArrayList<JSONObject> checkpoints) {
         PlaceDetailFragment fragment = new PlaceDetailFragment();
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
+        args.putSerializable("availableCheckpoints", checkpoints);
         fragment.setArguments(args);
         return fragment;
     }
+
     @Nullable
     @Override
     public View onCreateView(
@@ -78,6 +81,7 @@ public class PlaceDetailFragment extends Fragment {
         placeAddress = view.findViewById(R.id.placeAddress);
         overallDescription = view.findViewById(R.id.overallDescription);
         locationText = view.findViewById(R.id.locationText);
+        btnCheckpoint = view.findViewById(R.id.btnCheckpoint);
         btnDirections = view.findViewById(R.id.btnDirections);
         btnSave = view.findViewById(R.id.btnSave);
         btnWriteReview = view.findViewById(R.id.btnWriteReview);
@@ -120,6 +124,7 @@ public class PlaceDetailFragment extends Fragment {
         // --- Lấy dữ liệu place từ bundle ---
         if (getArguments() != null) {
             placeData = (Place) getArguments().getSerializable("placeData");
+            availableCheckpoints = (ArrayList<JSONObject>) getArguments().getSerializable("availableCheckpoints");
         }
 
         fetchPlaceDetail(placeData.getAddress());
@@ -148,7 +153,7 @@ public class PlaceDetailFragment extends Fragment {
                         if (lat != 0 && lng != 0) {
                             Fragment parent = getParentFragment();
                             if (parent instanceof MapFragment) {
-                                ((MapFragment) parent).showMarker(lat, lng, result.optString("name", "Unknown Place"), true);
+                                ((MapFragment) parent).showLocationMarker(lat, lng, result, true);
                             }
                         }
                         placeTitle.setText(result.optString("name", "Không có tên"));

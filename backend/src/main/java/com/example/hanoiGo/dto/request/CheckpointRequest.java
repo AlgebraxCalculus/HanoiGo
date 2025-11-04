@@ -10,7 +10,7 @@ import lombok.*;
 
 public class CheckpointRequest {
     private UUID userId;
-    private String locationId;
+    private String locationAddress;
     private double userLatitude;
     private double userLongitude;
 }

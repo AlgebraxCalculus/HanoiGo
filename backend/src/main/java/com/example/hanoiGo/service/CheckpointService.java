@@ -60,11 +60,11 @@ public class CheckpointService {
         List<EnableCheckpointResponse> enableCheckpoints = new ArrayList<>();
 
         for (LocationListResponse locRes : locationListResponses) {
-            LocationResponse location = locRes.getLocationResponse();
+            LocationResponse locationResponse = locRes.getLocationResponse();
             int distance = locRes.getDistanceValue();
-            if (distance > 100) break;
+            if (distance > 10000) break;
 
-            LocationDetail detail = locationDetailRepository.findByAddress(location.getAddress()).orElse(null);
+            LocationDetail detail = locationDetailRepository.findByAddress(locationResponse.getAddress()).orElse(null);
             if (detail == null) continue;
 
             boolean alreadyChecked = checkpointRepository.existsByUserIdAndLocationId(
@@ -98,7 +98,7 @@ public class CheckpointService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Load location detail by id from request
-        LocationDetail loc = locationDetailRepository.findById(request.getLocationId())
+        LocationDetail loc = locationDetailRepository.findByAddress(request.getLocationAddress())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
         // Add points for check-in
         int addedPoints = 3;
@@ -113,7 +113,7 @@ public class CheckpointService {
         checkpoint.setCheckedInTime(LocalDateTime.now());
         checkpointRepository.save(checkpoint);
 
-        // Push updated points to Firestore userStats and send FCM notification
+        // Push updated points to Firestore userStats
         try {
             firebaseService.pushUserStatsData(userEntity.getId(), "points", newPoints);
         } catch (Exception ex) {
