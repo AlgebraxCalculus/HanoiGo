@@ -240,4 +240,22 @@ public class FirebaseService {
             System.err.println("Exception while updating Firestore: " + e.getMessage());
         }
     }
+
+    public List<String> getReviewPictures(UUID reviewId) {
+        List<String> urls = new ArrayList<>();
+        try {
+            DocumentSnapshot doc = db.collection("reviews")
+                    .document(reviewId.toString())
+                    .get()
+                    .get();
+            if (doc.exists()) {
+                @SuppressWarnings("unchecked")
+                List<String> pics = (List<String>) doc.get("pictureUrl");
+                if (pics != null) urls = pics;
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting review pictures for " + reviewId + ": " + e.getMessage());
+        }
+        return urls;
+    }
 }
