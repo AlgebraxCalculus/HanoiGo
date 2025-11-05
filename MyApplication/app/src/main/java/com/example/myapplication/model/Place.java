@@ -19,6 +19,7 @@ public class Place implements Serializable {
         this.distance = distance;
         this.pictureURL = pictureURL;
     }
+
     public String getId() {
         return id;
     }

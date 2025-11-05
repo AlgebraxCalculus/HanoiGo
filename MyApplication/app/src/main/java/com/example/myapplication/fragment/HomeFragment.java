@@ -65,8 +65,8 @@ public class HomeFragment extends Fragment {
     private List<LeaderboardItem> leaderboardList;
 
 
-    TextView tvUsername, tvPoints, tvRank, tvAchieveCount, tvTopAchievement, tvTop1Name, tvTop2Name, tvTop3Name, tvTop1Points, tvTop2Points, tvTop3Points;
-    ImageView imgUserAvatar, imgTop1Avatar, imgTop2Avatar, imgTop3Avatar;
+    TextView tvUsername, tvPoints, tvRank, tvAchieveCount, tvTopAchievement, tvTop1Name, tvTop2Name, tvTop3Name, tvTop1Points, tvTop2Points, tvTop3Points, tvCurRankPosition, tvCurRankUsername, tvCurRankPoints;
+    ImageView imgUserAvatar, imgTop1Avatar, imgTop2Avatar, imgTop3Avatar, imgCurRankAvatar;
     String username = "default user";
     String avatar = "";
     String points = "0";
@@ -120,6 +120,10 @@ public class HomeFragment extends Fragment {
          imgTop1Avatar = view.findViewById(R.id.imgTop1Avatar);
          imgTop2Avatar = view.findViewById(R.id.imgTop2Avatar);
          imgTop3Avatar = view.findViewById(R.id.imgTop3Avatar);
+        tvCurRankPosition = view.findViewById(R.id.tvCurRankPosition);
+        tvCurRankUsername = view.findViewById(R.id.tvCurRankUsername);
+        tvCurRankPoints = view.findViewById(R.id.tvCurRankPoints);
+        imgCurRankAvatar = view.findViewById(R.id.imgCurRankAvatar);
 
         // --- Place sections ---
         recyclerViewIconic = view.findViewById(R.id.recyclerViewIconic);
@@ -155,7 +159,7 @@ public class HomeFragment extends Fragment {
 
             //chỉ khi cập nhật xong user location mới setupPlaceData
             if (userLat != 0 && userLng != 0){
-                setupPlaceData();
+//                setupPlaceData();
             }else{
                 System.out.println("reloadData(): userLat/lng not ready yet, skip place setup");
             }
@@ -174,7 +178,7 @@ public class HomeFragment extends Fragment {
 
         // Chỉ gọi setupPlaceData() lần đầu khi fragment mới được load
         if (listIconic == null || listIconic.isEmpty()) {
-            setupPlaceData();
+//            setupPlaceData();
         }
     }
 
@@ -354,7 +358,7 @@ public class HomeFragment extends Fragment {
     private void setupAchievementData(String jwt) {
         achievementList = new ArrayList<>();
 
-        UserApi.GetMyAchievementList(jwt,getContext(), new UserApi.UserApiCallback() {
+        UserApi.GetMyAchievementList(jwt, "tier", "desc", getContext(), new UserApi.UserApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> data) {
                 int num = 1;
@@ -369,6 +373,7 @@ public class HomeFragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
+//                System.out.println("listAchievemnent: "+achievementList);
                 String FinalTopAchievement = topAchievemnent;
                 requireActivity().runOnUiThread(() -> {
                     if (achievementList == null || achievementList.isEmpty()) {
@@ -446,17 +451,26 @@ public class HomeFragment extends Fragment {
                                 .into(imgTop3Avatar);
                     }
 
-                    // --- Chèn người dùng hiện tại vào vị trí 3 ---
-                    leaderboardList.add(3, leaderboardList.get(finalMyRank - 1));
-
                     // --- Cắt list giữ từ index 3 trở đi ---.
                     if (leaderboardList.size() > 3) {
                         leaderboardList = new ArrayList<>(leaderboardList.subList(3, leaderboardList.size()));
                     } else {
-                        LeaderboardItem li = leaderboardList.get(-1);
+//                        LeaderboardItem li = leaderboardList.get(-1);
                         leaderboardList = new ArrayList<>();
-                        leaderboardList.add(li);
+//                        leaderboardList.add(li);
                     }
+
+//                    leaderboardList.add(new LeaderboardItem(6, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(7, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(8, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(9, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(10, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(11, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(12, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(13, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(14, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(15, "lmao", 0, ""));
+//                    leaderboardList.add(new LeaderboardItem(16, "lmao", 0, ""));
 
                     // --- Cập nhật RecyclerView sau khi đã xử lý dữ liệu ---
                     leaderboardAdapter = new LeaderboardAdapter(leaderboardList);
@@ -469,7 +483,13 @@ public class HomeFragment extends Fragment {
                         case 3: suffix = "rd"; break;
                         default: suffix = "th"; break;
                     }
-                    tvRank.setText(String.valueOf(finalMyRank) + suffix);
+                    tvRank.setText(finalMyRank + suffix);
+                    tvCurRankPosition.setText("#"+String.valueOf(finalMyRank));
+                    tvCurRankUsername.setText(username);
+                    tvCurRankPoints.setText(points);
+                    Glide.with(requireContext())
+                            .load(avatar)
+                            .into(imgCurRankAvatar);
                 });
             }
 

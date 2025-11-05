@@ -7,6 +7,7 @@ import com.example.hanoiGo.dto.request.UpdateFcmTokenRequest;
 import com.example.hanoiGo.dto.request.UpdateUserStatsRequest;
 import com.example.hanoiGo.dto.response.ApiResponse;
 import com.example.hanoiGo.dto.response.LoginResponse;
+import com.example.hanoiGo.dto.response.ChartDataResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
 import com.example.hanoiGo.service.UserService;
 import com.example.hanoiGo.service.FirebaseService;
@@ -125,6 +126,19 @@ public class UserController {
                 .code(1000)
                 .message("Cập nhật UserStats thành công")
                 .result("ok")
+                .build();
+    }
+
+    @GetMapping("/get-chartData")
+    public ApiResponse<ChartDataResponse> getChartData(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
+        String username = jwtUtil.getUsernameFromToken(token);
+        System.out.println("get chartData of user: " + username);
+        ChartDataResponse response = userService.getChartData(username);
+        return ApiResponse.<ChartDataResponse>builder()
+                .code(1000)
+                .message("Lấy chartData của user "+username+" thành công!")
+                .result(response)
                 .build();
     }
 

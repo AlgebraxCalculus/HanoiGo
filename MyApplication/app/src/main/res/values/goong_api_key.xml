@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Goong Map Key -->
-    <string name="goong_map_key"></string>
+    <string name="goong_map_key">GDK777ogTW3fz0dF5AXvxNTb0mKBgruHsqQ9iTjH</string>
     <!-- Goong API Key -->
-    <string name="goong_api_key"></string>
+    <string name="goong_api_key">q49Hfhi0FaSnSJ06I55fbp9FtAdmgjLnSoW8AcN5</string>
 </resources>

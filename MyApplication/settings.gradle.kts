@@ -19,6 +19,7 @@ pluginManagement {
                 password = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").get()
             }
         }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 dependencyResolutionManagement {

@@ -5,24 +5,27 @@ import com.example.hanoiGo.dto.request.RegisterRequest;
 import com.example.hanoiGo.dto.request.UpdateFcmTokenRequest;
 import com.example.hanoiGo.dto.response.LoginResponse;
 import com.example.hanoiGo.dto.response.UserResponse;
+import com.example.hanoiGo.dto.response.ChartDataResponse;
 import com.example.hanoiGo.exception.AppException;
 import com.example.hanoiGo.exception.ErrorCode;
 import com.example.hanoiGo.mapper.UserMapper;
 import com.example.hanoiGo.model.User;
 import com.example.hanoiGo.repository.UserRepository;
 import com.example.hanoiGo.service.FirebaseService.FirebaseUserInfo;
-import com.example.hanoiGo.util.JwtUtil;
+import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.firestore.*;
+import com.example.hanoiGo.util.*;
 import lombok.*;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
  @Service
  @RequiredArgsConstructor
@@ -33,6 +36,7 @@ import java.util.List;
      private final JwtUtil jwtUtil;
      private final UserMapper userMapper;
      private final PasswordEncoder passwordEncoder;
+     private final Firestore db = FirestoreClient.getFirestore();
     
      // Đăng nhập bằng Firebase
      public LoginResponse loginWithFirebase(String firebaseToken) {
@@ -61,6 +65,9 @@ import java.util.List;
                  user.setPoints(0);
                  user.setLastLogin(LocalDateTime.now());
                  user = userRepository.save(user);
+
+                 firebaseService.setupChartData(user.getId());
+                 firebaseService.setupUserStats(user.getId());
              }
             
              // Tạo JWT token cho backend
@@ -138,6 +145,8 @@ import java.util.List;
         
         try {
             user = userRepository.save(user);
+            firebaseService.setupChartData(user.getId());
+            firebaseService.setupUserStats(user.getId());
         } catch (DataIntegrityViolationException exception) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
@@ -187,4 +196,87 @@ import java.util.List;
         user.setFcmToken(request.getFcmToken());
         userRepository.save(user);
     }
+
+    public ChartDataResponse getChartData(String username) {
+        try {
+            // 1️⃣ Lấy userId
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isEmpty()) {
+                throw new AppException(ErrorCode.LOGIN_FAIL);
+            }
+            User user = userOpt.get();
+            String userId = String.valueOf(user.getId());
+
+            // 2️⃣ Lấy chartData Firestore
+            DocumentReference chartDocRef = db.collection("chartData").document(userId);
+            DocumentSnapshot chartDocSnap = chartDocRef.get().get();
+
+            List<Map<String, Object>> chartDataList = new ArrayList<>();
+
+            if (chartDocSnap.exists()) {
+                Map<String, Object> data = chartDocSnap.getData();
+                if (data != null && data.containsKey("data")) {
+                    chartDataList = (List<Map<String, Object>>) data.get("data");
+                }
+            }
+
+            // 3️⃣ Lấy dữ liệu hôm nay
+            DocumentReference statsDocRef = db.collection("userStats").document(userId);
+            DocumentSnapshot statsSnap = statsDocRef.get().get();
+
+            if (statsSnap.exists()) {
+                Map<String, Object> todayMap = new HashMap<>();
+                todayMap.put("date", LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"))
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                todayMap.put("points", statsSnap.getLong("points"));
+                todayMap.put("checkpoints", statsSnap.getLong("checkin_count"));
+                todayMap.put("rank", getMyRank(username));
+                chartDataList.add(todayMap);
+            }
+
+            // 4️⃣ Tạo response
+            ChartDataResponse response = new ChartDataResponse();
+            response.setUsername(username);
+            response.setData(chartDataList);
+            return response;
+
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException("Error retrieving chart data", e);
+        }
+    }
+
+    public void updateChartData() throws Exception {
+        CollectionReference chartDataRef = db.collection("chartData");
+        CollectionReference userStatsRef = db.collection("userStats");
+
+        Iterable<DocumentReference> docs = chartDataRef.listDocuments();
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        LocalDate yesterday = today.minusDays(1);
+
+        for (DocumentReference doc : docs) {
+            DocumentSnapshot chartSnap = doc.get().get();
+            List<Map<String, Object>> data = (List<Map<String, Object>>) chartSnap.get("data");
+
+            if(data.size() == 6){
+                data.remove(0);
+            }else{
+                data = new ArrayList<>();
+            }
+
+            DocumentSnapshot statsSnap = userStatsRef.document(doc.getId()).get().get();
+            Map<String, Object> newData = new HashMap<>();
+            newData.put("points", statsSnap.getLong("points"));
+            newData.put("checkpoints", statsSnap.getLong("checkin_count"));
+            newData.put("rank", statsSnap.getLong("rank"));
+            newData.put("date", yesterday.toString());
+            data.add(newData);
+
+            doc.update("data", data);
+        }
+
+        // firestore.collection("meta").document("chartUpdate")
+        //         .set(Map.of("lastUpdated", today.toString()));
+    }
+
 }

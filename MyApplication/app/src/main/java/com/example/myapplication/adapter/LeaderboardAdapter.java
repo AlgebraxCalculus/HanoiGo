@@ -43,11 +43,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                 .load(item.getAvatar())
                 .into(holder.imgAvatar);
 
-        if (position == 0) {
-            holder.itemView.setBackgroundResource(R.drawable.bg_rank_highlight);
-        } else {
-            holder.itemView.setBackgroundResource(android.R.color.transparent);
-        }
+        holder.itemView.setBackgroundResource(android.R.color.transparent);
     }
 
     @Override
