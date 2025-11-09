@@ -15,6 +15,8 @@ public class BookmarkRequest {
     @NotNull(message = "Bookmark List ID không được để trống")
     private UUID bookmarkListId;
 
+    private String description;
+
     // userId sẽ được set từ JWT token để validate quyền sở hữu
     private UUID userId;
 }

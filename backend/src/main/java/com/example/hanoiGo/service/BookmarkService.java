@@ -52,6 +52,7 @@ public class BookmarkService {
         Bookmark bookmark = new Bookmark();
         bookmark.setBookmarkList(bookmarkList);
         bookmark.setLocation(location);
+        bookmark.setDescription(request.getDescription());
 
         Bookmark savedBookmark = bookmarkRepository.save(bookmark);
 
@@ -134,6 +135,7 @@ public class BookmarkService {
                 .defaultPicture(location.getDefaultPicture())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
+                .description(bookmark.getDescription())
                 .bookmarkedAt(bookmark.getBookmarkedAt())
                 .build();
     }

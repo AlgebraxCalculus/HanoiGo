@@ -30,6 +30,9 @@ public class Bookmark {
     @JoinColumn(name = "location_id", nullable = false)
     private LocationDetail location;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @CreationTimestamp
     @Column(name = "bookmarked_at", nullable = false, updatable = false)
     private LocalDateTime bookmarkedAt;
