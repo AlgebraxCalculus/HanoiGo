@@ -17,9 +17,19 @@ import java.util.List;
 public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.SavedListViewHolder> {
 
     private List<SavedList> savedLists;
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(SavedList savedList);
+        void onMenuClick(SavedList savedList);
+    }
 
     public SavedListAdapter(List<SavedList> savedLists) {
         this.savedLists = savedLists;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -43,6 +53,18 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
 
         holder.listTitle.setText(savedList.getTitle());
         holder.placeCount.setText(savedList.getPlaceCount() + " places");
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(savedList);
+            }
+        });
+
+        holder.menuIcon.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onMenuClick(savedList);
+            }
+        });
     }
 
     @Override

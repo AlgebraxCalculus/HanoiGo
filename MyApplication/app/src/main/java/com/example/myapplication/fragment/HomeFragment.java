@@ -425,16 +425,18 @@ public class HomeFragment extends Fragment {
                                 .into(imgTop3Avatar);
                     }
 
-                    // --- Chèn người dùng hiện tại vào vị trí 3 ---
-                    leaderboardList.add(3, leaderboardList.get(finalMyRank - 1));
-
-                    // --- Cắt list giữ từ index 3 trở đi ---.
-                    if (leaderboardList.size() > 3) {
+                    // --- Chèn người dùng hiện tại vào RecyclerView ---
+                    if (leaderboardList.size() >= 3 && finalMyRank > 3) {
+                        // Nếu có >= 3 users và current user không nằm trong top 3
+                        leaderboardList.add(3, leaderboardList.get(finalMyRank - 1));
+                        // Cắt list giữ từ index 3 trở đi
+                        leaderboardList = new ArrayList<>(leaderboardList.subList(3, leaderboardList.size()));
+                    } else if (leaderboardList.size() > 3) {
+                        // Có > 3 users nhưng current user đã nằm trong top 3
                         leaderboardList = new ArrayList<>(leaderboardList.subList(3, leaderboardList.size()));
                     } else {
-                        LeaderboardItem li = leaderboardList.get(-1);
+                        // Có <= 3 users, không hiển thị gì trong RecyclerView
                         leaderboardList = new ArrayList<>();
-                        leaderboardList.add(li);
                     }
 
                     // --- Cập nhật RecyclerView sau khi đã xử lý dữ liệu ---

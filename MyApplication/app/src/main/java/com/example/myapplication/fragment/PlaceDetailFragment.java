@@ -21,12 +21,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
+import com.example.myapplication.adapter.BookmarkListSelectorAdapter;
 import com.example.myapplication.adapter.ImageAdapter;
 import com.example.myapplication.adapter.ReviewAdapter;
-import com.example.myapplication.api.CheckpointApi;
 import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
+import com.example.myapplication.model.SavedList;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 
@@ -260,8 +261,7 @@ public class PlaceDetailFragment extends Fragment {
         btnDirections.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Opening directions...", Toast.LENGTH_SHORT).show());
 
-        btnSave.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Saved place", Toast.LENGTH_SHORT).show());
+        btnSave.setOnClickListener(v -> showBookmarkListDialog());
 
         btnWriteReview.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Write your review", Toast.LENGTH_SHORT).show());
@@ -313,5 +313,169 @@ public class PlaceDetailFragment extends Fragment {
                 });
             }
         }
+    }
+
+    private void showBookmarkListDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_select_bookmark_list, null);
+        builder.setView(dialogView);
+
+        RecyclerView recyclerBookmarkLists = dialogView.findViewById(R.id.recyclerBookmarkLists);
+        MaterialButton btnCreateNewList = dialogView.findViewById(R.id.btnCreateNewList);
+
+        recyclerBookmarkLists.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        android.app.AlertDialog dialog = builder.create();
+
+        // Load bookmark lists from backend
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+        String jwtToken = prefs.getString("jwt_token", null);
+
+        if (jwtToken == null) {
+            Toast.makeText(requireContext(), "Please login first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        BookmarkApi.getMyBookmarkLists(jwtToken, requireContext(), new BookmarkApi.BookmarkListCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> bookmarkLists) {
+                requireActivity().runOnUiThread(() -> {
+                    List<SavedList> lists = new ArrayList<>();
+                    for (JSONObject json : bookmarkLists) {
+                        try {
+                            SavedList list = new SavedList(
+                                    json.getString("id"),
+                                    json.optString("icon", "bookmark"),
+                                    json.getString("name"),
+                                    json.getLong("bookmarkCount")
+                            );
+                            lists.add(list);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    BookmarkListSelectorAdapter adapter = new BookmarkListSelectorAdapter(lists, selectedList -> {
+                        // Save to selected list
+                        saveToBookmarkList(selectedList.getId(), jwtToken);
+                        dialog.dismiss();
+                    });
+                    recyclerBookmarkLists.setAdapter(adapter);
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Failed to load lists: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+
+        // Create new list button
+        btnCreateNewList.setOnClickListener(v -> {
+            dialog.dismiss();
+            showCreateNewListDialog(jwtToken);
+        });
+
+        dialog.show();
+    }
+
+    private void saveToBookmarkList(String listId, String jwtToken) {
+        if (placeData == null) {
+            Toast.makeText(requireContext(), "No location selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String locationId = placeData.getId();
+
+        BookmarkApi.addBookmark(jwtToken, locationId, listId, null, requireContext(), new BookmarkApi.SingleBookmarkCallback() {
+            @Override
+            public void onSuccess(JSONObject bookmark) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Saved to bookmark list!", Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Failed to save: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private void showCreateNewListDialog(String jwtToken) {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_bookmark_list, null);
+
+        android.widget.EditText editListName = dialogView.findViewById(R.id.editListName);
+        ImageView iconBookmark = dialogView.findViewById(R.id.iconBookmark);
+        ImageView iconHeart = dialogView.findViewById(R.id.iconHeart);
+        ImageView iconFlag = dialogView.findViewById(R.id.iconFlag);
+
+        final String[] selectedIcon = {"bookmark"};
+
+        iconBookmark.setBackgroundColor(android.graphics.Color.LTGRAY);
+
+        iconBookmark.setOnClickListener(v -> {
+            selectedIcon[0] = "bookmark";
+            iconBookmark.setBackgroundColor(android.graphics.Color.LTGRAY);
+            iconHeart.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            iconFlag.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+
+        iconHeart.setOnClickListener(v -> {
+            selectedIcon[0] = "heart";
+            iconHeart.setBackgroundColor(android.graphics.Color.LTGRAY);
+            iconBookmark.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            iconFlag.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+
+        iconFlag.setOnClickListener(v -> {
+            selectedIcon[0] = "flag";
+            iconFlag.setBackgroundColor(android.graphics.Color.LTGRAY);
+            iconBookmark.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            iconHeart.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        });
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnCreate).setOnClickListener(v -> {
+            String listName = editListName.getText().toString().trim();
+            if (listName.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter a list name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            BookmarkApi.createBookmarkList(jwtToken, listName, selectedIcon[0], requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
+                @Override
+                public void onSuccess(JSONObject bookmarkList) {
+                    requireActivity().runOnUiThread(() -> {
+                        try {
+                            String newListId = bookmarkList.getString("id");
+                            Toast.makeText(requireContext(), "List created!", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                            // Now save to the newly created list
+                            saveToBookmarkList(newListId, jwtToken);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "Failed to create list: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        });
+
+        dialog.show();
     }
 }
