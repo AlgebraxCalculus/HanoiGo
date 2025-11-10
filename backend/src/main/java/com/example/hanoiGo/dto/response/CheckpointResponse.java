@@ -3,11 +3,16 @@ package com.example.hanoiGo.dto.response;
 import java.time.LocalDateTime;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;     
+import lombok.AllArgsConstructor;    
+import lombok.Builder; 
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CheckpointResponse {
-    private String locationAddress;
+    private LocationResponse location;
     private LocalDateTime checkedInTime;
-    private String userName;
-    private int userPoint;
+    private ReviewResponse review;
 }

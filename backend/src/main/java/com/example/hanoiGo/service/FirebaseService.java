@@ -109,7 +109,7 @@ public class FirebaseService {
                 System.err.println("Listen failed: " + e);
                 return;
             }
-            System.out.println(" Firestore listener started!");
+            System.out.println("🔥 Firestore listener started!");
             if (snapshots == null) return;
 
             for (DocumentChange dc : snapshots.getDocumentChanges()) {
@@ -126,7 +126,7 @@ public class FirebaseService {
                 }
             }   
         });
-        System.out.println(" Firestore listener for userStats started.");
+        System.out.println("🔥 Firestore listener for userStats started.");
     }
 
     private void handleUserStatsUpdate(Map<String, Object> before, Map<String, Object> after) {
@@ -217,19 +217,6 @@ public class FirebaseService {
         }
     }
 
-    public void pushCheckinData(UUID userId, String locationName) {
-        try {
-            Map<String, Object> data = new HashMap<>();
-            data.put("userId", userId.toString());
-            data.put("location", locationName);
-            data.put("timestamp", LocalDateTime.now().toString());
-            db.collection("checkins").add(data);
-            System.out.println("Check-in data pushed to Firestore!");
-        } catch (Exception e) {
-            System.err.println("Failed to push check-in data to Firebase: " + e.getMessage());
-        }
-    }
-
     public void pushUserStatsData(UUID userId, String field, int newValue) {
         try {
             Map<String, Object> data = new HashMap<>();
@@ -302,5 +289,23 @@ public class FirebaseService {
         } catch (Exception e) {
             System.err.println("Exception while updating Firestore: " + e.getMessage());
         }
+    }
+    
+    public List<String> getReviewPictures(UUID reviewId) {
+        List<String> urls = new ArrayList<>();
+        try {
+            DocumentSnapshot doc = db.collection("reviews")
+                    .document(reviewId.toString())
+                    .get()
+                    .get();
+            if (doc.exists()) {
+                @SuppressWarnings("unchecked")
+                List<String> pics = (List<String>) doc.get("pictureUrl");
+                if (pics != null) urls = pics;
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting review pictures for " + reviewId + ": " + e.getMessage());
+        }
+        return urls;
     }
 }

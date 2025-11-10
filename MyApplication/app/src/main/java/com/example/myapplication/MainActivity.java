@@ -1,3 +1,4 @@
+// java
 package com.example.myapplication;
 
 import android.Manifest;
@@ -5,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -21,6 +23,9 @@ import com.example.myapplication.api.FirebaseMessagingApi;
 import com.example.myapplication.fragment.PersonalFragment;
 import com.example.myapplication.model.Place;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -34,7 +39,14 @@ public class MainActivity extends AppCompatActivity {
     private double userLat = 0.0;
     private double userLng = 0.0;
     private FusedLocationProviderClient fusedLocationClient;
+    private static final float LOCATION_UPDATE_THRESHOLD_METERS = 15f; // chỉ update khi di chuyển > 15m
+
+    private double lastLat = 0.0;
+    private double lastLng = 0.0;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1000;
+
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-
         // ====== KHỞI TẠO BUNDLE DÙNG CHUNG ======
         Bundle sharedBundle = new Bundle();
         sharedBundle.putString("jwtToken", jwtToken);
@@ -100,8 +111,45 @@ public class MainActivity extends AppCompatActivity {
         homeFragment.setArguments(sharedBundle);
         mapFragment.setArguments(sharedBundle);
         personalFragment.setArguments(sharedBundle);
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Setup location request and callback for real-time updates
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(5000) // set desired interval for active location updates
+                .setFastestInterval(2000);  // set fastest interval for location updates
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) return;
+                android.location.Location location = locationResult.getLastLocation();
+                if (location != null) {
+                    double newLat = location.getLatitude();
+                    double newLng = location.getLongitude();
+
+                    float[] results = new float[1];
+                    android.location.Location.distanceBetween(lastLat, lastLng, newLat, newLng, results);
+                    float distanceMoved = results[0];
+
+                    // chỉ update khi user di chuyển hơn 15m
+                    if (distanceMoved > LOCATION_UPDATE_THRESHOLD_METERS || lastLat == 0.0) {
+                        lastLat = newLat;
+                        lastLng = newLng;
+                        userLat = newLat;
+                        userLng = newLng;
+
+                        if (mapFragment instanceof MapFragment) {
+                            ((MapFragment) mapFragment).updateUserLocation(userLat, userLng);
+                        }
+                        if (homeFragment instanceof HomeFragment) {
+                            ((HomeFragment) homeFragment).updateUserLocation(userLat, userLng);
+                        }
+                    }
+                }
+            }
+        };
+
         checkLocationPermissionAndGetLocation();
 
         // Thêm Fragment vào Activity

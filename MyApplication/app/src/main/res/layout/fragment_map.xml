@@ -65,6 +65,15 @@
                     android:textSize="16sp" />
 
                 <ImageView
+                    android:id="@+id/ivClear"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_clear"
+                    android:padding="8dp"
+                    android:visibility="gone"
+                    app:tint="@android:color/white" />
+
+                <ImageView
                     android:id="@+id/imgAvatar"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
@@ -75,7 +84,32 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Tag filter -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/searchSuggestionsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@android:color/white">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="325dp"
+                android:paddingVertical="4dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSearchSuggestions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="always"
+                android:scrollbars="vertical"
+                android:background="@android:color/transparent"/>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Tag filter -->
         <HorizontalScrollView
             android:id="@+id/tagScrollView"
             android:layout_width="match_parent"

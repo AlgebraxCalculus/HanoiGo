@@ -5,10 +5,12 @@ package com.example.hanoiGo.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.hanoiGo.dto.request.CheckpointRequest;
@@ -29,9 +31,10 @@ public class CheckpointController {
     private final CheckpointService checkpointService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping("/enable-checkin")
+    @GetMapping("/enable-checkin")
     public ApiResponse<List<EnableCheckpointResponse>> enableCheckIn(
-            @Valid @RequestBody CheckpointRequest request,
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude,    
             @RequestHeader("Authorization") String authHeader) {
 
         // Lấy token từ header "Bearer <token>"
@@ -40,11 +43,8 @@ public class CheckpointController {
         // Lấy userId từ token
         UUID userId = jwtUtil.extractUserId(token);
 
-        // Gán userId vào request 
-        request.setUserId(userId);
-
         // Gọi service enable check-in
-        List<EnableCheckpointResponse> response = checkpointService.enableCheckIn(request);
+        List<EnableCheckpointResponse> response = checkpointService.enableCheckIn(userId, latitude, longitude);
 
         // Trả về kết quả API
         return ApiResponse.<List<EnableCheckpointResponse>>builder()
@@ -74,6 +74,25 @@ public class CheckpointController {
         return ApiResponse.<CheckpointResponse>builder()
                 .code(1000)
                 .message("Check-in địa điểm thành công")
+                .result(response)
+                .build();
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<List<CheckpointResponse>> getMyCheckpoints(
+        @RequestHeader("Authorization") String authHeader,
+        @RequestParam(required = false) String rating,
+        @RequestParam(required = false) String date,
+        @RequestParam(defaultValue = "all") String view
+    ) {
+        String token = jwtUtil.extractToken(authHeader);
+        UUID userId = jwtUtil.extractUserId(token);
+
+        List<CheckpointResponse> response = checkpointService.getListCheckpoint(userId, rating, date, view);
+
+        return ApiResponse.<List<CheckpointResponse>>builder()
+                .code(1000)
+                .message("Lấy danh sách check-in của người dùng thành công")
                 .result(response)
                 .build();
     }

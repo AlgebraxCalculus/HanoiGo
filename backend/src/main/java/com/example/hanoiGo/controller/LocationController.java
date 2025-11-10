@@ -69,14 +69,25 @@ public class LocationController {
     }
 
     // Lấy locationId theo address
-    @GetMapping("/get-id-by-address")
-    public ApiResponse<String> getLocationIdByAddress(
-        @RequestParam(value = "address") String address) {
-        String locationId = locationService.getLocationIdByAddress(address);
-        return ApiResponse.<String>builder()
+    @GetMapping("/get-detail-by-address")
+    public ApiResponse<LocationResponse> getDetailByLocationAddress(
+        @RequestParam(value = "address") String address
+    ) {
+        LocationResponse locationDetail = locationService.getLocationDetailByAddress(address);
+        return ApiResponse.<LocationResponse>builder()
                 .code(1000)
-                .message("Lấy locationId theo address thành công")
-                .result(locationId)
+                .message("Lấy thông tin chi tiết của location thành công")
+                .result(locationDetail)
+                .build();
+    }
+
+    @GetMapping("/search-autocomplete")
+    public ApiResponse<List<LocationResponse>> searchAutocomplete(@RequestParam String keyword) {
+        List<LocationResponse> results = locationService.searchAutocompleteByAddress(keyword);
+        return ApiResponse.<List<LocationResponse>>builder()
+                .code(1000)
+                .message("Lấy thông tin chi tiết của location thành công")
+                .result(results)
                 .build();
     }
 }

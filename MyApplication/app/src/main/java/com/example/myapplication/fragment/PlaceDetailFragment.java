@@ -40,7 +40,7 @@ public class PlaceDetailFragment extends Fragment {
 
     private CoordinatorLayout placeDetailContainer;
     private BottomSheetBehavior<View> bottomSheetBehavior;
-    private TextView placeTitle, tvRatingNumber, tvRatingMeta, placeAddress, overallDescription, locationText;
+    private TextView placeTitle, placeAddress, overallDescription, locationText;
     private RatingBar ratingBar;
     private MaterialButton btnDirections, btnSave, btnWriteReview;
     private EditText searchBar;
@@ -60,7 +60,6 @@ public class PlaceDetailFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
     @Nullable
     @Override
     public View onCreateView(
@@ -75,8 +74,6 @@ public class PlaceDetailFragment extends Fragment {
         rvReviews = view.findViewById(R.id.rvReviews);
         placeDetailContainer = view.findViewById(R.id.placeDetailContainer);
         placeTitle = view.findViewById(R.id.placeTitle);
-        tvRatingNumber = view.findViewById(R.id.tvRatingNumber);
-        tvRatingMeta = view.findViewById(R.id.tvRatingMeta);
         ratingBar = view.findViewById(R.id.ratingBar);
         placeAddress = view.findViewById(R.id.placeAddress);
         overallDescription = view.findViewById(R.id.overallDescription);
@@ -123,39 +120,15 @@ public class PlaceDetailFragment extends Fragment {
         // --- Lấy dữ liệu place từ bundle ---
         if (getArguments() != null) {
             placeData = (Place) getArguments().getSerializable("placeData");
-            if (placeData != null) {
-                if (placeData.getId() != null) {
-                    fetchPlaceDetail(placeData.getId());
-                } else if (placeData.getName() != null) {
-                    fetchLocationIdThenDetail(placeData.getAddress());
-                } else {
-                    Toast.makeText(getContext(), "Không có thông tin địa điểm", Toast.LENGTH_SHORT).show();
-                }
-            }
         }
+
+        fetchPlaceDetail(placeData.getAddress());
 
         return view;
     }
-    private void fetchLocationIdThenDetail(String address) {
-        LocationApi.GetLocationIdByAddress(address, requireContext(), new LocationApi.LocationIdCallback() {
-            @Override
-            public void onSuccess(String locationId) {
-                placeData.setId(locationId);
-                fetchPlaceDetail(locationId);
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Lấy ID thất bại: " + errorMessage, Toast.LENGTH_SHORT).show()
-                );
-            }
-        });
-    }
-
     // Gọi API chi tiết địa điểm
-    private void fetchPlaceDetail(String locationId) {
-        LocationApi.GetLocationByDetail(locationId, requireContext(), new LocationApi.LocationDetailCallback() {
+    private void fetchPlaceDetail(String address) {
+        LocationApi.GetLocationByDetail(address, requireContext(), new LocationApi.LocationDetailCallback() {
             @Override
             public void onSuccess(JSONObject result) {
                 requireActivity().runOnUiThread(() -> {
@@ -175,7 +148,7 @@ public class PlaceDetailFragment extends Fragment {
                         if (lat != 0 && lng != 0) {
                             Fragment parent = getParentFragment();
                             if (parent instanceof MapFragment) {
-                                ((MapFragment) parent).showMarker(lat, lng, result.optString("name", "Unknown Place"));
+                                ((MapFragment) parent).showMarker(lat, lng, result.optString("name", "Unknown Place"), true);
                             }
                         }
                         placeTitle.setText(result.optString("name", "Không có tên"));
@@ -222,15 +195,15 @@ public class PlaceDetailFragment extends Fragment {
         List<Review> reviews = List.of(
                 new Review("Minh Đỗ", "Local Guide • 24 reviews",
                         "Quán có không gian đẹp, đồ uống ổn, phục vụ nhiệt tình. Mình thích nhất là phần trang trí và nhạc nhẹ nhàng.",
-                        "2 days ago", 4, 32,
+                        "2 days ago", 4.5f, 32,
                         new int[]{R.drawable.review_sample_img1, R.drawable.review_sample_img2, R.drawable.review_sample_img3}),
                 new Review("Anh Phạm", "Traveler",
                         "Rất hài lòng, đồ ăn ngon, chỗ ngồi thoải mái. Giá hơi cao nhưng xứng đáng.",
-                        "1 week ago", 5, 21,
+                        "1 week ago", 5f, 21,
                         new int[]{R.drawable.review_sample_img4}),
                 new Review("Hà Lê", "Food Blogger",
                         "Không gian hơi ồn, nhưng đồ uống ngon, nhân viên thân thiện.",
-                        "3 weeks ago", 3, 10,
+                        "3 weeks ago", 3.5f, 10,
                         new int[]{})
         );
 

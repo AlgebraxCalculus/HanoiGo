@@ -359,9 +359,6 @@ public class HomeFragment extends Fragment {
         achievementList = new ArrayList<>();
 
         UserApi.GetMyAchievementList(jwt, "tier", "desc", getContext(), new UserApi.UserApiCallback() {
-            @Override
-            public void onSuccess(ArrayList<JSONObject> data) {
-                int num = 1;
                 String topAchievemnent = "";
                 for(JSONObject a : data){
                     try {
