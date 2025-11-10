@@ -20,6 +20,14 @@ public class Place implements Serializable {
         this.pictureURL = pictureURL;
     }
 
+    public Place(String name, String description, String distance, String pictureURL, String address) {
+        this.name = name;
+        this.description = description;
+        this.distance = distance;
+        this.pictureURL = pictureURL;
+        this.address = address;
+    }
+
     public String getId() {
         return id;
     }
