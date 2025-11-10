@@ -24,6 +24,8 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.BookmarkListSelectorAdapter;
 import com.example.myapplication.adapter.ImageAdapter;
 import com.example.myapplication.adapter.ReviewAdapter;
+import com.example.myapplication.api.BookmarkApi;
+import com.example.myapplication.api.CheckpointApi;
 import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
