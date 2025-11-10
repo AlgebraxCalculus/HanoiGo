@@ -80,6 +80,10 @@ public class LocationService {
                 return count2.compareTo(count1); // Sắp xếp giảm dần
             });
         }
+        if(locationIds.isEmpty()) {
+            return locationList;
+        }
+
         // Lấy thông tin location và khoảng cách từ API Goong
         for(String lcIds : locationIds) {
             LocationListResponse locationListResponse = new LocationListResponse();

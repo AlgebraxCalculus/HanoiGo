@@ -72,4 +72,7 @@ dependencies {
 
     // TextViewMoreLess for expandable text views
     implementation("com.github.colourmoon:readmore-textview:v1.0.2")
+
+    // MPAndroidChart for dashboard chart
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

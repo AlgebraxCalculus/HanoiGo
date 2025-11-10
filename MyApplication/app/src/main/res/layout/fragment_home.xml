@@ -863,13 +863,82 @@
                     android:text="Your current rank:"
                     android:textColor="@android:color/white"/>
 
+                <LinearLayout
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="8dp"
+                    android:background="@drawable/bg_rank_highlight"
+                    android:layout_marginBottom="6dp">
+
+                    <!-- Rank -->
+                    <TextView
+                        android:id="@+id/tvCurRankPosition"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        android:gravity="center" />
+
+                    <!-- Avatar -->
+                    <ImageView
+                        android:id="@+id/imgCurRankAvatar"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:scaleType="centerCrop"
+                        android:clipToOutline="true"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/bg_circle"/>
+
+                    <!-- Name -->
+                    <TextView
+                        android:id="@+id/tvCurRankUsername"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="TheHanoiEnjoyer"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <!-- Score -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/imgPointIcon"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@drawable/ic_point_user" />
+
+                        <TextView
+                            android:id="@+id/tvCurRankPoints"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@android:color/white"
+                            android:layout_marginStart="4dp"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewLeaderboard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
+                    android:layout_height="580dp"
                     android:overScrollMode="never"
+                    android:scrollbars="vertical"
+                    android:scrollbarThumbVertical="@android:color/darker_gray"
+                    android:fadeScrollbars="false"
+                    android:scrollbarSize="6dp"
+                    android:nestedScrollingEnabled="true"
                     android:paddingBottom="8dp" />
+
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

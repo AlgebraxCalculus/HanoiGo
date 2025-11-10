@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="view_filter_options">
+        <item>All</item>
+        <item>Review-only</item>
+        <item>No review</item>
+    </string-array>
+</resources>

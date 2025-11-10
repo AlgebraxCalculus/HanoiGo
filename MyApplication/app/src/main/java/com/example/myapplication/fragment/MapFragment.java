@@ -1,18 +1,6 @@
 package com.example.myapplication.fragment;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +22,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
-import com.example.myapplication.adapter.SearchSuggestionAdapter;
-import com.example.myapplication.api.CheckpointApi;
 import com.example.myapplication.model.Place;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -52,14 +38,6 @@ import com.mapbox.mapboxsdk.maps.Style;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.example.myapplication.api.LocationApi;
 
 public class MapFragment extends Fragment {
 
@@ -147,7 +125,7 @@ public class MapFragment extends Fragment {
                 });
                 // Nếu userLocation có sẵn, show marker user
                 if (userLocation != null) {
-                    showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here", false);
+                    showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here", false, false);
                 }
             });
         });

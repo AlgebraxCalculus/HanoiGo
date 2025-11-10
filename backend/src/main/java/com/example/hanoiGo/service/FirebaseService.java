@@ -14,7 +14,7 @@ import com.google.cloud.firestore.*;
 import lombok.RequiredArgsConstructor;
 import jakarta.annotation.PostConstruct;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -137,7 +137,7 @@ public class FirebaseService {
                             .map(Map.Entry::getKey)
                             .toList();
 
-            System.out.println("🔍 Changed fields: " + changedFields);
+            System.out.println(" Changed fields: " + changedFields);
             String userId = String.valueOf(after.get("userId"));
             User userEntity = userRepository.findUserById(UUID.fromString(userId)).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             List<String> unlockedIds = new ArrayList<>();
@@ -146,7 +146,7 @@ public class FirebaseService {
             for (String field : changedFields) {
                 int currentValue = ((Number) after.get(field)).intValue();
 
-                // 3️⃣ Lấy danh sách achievement có field trùng
+                // Lấy danh sách achievement có field trùng
                 ApiFuture<QuerySnapshot> future = db.collection("achievements")
                         .whereEqualTo("field", field)
                         .get();
@@ -161,7 +161,7 @@ public class FirebaseService {
                     }
                 }
             }
-            System.out.println("🔓 Unlocked achievement IDs: " + unlockedIds);
+            System.out.println(" Unlocked achievement IDs: " + unlockedIds);
             
             int achievementUnlockedCount = 0;
             List<UserAchievement> achievements = userAchievementRepository.findByUserId(UUID.fromString(userId));
@@ -189,7 +189,7 @@ public class FirebaseService {
 
                     // Thêm vào bảng user_achievements
                     userAchievementRepository.save(ua);
-                    System.out.println("✅ New achievement unlocked: " + unlockedIds.get(i));
+                    System.out.println(" New achievement unlocked: " + unlockedIds.get(i));
                 }
             }
             System.out.println("Total new achievements unlocked: " + achievementUnlockedCount);
@@ -197,7 +197,7 @@ public class FirebaseService {
             // Cập nhật lại achievement_count trong userStats
             if(achievementUnlockedCount > 0) pushUserStatsData(UUID.fromString(userId), "achievement_count", achievementUnlockedCount + ((Number) after.get("achievement_count")).intValue());
         } catch (Exception ex) {
-            System.err.println("⚠️ Error processing Firestore update: " + ex.getMessage());
+            System.err.println(" Error processing Firestore update: " + ex.getMessage());
         }
     }
 
@@ -239,5 +239,73 @@ public class FirebaseService {
         } catch (Exception e) {
             System.err.println("Exception while updating Firestore: " + e.getMessage());
         }
+    }
+
+    public void setupChartData(UUID userId) {
+        try {
+            List<Map<String, Object>> data = new ArrayList<>();
+            LocalDate today = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+            for(int i=6;i>=1;i--){
+                Map<String, Object> map = new HashMap<>();
+                map.put("date", today.minusDays(i).toString());
+                map.put("points", 0);
+                map.put("checkpoints", 0);
+                map.put("rank", userService.getMyRank(userRepository.findUserById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)).getUsername()));
+                data.add(map);
+            }
+
+            Map<String, Object> chartDoc = new HashMap<>();
+            chartDoc.put("data", data);
+
+            ApiFuture<WriteResult> future = db.collection("chartData")
+                    .document(userId.toString())
+                    .set(chartDoc);
+
+            // Chờ ghi xong và in thời gian cập nhật
+            WriteResult result = future.get();
+            System.out.println("User's chartData setup successfully at: " + result.getUpdateTime());
+        } catch (Exception e) {
+            System.err.println("Exception while updating Firestore: " + e.getMessage());
+        }
+    }
+
+    public void setupUserStats(UUID userId) {
+        try {
+            Map<String, Object> data = new HashMap<>();
+            data.put("userId", userId.toString());
+            data.put("points", 0);
+            data.put("checkin_count", 0);
+            data.put("most_likes", 0);
+            data.put("achievement_count", 0);
+            data.put("rank", userService.getMyRank(userRepository.findUserById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)).getUsername()));
+
+            ApiFuture<WriteResult> future = db.collection("userStats")
+                    .document(userId.toString())
+                    .set(data);
+
+            // Chờ ghi xong và in thời gian cập nhật
+            WriteResult result = future.get();
+            System.out.println("User's userStats setup successfully at: " + result.getUpdateTime());
+        } catch (Exception e) {
+            System.err.println("Exception while updating Firestore: " + e.getMessage());
+        }
+    }
+    
+    public List<String> getReviewPictures(UUID reviewId) {
+        List<String> urls = new ArrayList<>();
+        try {
+            DocumentSnapshot doc = db.collection("reviews")
+                    .document(reviewId.toString())
+                    .get()
+                    .get();
+            if (doc.exists()) {
+                @SuppressWarnings("unchecked")
+                List<String> pics = (List<String>) doc.get("pictureUrl");
+                if (pics != null) urls = pics;
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting review pictures for " + reviewId + ": " + e.getMessage());
+        }
+        return urls;
     }
 }

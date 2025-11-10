@@ -77,4 +77,23 @@ public class CheckpointController {
                 .result(response)
                 .build();
     }
+
+    @GetMapping("/me")
+    public ApiResponse<List<CheckpointResponse>> getMyCheckpoints(
+        @RequestHeader("Authorization") String authHeader,
+        @RequestParam(required = false) String rating,
+        @RequestParam(required = false) String date,
+        @RequestParam(defaultValue = "all") String view
+    ) {
+        String token = jwtUtil.extractToken(authHeader);
+        UUID userId = jwtUtil.extractUserId(token);
+
+        List<CheckpointResponse> response = checkpointService.getListCheckpoint(userId, rating, date, view);
+
+        return ApiResponse.<List<CheckpointResponse>>builder()
+                .code(1000)
+                .message("Lấy danh sách check-in của người dùng thành công")
+                .result(response)
+                .build();
+    }
 }

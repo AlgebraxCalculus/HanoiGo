@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class AuthApi {
-    private static final String BASE_URL = "http://192.168.50.50:8080/api/users";
+    private static final String BASE_URL = "http://192.168.100.135:8080/api/users";
 
     public static void loginWithFirebase(String firebaseToken, Context context, AuthApiCallback callback) {
         OkHttpClient client = new OkHttpClient();

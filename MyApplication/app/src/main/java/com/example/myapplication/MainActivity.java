@@ -20,6 +20,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.myapplication.fragment.HomeFragment;
 import com.example.myapplication.fragment.MapFragment;
 import com.example.myapplication.api.FirebaseMessagingApi;
+import com.example.myapplication.fragment.PersonalFragment;
 import com.example.myapplication.model.Place;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Fragment homeFragment;
     private Fragment mapFragment;
+    private Fragment personalFragment;
     private Fragment activeFragment;
 
     private double userLat = 0.0;
@@ -102,11 +104,12 @@ public class MainActivity extends AppCompatActivity {
         // Khởi tạo Fragment
         homeFragment = new HomeFragment();
         mapFragment = new MapFragment();
+        personalFragment = new PersonalFragment();
 
         // Truyền bundle vào cả 2 fragment
         homeFragment.setArguments(sharedBundle);
         mapFragment.setArguments(sharedBundle);
-
+        personalFragment.setArguments(sharedBundle);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Setup location request and callback for real-time updates
@@ -153,11 +156,15 @@ public class MainActivity extends AppCompatActivity {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.add(R.id.fragment_container, homeFragment, "HOME");
             transaction.add(R.id.fragment_container, mapFragment, "MAP").hide(mapFragment);
+            transaction.add(R.id.fragment_container, personalFragment, "PERSONAL").hide(personalFragment);
+            transaction.show(homeFragment);
+
             transaction.commit();
 
             activeFragment = homeFragment;
         }
 
+        //
         View btnMapFloat = findViewById(R.id.btnMapFloat);
         if (btnMapFloat != null) {
             btnMapFloat.setOnClickListener(v -> switchFragment(mapFragment));
@@ -167,6 +174,12 @@ public class MainActivity extends AppCompatActivity {
         View btnHomepage = findViewById(R.id.btnHomepage);
         if (btnHomepage != null) {
             btnHomepage.setOnClickListener(v -> switchFragment(homeFragment));
+        }
+
+        // ====== XỬ LÝ NÚT PERSONAL ======
+        View btnPersonal = findViewById(R.id.btnPersonal);
+        if (btnPersonal != null) {
+            btnPersonal.setOnClickListener(v -> switchFragment(personalFragment));
         }
     }
 
@@ -285,3 +298,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

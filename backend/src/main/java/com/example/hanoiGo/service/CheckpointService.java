@@ -23,6 +23,7 @@ import com.example.hanoiGo.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -133,5 +134,72 @@ public class CheckpointService {
         ReviewResponse reviewRes = null; // no review on check-in
         CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, reviewRes);
         return resp;
+    }
+
+    public List<CheckpointResponse> getListCheckpoint(UUID userId, String rating, String date, String view) {
+        return getMyCheckpoints(userId, rating, date, view);
+    }
+
+    public List<CheckpointResponse> getMyCheckpoints(
+        UUID userId,
+        String rating,
+        String date,
+        String view
+    ) {
+        User user = userRepository.findUserById(userId)
+            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        List<Checkpoint> checkpoints = checkpointRepository.findByUserId(user.getId());
+
+        List<CheckpointResponse> responses = new ArrayList<>();
+        
+        for(Checkpoint cp : checkpoints) {
+            LocationResponse locationRes = locationMapper.toLocationResponse(cp.getLocation());
+
+            ReviewResponse reviewRes = null;
+            Optional<Review> reviewOpt = reviewRepository.findByUserIdAndLocationId(user.getId(), cp.getLocation().getId());
+            if (reviewOpt.isPresent()) {
+                Review review = reviewOpt.get();
+                reviewRes = ReviewResponse.builder()
+                        .userResponse(userService.getUserById(user.getId()))
+                        .rating(review.getRating())
+                        .createdAt(review.getCreatedAt())
+                        .content(review.getContent()) 
+                        .pictureUrl(firebaseService.getReviewPictures(review.getId()))
+                        .build();           
+            }
+
+            CheckpointResponse resp = checkpointMapper.toCheckpointResponse(cp, locationRes, reviewRes);
+            responses.add(resp);
+        }
+
+        if("reviewed".equalsIgnoreCase(view) || rating != null || date != null) {
+            responses = responses.stream()
+                .filter(r -> r.getReview() != null)
+                .toList();
+        } else if ("unreviewed".equalsIgnoreCase(view)) {
+            responses = responses.stream()
+                .filter(r -> r.getReview() == null)
+                .toList();
+        }
+
+        if ("best".equalsIgnoreCase(rating)) {
+            responses = responses.stream()
+                    .sorted((a,b) -> Integer.compare(b.getReview().getRating(),a.getReview().getRating()))
+                    .toList();
+        } else if ("worst".equalsIgnoreCase(rating)) {
+            responses = responses.stream()
+                    .sorted((a,b) -> Integer.compare(a.getReview().getRating(),b.getReview().getRating()))
+                    .toList();
+        } else if ("newest".equalsIgnoreCase(date)) {
+            responses = responses.stream()
+                    .sorted((a,b) -> b.getCheckedInTime().compareTo(a.getCheckedInTime()))
+                    .toList();
+        } else if ("oldest".equalsIgnoreCase(date)) {
+            responses = responses.stream()
+                    .sorted((a,b) -> a.getCheckedInTime().compareTo(b.getCheckedInTime()))
+                    .toList();
+        }
+        return responses;
     }
 }
