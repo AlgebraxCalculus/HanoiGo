@@ -163,7 +163,6 @@ public class PersonalFragment extends Fragment {
         setupUserData(() -> {
             if(activeFragment == progressFragment) ((ProgressFragment) progressFragment).setupChartData(jwtToken);
             else if(activeFragment == achievementsFragment) ((AchievementsFragment) achievementsFragment).setupAchievementData(jwtToken, "tier", "desc");
-            else if(activeFragment == checkpointsFragment) ((CheckpointsFragment) checkpointsFragment).setupCheckpointData(jwtToken, "earned_at", "desc");
         });
     }
 
