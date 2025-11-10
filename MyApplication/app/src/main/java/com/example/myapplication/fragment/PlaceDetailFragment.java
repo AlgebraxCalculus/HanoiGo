@@ -45,7 +45,6 @@ public class PlaceDetailFragment extends Fragment {
     private CoordinatorLayout placeDetailContainer;
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private TextView placeTitle, placeAddress, overallDescription, locationText;
-    private TextView placeTitle, placeAddress, overallDescription, locationText;
     private RatingBar ratingBar;
     private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckin;
     private EditText searchBar;
@@ -167,8 +166,6 @@ public class PlaceDetailFragment extends Fragment {
     }
 
     // Gọi API chi tiết địa điểm
-    private void fetchPlaceDetail(String address) {
-        LocationApi.GetLocationByDetail(address, requireContext(), new LocationApi.LocationDetailCallback() {
     private void fetchPlaceDetail(String address) {
         LocationApi.GetLocationByDetail(address, requireContext(), new LocationApi.LocationDetailCallback() {
             @Override

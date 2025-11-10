@@ -338,19 +338,30 @@ public class HomeFragment extends Fragment {
         achievementList = new ArrayList<>();
 
         UserApi.GetMyAchievementList(jwt, "tier", "desc", getContext(), new UserApi.UserApiCallback() {
-                String topAchievemnent = "";
-                for(JSONObject a : data){
+            @Override
+            public void onSuccess(JSONArray data) {
+                String topAchievement = "";
+                int num = 1;
+
+                for (int i = 0; i < data.length(); i++) {
                     try {
-                        if(num == 1) topAchievemnent = a.getString("name");
-                        if(num>3) break;
-                        achievementList.add(new Achievement(a.getString("name"), a.getString("description"), "Tier "+a.getString("tier"), R.drawable.ic_medal));
+                        JSONObject a = data.getJSONObject(i);
+                        if (num == 1) topAchievement = a.getString("name");
+                        if (num > 3) break;
+
+                        achievementList.add(new Achievement(
+                                a.getString("name"),
+                                a.getString("description"),
+                                "Tier " + a.getString("tier"),
+                                R.drawable.ic_medal
+                        ));
                         num++;
-                    }catch (JSONException e){
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-//                System.out.println("listAchievemnent: "+achievementList);
-                String FinalTopAchievement = topAchievemnent;
+
+                String finalTopAchievement = topAchievement;
                 requireActivity().runOnUiThread(() -> {
                     if (achievementList == null || achievementList.isEmpty()) {
                         recyclerAchievements.setVisibility(View.GONE);
@@ -359,26 +370,31 @@ public class HomeFragment extends Fragment {
                         recyclerAchievements.setVisibility(View.VISIBLE);
                         layoutNoAchievements.setVisibility(View.GONE);
                     }
-                    tvTopAchievement.setText(FinalTopAchievement);
-                    tvAchieveCount.setText(String.valueOf(data.size()));
+
+                    tvTopAchievement.setText(finalTopAchievement);
+                    tvAchieveCount.setText(String.valueOf(data.length()));
+
                     achievementAdapter = new AchievementAdapter(requireContext(), achievementList);
                     recyclerAchievements.setAdapter(achievementAdapter);
                 });
             }
 
             @Override
-            public void onSuccess(JSONObject userObj) {}
+            public void onSuccess(JSONObject userObj) {
+                // Không dùng trong hàm này
+            }
 
             @Override
             public void onFailure(String errorMessage) {
                 requireActivity().runOnUiThread(() -> {
                     recyclerAchievements.setVisibility(View.GONE);
                     layoutNoAchievements.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), "fetch achievement list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Fetch achievement list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
                 });
             }
         });
     }
+
 
     private void setupLeaderboardData() {
         leaderboardList = new ArrayList<>();
