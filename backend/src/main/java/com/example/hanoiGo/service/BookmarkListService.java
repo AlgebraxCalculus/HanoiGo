@@ -38,6 +38,7 @@ public class BookmarkListService {
         BookmarkList bookmarkList = new BookmarkList();
         bookmarkList.setUser(user);
         bookmarkList.setName(request.getName());
+        bookmarkList.setIcon(request.getIcon() != null ? request.getIcon() : "bookmark");
 
         BookmarkList saved = bookmarkListRepository.save(bookmarkList);
 
@@ -68,6 +69,7 @@ public class BookmarkListService {
         return BookmarkListResponse.builder()
                 .id(bookmarkList.getId())
                 .name(bookmarkList.getName())
+                .icon(bookmarkList.getIcon())
                 .bookmarkCount(bookmarkList.getBookmarks() != null ? bookmarkList.getBookmarks().size() : 0)
                 .build();
     }
