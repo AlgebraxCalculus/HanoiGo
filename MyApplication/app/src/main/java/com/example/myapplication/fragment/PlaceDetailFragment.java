@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.ImageAdapter;
 import com.example.myapplication.adapter.ReviewAdapter;
+import com.example.myapplication.api.CheckpointApi;
 import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
@@ -42,7 +43,7 @@ public class PlaceDetailFragment extends Fragment {
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private TextView placeTitle, placeAddress, overallDescription, locationText;
     private RatingBar ratingBar;
-    private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckpoint;
+    private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckin;
     private EditText searchBar;
     private ImageView actionButton, btnClose;
     private LinearLayout tagContainer;
@@ -52,13 +53,20 @@ public class PlaceDetailFragment extends Fragment {
     private RecyclerView rvPlacePhotos;
     private RecyclerView rvReviews;
 
+    private String username = "default";
+    private String avatar = "";
+    private String jwtToken = "";
+
     public PlaceDetailFragment() {}
 
-    public static PlaceDetailFragment newInstance(Place place, ArrayList<JSONObject> checkpoints) {
+    public static PlaceDetailFragment newInstance(Place place, ArrayList<JSONObject> checkpoints, String jwtToken, String username, String avatar) {
         PlaceDetailFragment fragment = new PlaceDetailFragment();
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
         args.putSerializable("availableCheckpoints", checkpoints);
+        args.putString("jwtToken", jwtToken);
+        args.putString("username", username);
+        args.putString("avatar", avatar);
         fragment.setArguments(args);
         return fragment;
     }
@@ -81,7 +89,7 @@ public class PlaceDetailFragment extends Fragment {
         placeAddress = view.findViewById(R.id.placeAddress);
         overallDescription = view.findViewById(R.id.overallDescription);
         locationText = view.findViewById(R.id.locationText);
-        btnCheckpoint = view.findViewById(R.id.btnCheckpoint);
+        btnCheckin = view.findViewById(R.id.btnCheckin);
         btnDirections = view.findViewById(R.id.btnDirections);
         btnSave = view.findViewById(R.id.btnSave);
         btnWriteReview = view.findViewById(R.id.btnWriteReview);
@@ -125,12 +133,36 @@ public class PlaceDetailFragment extends Fragment {
         if (getArguments() != null) {
             placeData = (Place) getArguments().getSerializable("placeData");
             availableCheckpoints = (ArrayList<JSONObject>) getArguments().getSerializable("availableCheckpoints");
+            jwtToken = getArguments().getString("jwtToken");
+            username = getArguments().getString("username");
+            avatar = getArguments().getString("avatar");
+        }
+
+        if (placeData != null && availableCheckpoints != null) {
+            boolean isCheckpointAvailable = checkAddressInCheckpoints(placeData.getAddress(), availableCheckpoints);
+            btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
         }
 
         fetchPlaceDetail(placeData.getAddress());
 
         return view;
     }
+
+    private boolean checkAddressInCheckpoints(String address, ArrayList<JSONObject> checkpointList) {
+        if (address == null || checkpointList == null) return false;
+
+        for (JSONObject checkpoint : checkpointList) {
+            JSONObject location = checkpoint.optJSONObject("locationResponse");
+            if (location != null) {
+                String checkpointAddress = location.optString("address", "");
+                if (checkpointAddress.equalsIgnoreCase(address)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Gọi API chi tiết địa điểm
     private void fetchPlaceDetail(String address) {
         LocationApi.GetLocationByDetail(address, requireContext(), new LocationApi.LocationDetailCallback() {
@@ -241,6 +273,34 @@ public class PlaceDetailFragment extends Fragment {
             } else {
                 Toast.makeText(getContext(), "Searching reviews for: " + query, Toast.LENGTH_SHORT).show();
             }
+        });
+
+        btnCheckin.setOnClickListener(v -> {
+            if (placeData == null || placeData.getAddress() == null) {
+                Toast.makeText(getContext(), "No address available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (jwtToken == null || jwtToken.isEmpty()) {
+                Toast.makeText(getContext(), "You need to log in before checking in", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Gọi API Check-in
+            CheckpointApi.CheckIn(jwtToken, placeData.getAddress(), getContext(), new CheckpointApi.CheckpointApiCallback() {
+                @Override
+                public void onSuccess(ArrayList<JSONObject> resultList) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Check-in successful!", Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Check-in failed: " + errorMessage, Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
         });
 
         // Gắn sự kiện cho tag filter

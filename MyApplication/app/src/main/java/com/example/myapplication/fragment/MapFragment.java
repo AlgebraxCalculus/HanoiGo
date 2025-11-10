@@ -295,7 +295,8 @@ public class MapFragment extends Fragment {
 
     // Mở chi tiết địa điểm
     public void openPlaceDetailFragment(Place place) {
-        PlaceDetailFragment detailFragment = PlaceDetailFragment.newInstance(place, checkpointList);
+        PlaceDetailFragment detailFragment =
+                PlaceDetailFragment.newInstance(place, checkpointList, jwtToken, username, avatar);
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
         args.putString("jwtToken", jwtToken);
