@@ -22,5 +22,6 @@ public class BookmarkResponse {
     private String defaultPicture;
     private double latitude;
     private double longitude;
+    private String description;
     private LocalDateTime bookmarkedAt;
 }

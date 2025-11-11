@@ -156,6 +156,7 @@ public class LocationApi {
         });
     }
 
+
     // Callback interface
     public interface LocationApiCallback {
         void onSuccess(ArrayList<JSONObject> locationList);

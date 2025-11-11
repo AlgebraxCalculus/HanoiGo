@@ -15,19 +15,18 @@ import com.example.hanoiGo.mapper.CheckpointMapper;
 import com.example.hanoiGo.mapper.LocationMapper;
 import com.example.hanoiGo.model.Checkpoint;
 import com.example.hanoiGo.model.LocationDetail;
-import com.example.hanoiGo.model.User;
 import com.example.hanoiGo.model.Review;
+import com.example.hanoiGo.model.User;
 import com.example.hanoiGo.repository.CheckpointRepository;
 import com.example.hanoiGo.repository.LocationDetailRepository;
-import com.example.hanoiGo.repository.UserRepository;
 import com.example.hanoiGo.repository.ReviewRepository;
-import com.example.hanoiGo.service.FirebaseService;
+import com.example.hanoiGo.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,13 +36,13 @@ public class CheckpointService {
 
     private final LocationDetailRepository locationDetailRepository;
     private final CheckpointRepository checkpointRepository;
+    private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final LocationService locationService;
     private final UserService userService;
     private final CheckpointMapper checkpointMapper;
     private final LocationMapper locationMapper;
     private final FirebaseService firebaseService;
-    private final ReviewRepository reviewRepository;
 
     // Get list of locations eligible for check-in
     public List<EnableCheckpointResponse> enableCheckIn(UUID userId, Double userLatitude, Double userLongitude) {
@@ -65,11 +64,11 @@ public class CheckpointService {
         List<EnableCheckpointResponse> enableCheckpoints = new ArrayList<>();
 
         for (LocationListResponse locRes : locationListResponses) {
-            LocationResponse location = locRes.getLocationResponse();
+            LocationResponse locationResponse = locRes.getLocationResponse();
             int distance = locRes.getDistanceValue();
-            if (distance > 100) break;
+            if (distance > 10000) break;
 
-            LocationDetail detail = locationDetailRepository.findByAddress(location.getAddress()).orElse(null);
+            LocationDetail detail = locationDetailRepository.findByAddress(locationResponse.getAddress()).orElse(null);
             if (detail == null) continue;
 
             boolean alreadyChecked = checkpointRepository.existsByUserIdAndLocationId(
@@ -103,7 +102,7 @@ public class CheckpointService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Load location detail by id from request
-        LocationDetail loc = locationDetailRepository.findById(request.getLocationId())
+        LocationDetail loc = locationDetailRepository.findByAddress(request.getLocationAddress())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
         // Add points for check-in
         int addedPoints = 3;
@@ -115,6 +114,15 @@ public class CheckpointService {
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setUser(userEntity);
         checkpoint.setLocation(loc);
+        checkpoint.setCheckedInTime(LocalDateTime.now());
+        checkpointRepository.save(checkpoint);
+
+        // Push updated points to Firestore userStats
+        try {
+            firebaseService.pushUserStatsData(userEntity.getId(), "points", newPoints);
+        } catch (Exception ex) {
+            System.err.println("Failed to push user stats to Firestore: " + ex.getMessage());
+        }
 
         // Send FCM notification
         String fcm = userEntity.getFcmToken();

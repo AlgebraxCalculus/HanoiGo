@@ -145,6 +145,26 @@
         android:orientation="vertical"
         android:gravity="center">
 
+        <!-- Checkpoint button -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnCheckpoint"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="26dp"
+            app:cardBackgroundColor="#001A2E"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_checkpoint"
+                app:tint="#FFFFFF" />
+        </androidx.cardview.widget.CardView>
+
         <!-- Bookmark button -->
         <androidx.cardview.widget.CardView
             android:id="@+id/btnBookmark"

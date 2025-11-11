@@ -6,13 +6,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +35,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.SearchSuggestionAdapter;
+import com.example.myapplication.api.CheckpointApi;
+import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.model.Place;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -53,11 +55,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.example.myapplication.api.LocationApi;
 
 public class MapFragment extends Fragment {
 
@@ -66,7 +67,7 @@ public class MapFragment extends Fragment {
     private LatLng userLocation;
     private Marker userMarker;
 
-    private View btnBookmark, btnCompass, btnNavigate;
+    private CardView btnCheckpoint, btnBookmark, btnCompass, btnNavigate;
     private String username = "default";
     private ImageView imgAvatar;
     private String avatar = "";
@@ -77,12 +78,8 @@ public class MapFragment extends Fragment {
 
     private CardView searchSuggestionsCard;
     private TextWatcher textWatcher;
-    private static final Map<String, Integer> iconMap = new HashMap<String, Integer>() {{
-        put("Iconic", R.drawable.ic_tag_iconic);
-        put("Cuisine", R.drawable.ic_tag_cuisine);
-        put("Entertaining", R.drawable.ic_tag_entertaining);
-        put("Culture", R.drawable.ic_tag_culture);
-    }};
+
+    private ArrayList<JSONObject> checkpointList = new ArrayList<>();
 
     private final Map<Marker, JSONObject> markerMap = new HashMap<>();
 
@@ -163,20 +160,38 @@ public class MapFragment extends Fragment {
         loadChildFragment(exploreFragment);
 
         // Button
+        btnCheckpoint = view.findViewById(R.id.btnCheckpoint);
         btnBookmark = view.findViewById(R.id.btnBookmark);
         btnCompass = view.findViewById(R.id.btnCompass);
         btnNavigate = view.findViewById(R.id.btnNavigate);
 
-        btnBookmark.setOnClickListener(v -> loadChildFragment(new BookmarkFragment()));
-        btnCompass.setOnClickListener(v -> loadChildFragment(exploreFragment));
+        List<CardView> allButtons = Arrays.asList(btnCheckpoint, btnBookmark, btnCompass, btnNavigate);
 
-        btnNavigate.setOnClickListener(v -> {
-            if (userLocation != null && map != null) {
-                showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here", true);
-            } else {
-                Toast.makeText(requireContext(), "User location unavailable", Toast.LENGTH_SHORT).show();
+        View.OnClickListener buttonClickListener = v -> {
+            setActiveButton((CardView) v);
+            // Xóa marker cũ nếu có
+            for (Marker m : new ArrayList<>(markerMap.keySet())) {
+                m.remove();
             }
-        });
+            markerMap.clear();
+            if (v == btnBookmark) {
+                loadChildFragment(new BookmarkFragment());
+            } else if (v == btnCompass) {
+                loadChildFragment(exploreFragment);
+            } else if (v == btnNavigate) {
+                if (userLocation != null && map != null) {
+                    showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here", true);
+                } else {
+                    Toast.makeText(requireContext(), "User location unavailable", Toast.LENGTH_SHORT).show();
+                }
+            } else if (v == btnCheckpoint) {
+                fetchCheckpoints();
+            }
+        };
+
+        for (CardView btn : allButtons) {
+            btn.setOnClickListener(buttonClickListener);
+        }
         // Search autocomplete
         EditText searchBar = view.findViewById(R.id.searchBar);
         ImageView ivClear = view.findViewById(R.id.ivClear);
@@ -190,6 +205,86 @@ public class MapFragment extends Fragment {
         return view;
     }
 
+    private void fetchCheckpoints() {
+        CheckpointApi.GetEnableCheckIn(userLocation.getLatitude(), userLocation.getLongitude(), jwtToken, getContext(), new CheckpointApi.CheckpointApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> list) {
+                requireActivity().runOnUiThread(() -> {
+                    checkpointList.clear();
+                    checkpointList.addAll(list);
+                    // Thêm marker mới
+                    for (JSONObject checkpoint : checkpointList) {
+                        try {
+                            JSONObject location = checkpoint.optJSONObject("locationResponse");
+                            if (location == null) continue;
+
+                            double cLat = location.optDouble("latitude", 0);
+                            double cLng = location.optDouble("longitude", 0);
+                            showLocationMarker(cLat, cLng, checkpoint, false);
+
+                        } catch (Exception e) {
+                            Log.e("MapFragment", "Lỗi parse checkpoint: " + e.getMessage());
+                        }
+                    }
+
+                    // Zoom về vùng hiển thị đầu tiên nếu có ít nhất 1 checkpoint
+                    if (!checkpointList.isEmpty()) {
+                        try {
+                            List<LatLng> allPoints = new ArrayList<>();
+
+                            for (JSONObject checkpoint : checkpointList) {
+                                JSONObject location = checkpoint.optJSONObject("locationResponse");
+                                if (location == null) continue;
+
+                                double lat = location.optDouble("latitude", 0);
+                                double lng = location.optDouble("longitude", 0);
+                                allPoints.add(new LatLng(lat, lng));
+                            }
+
+                            if (!allPoints.isEmpty()) {
+                                LatLngBounds bounds = LatLngBounds.from(
+                                        getMaxLat(allPoints), getMaxLng(allPoints),
+                                        getMinLat(allPoints), getMinLng(allPoints)
+                                );
+                                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 80));
+                            }
+
+                        } catch (Exception e) {
+                            Log.e("MapFragment", "Zoom bounds error: " + e.getMessage());
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() ->
+                        Log.e("MapFragment", "Checkpoint API error: " + errorMessage)
+                );
+            }
+        });
+    }
+
+    private void setActiveButton(CardView activeButton) {
+        int activeColor = Color.parseColor("#007AFF");
+        int inactiveColor = Color.parseColor("#001A2E");
+        // Reset tất cả button về màu mặc định
+        List<CardView> allButtons = Arrays.asList(btnCheckpoint, btnBookmark, btnCompass, btnNavigate);
+        for (CardView btn : allButtons) {
+            btn.setCardBackgroundColor(inactiveColor);
+            ImageView icon = (ImageView) btn.getChildAt(0);
+            if (icon != null) {
+                icon.setColorFilter(Color.WHITE);
+            }
+        }
+        activeButton.setCardBackgroundColor(activeColor);
+
+        ImageView icon = (ImageView) activeButton.getChildAt(0);
+        if (icon != null) {
+            icon.setColorFilter(Color.parseColor("#FFFFFF"));
+        }
+    }
+
     // Load fragment con
     private void loadChildFragment(Fragment fragment) {
         getChildFragmentManager().beginTransaction()
@@ -199,7 +294,8 @@ public class MapFragment extends Fragment {
 
     // Mở chi tiết địa điểm
     public void openPlaceDetailFragment(Place place) {
-        PlaceDetailFragment detailFragment = PlaceDetailFragment.newInstance(place);
+        PlaceDetailFragment detailFragment =
+                PlaceDetailFragment.newInstance(place, checkpointList, jwtToken, username, avatar);
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
         args.putString("jwtToken", jwtToken);
@@ -218,7 +314,7 @@ public class MapFragment extends Fragment {
                 .replace(R.id.childFragmentContainer, detailFragment)
                 .addToBackStack(null)
                 .commit();
-
+        fadeOut(btnCheckpoint);
         fadeOut(btnBookmark);
         fadeOut(btnCompass);
         fadeOut(btnNavigate);
@@ -230,6 +326,7 @@ public class MapFragment extends Fragment {
 
     // Đóng chi tiết địa điểm và hiện lại nút
     public void onPlaceDetailClosed() {
+        fadeIn(btnCheckpoint);
         fadeIn(btnBookmark);
         fadeIn(btnCompass);
         fadeIn(btnNavigate);
@@ -277,103 +374,129 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void showLocationMarkerWithEmoji(double lat, double lng, String type, JSONObject placeData) {
-        if (map == null) return;
+    public void showLocationMarker(double lat, double lng, JSONObject placeData, boolean zoom) {
+        if (map == null || !isAdded()) return;
         LatLng position = new LatLng(lat, lng);
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        View iconView = inflater.inflate(R.layout.item_location_marker, null);
 
-        int emojiRes = iconMap.getOrDefault(type, R.drawable.ic_tag_iconic);
-        ImageView iv = iconView.findViewById(R.id.ivEmoji);
-        iv.setImageResource(emojiRes);
+        // Lấy tên: ưu tiên locationResponse.name, nếu không có thì dùng placeData.name
+        String name = "";
+        if (placeData != null) {
+            JSONObject locationResponse = placeData.optJSONObject("locationResponse");
+            if (locationResponse != null) {
+                name = locationResponse.optString("name", "");
+            }
+        }
 
-        // --- Đo layout và vẽ thành bitmap ---
-        int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        iconView.measure(spec, spec);
-        iconView.layout(0, 0, iconView.getMeasuredWidth(), iconView.getMeasuredHeight());
+        // Kiểm tra đã có marker tại vị trí này chưa (tránh trùng lặp)
+        final double EPS = 1e-5;
+        Marker existing = null;
+        for (Marker m : map.getMarkers()) {
+            LatLng p = m.getPosition();
+            if (Math.abs(p.getLatitude() - lat) < EPS && Math.abs(p.getLongitude() - lng) < EPS) {
+                existing = m;
+                break;
+            }
+        }
 
-        Bitmap iconBitmap = Bitmap.createBitmap(iconView.getMeasuredWidth(), iconView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-        Canvas iconCanvas = new Canvas(iconBitmap);
-        iconView.draw(iconCanvas);
+        // Nếu đã tồn tại marker tại vị trí này
+        if (existing != null) {
+            // Cập nhật dữ liệu vào markerMap để sử dụng khi click
+            if (placeData != null) {
+                markerMap.put(existing, placeData);
+            }
 
-        JSONObject locationResponse = placeData.optJSONObject("locationResponse");
-        String name = (locationResponse != null) ? locationResponse.optString("name", "") : "";
+            if (zoom) {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+            }
+            return;
+        }
 
-        // --- Thiết lập Paint để vẽ text ---
+        // Tạo mới nếu chưa có marker tại vị trí này
+        Bitmap iconBitmap = BitmapFactory.decodeResource(requireContext().getResources(), R.drawable.ic_tag_marker);
+
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(Color.parseColor("#1E90FF"));
-        textPaint.setTextSize(50f);
+        textPaint.setTextSize(40f);
         textPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.BOLD));
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setShadowLayer(5f, 0f, 0f, Color.WHITE);
 
-        // --- Xử lý text nhiều dòng ---
-        int maxTextWidth = 350;
+        // Xử lý text nhiều dòng
+        int maxTextWidth = 300;
         List<String> lines = new ArrayList<>();
+        if (name == null) name = "";
         String[] words = name.split(" ");
-        StringBuilder line = new StringBuilder();
-        for (String word : words) {
-            String testLine = line.length() == 0 ? word : line + " " + word;
+        StringBuilder lineBuilder = new StringBuilder();
+        for (String w : words) {
+            String testLine = lineBuilder.length() == 0 ? w : lineBuilder + " " + w;
             if (textPaint.measureText(testLine) > maxTextWidth) {
-                lines.add(line.toString());
-                line = new StringBuilder(word);
+                lines.add(lineBuilder.toString());
+                lineBuilder = new StringBuilder(w);
             } else {
-                line = new StringBuilder(testLine);
+                lineBuilder = new StringBuilder(testLine);
             }
         }
-        if (line.length() > 0) lines.add(line.toString());
+        if (lineBuilder.length() > 0) lines.add(lineBuilder.toString());
 
-        // --- Tính chiều cao tổng thể ---
-        Paint.FontMetrics fontMetrics = textPaint.getFontMetrics();
-        float lineHeight = fontMetrics.bottom - fontMetrics.top + 10;
+        int iconSizePx = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 35, requireContext().getResources().getDisplayMetrics());
+        Bitmap scaledIcon = Bitmap.createScaledBitmap(iconBitmap, iconSizePx, iconSizePx, true);
+
+        // Tính kích thước tổng thể
+        Paint.FontMetrics fm = textPaint.getFontMetrics();
+        float lineHeight = fm.bottom - fm.top + 10;
         int textHeight = (int) (lines.size() * lineHeight);
-        int textPadding = 20;
-        int iconTextSpacing = 20;
-        int totalWidth = Math.max(iconBitmap.getWidth(), maxTextWidth + textPadding * 2);
-        int totalHeight = iconBitmap.getHeight() + iconTextSpacing + textHeight + textPadding;
+        int textPadding = 15, iconTextSpacing = 35;
+
+        int totalWidth = Math.max(iconSizePx, maxTextWidth + textPadding * 2);
+        int totalHeight = iconSizePx + iconTextSpacing + textHeight + textPadding;
 
         Bitmap combined = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(combined);
 
-        int iconX = (totalWidth - iconBitmap.getWidth()) / 2;
-        canvas.drawBitmap(iconBitmap, iconX, 0, null);
+        // Vẽ icon và chữ lên canvas
+        int iconX = (totalWidth - iconSizePx) / 2;
+        canvas.drawBitmap(scaledIcon, iconX, 0, null);
 
-        // Vẽ nền chữ
         float textX = totalWidth / 2f;
-        float textYStart = iconBitmap.getHeight() + iconTextSpacing;
-        float bgLeft = textX - maxTextWidth / 2f - textPadding;
+        float textYStart = iconSizePx + iconTextSpacing;
+        float currentTextWidth = 0;
+        for (String l : lines) currentTextWidth = Math.max(currentTextWidth, textPaint.measureText(l));
+
+        float bgLeft = textX - (currentTextWidth / 2f) - textPadding;
+        float bgRight = textX + (currentTextWidth / 2f) + textPadding;
         float bgTop = textYStart - textPadding;
-        float bgRight = textX + maxTextWidth / 2f + textPadding;
         float bgBottom = textYStart + textHeight + textPadding;
 
-        // Vẽ hình chữ nhật bo góc làm nền
         Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bgPaint.setColor(Color.WHITE);
         bgPaint.setStyle(Paint.Style.FILL);
-        bgPaint.setShadowLayer(8f, 0f, 0f, Color.GRAY);
-        canvas.drawRoundRect(new RectF(bgLeft, bgTop, bgRight, bgBottom), 18f, 18f, bgPaint);
+        bgPaint.setShadowLayer(6f, 0f, 0f, Color.GRAY);
+        canvas.drawRoundRect(new RectF(bgLeft, bgTop, bgRight, bgBottom), 16f, 16f, bgPaint);
 
-        float y = textYStart - fontMetrics.top;
+        float y = textYStart - fm.top;
         for (String l : lines) {
             canvas.drawText(l, textX, y, textPaint);
             y += lineHeight;
         }
 
-        int scaledWidth = (int) (combined.getWidth() * 0.6);
-        int scaledHeight = (int) (combined.getHeight() * 0.6);
-        Bitmap finalBitmap = Bitmap.createScaledBitmap(combined, scaledWidth, scaledHeight, true);
-
+        // Tạo marker
         IconFactory iconFactory = IconFactory.getInstance(requireContext());
-        Icon icon = iconFactory.fromBitmap(finalBitmap);
+        Icon icon = iconFactory.fromBitmap(combined);
 
         Marker marker = map.addMarker(new MarkerOptions()
                 .position(position)
                 .icon(icon)
                 .title(name));
 
-        markerMap.put(marker, placeData);
-    }
+        if (placeData != null) {
+            markerMap.put(marker, placeData);
+        }
 
+        if (zoom) {
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+        }
+    }
 
     private void setupTagClicks() {
         for (int i = 0; i < tagContainer.getChildCount(); i++) {
@@ -504,12 +627,7 @@ public class MapFragment extends Fragment {
                 LatLng pos = new LatLng(lat, lng);
                 allPoints.add(pos);
 
-                JSONArray tagsArray = locationResponse.optJSONArray("tags");
-                String type = (tagsArray != null && tagsArray.length() > 0)
-                        ? tagsArray.optString(0)
-                        : "Iconic";
-
-                showLocationMarkerWithEmoji(lat, lng, type, loc);
+                showLocationMarker(lat, lng, loc, false);
 
             } catch (Exception e) {
                 e.printStackTrace();

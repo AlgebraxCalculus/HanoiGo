@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // Lấy token thủ công
                     String token = task.getResult();
                     Log.d("FCM", "Manual fetched token: " + token);
 
@@ -165,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
             activeFragment = homeFragment;
         }
 
-        // ====== XỬ LÝ NÚT MAP ======
+        //
         View btnMapFloat = findViewById(R.id.btnMapFloat);
         if (btnMapFloat != null) {
             btnMapFloat.setOnClickListener(v -> switchFragment(mapFragment));
@@ -192,7 +191,10 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
         } else {
+            // Immediate last location
             getLastKnownLocation();
+            // Start continuous updates
+            startLocationUpdates();
         }
     }
 
@@ -207,12 +209,9 @@ public class MainActivity extends AppCompatActivity {
                 userLat = location.getLatitude();
                 userLng = location.getLongitude();
 
-                // Gửi toạ độ sang MapFragment
                 if (mapFragment instanceof MapFragment) {
                     ((MapFragment) mapFragment).updateUserLocation(userLat, userLng);
                 }
-
-                // Gửi toạ độ sang HomeFragment
                 if (homeFragment instanceof HomeFragment) {
                     ((HomeFragment) homeFragment).updateUserLocation(userLat, userLng);
                 }
@@ -222,12 +221,42 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+    }
+
+    private void stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // resume updates if permission already granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // stop to save battery (will resume in onResume)
+        stopLocationUpdates();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getLastKnownLocation();
+                startLocationUpdates();
             } else {
                 Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
             }
@@ -269,3 +298,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+

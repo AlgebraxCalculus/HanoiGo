@@ -33,8 +33,7 @@ public class LocationController {
 
     @GetMapping("/get-detail-by-id")
     public ApiResponse<LocationResponse> getDetailByLocationId(
-        @RequestParam(value = "locationId") String locationId
-    ) {
+        @RequestParam(value = "locationId") String locationId) {
         LocationResponse locationDetail = locationService.getLocationDetailById(locationId);
         return ApiResponse.<LocationResponse>builder()
                 .code(1000)
