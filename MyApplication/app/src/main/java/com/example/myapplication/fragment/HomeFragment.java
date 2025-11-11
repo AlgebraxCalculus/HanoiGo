@@ -32,12 +32,11 @@ import com.example.myapplication.model.Place;
 
 import com.example.myapplication.adapter.PlaceAdapter;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -335,33 +334,26 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupAchievementData(String jwt) {
+
         achievementList = new ArrayList<>();
 
         UserApi.GetMyAchievementList(jwt, "tier", "desc", getContext(), new UserApi.UserApiCallback() {
             @Override
-            public void onSuccess(JSONArray data) {
-                String topAchievement = "";
+            public void onSuccess(ArrayList<JSONObject> data) {
                 int num = 1;
-
-                for (int i = 0; i < data.length(); i++) {
+                String topAchievemnent = "";
+                for(JSONObject a : data){
                     try {
-                        JSONObject a = data.getJSONObject(i);
-                        if (num == 1) topAchievement = a.getString("name");
-                        if (num > 3) break;
-
-                        achievementList.add(new Achievement(
-                                a.getString("name"),
-                                a.getString("description"),
-                                "Tier " + a.getString("tier"),
-                                R.drawable.ic_medal
-                        ));
+                        if(num == 1) topAchievemnent = a.getString("name");
+                        if(num>3) break;
+                        achievementList.add(new Achievement(a.getString("name"), a.getString("description"), "Tier "+a.getString("tier"), R.drawable.ic_medal));
                         num++;
-                    } catch (JSONException e) {
+                    }catch (JSONException e){
                         e.printStackTrace();
                     }
                 }
-
-                String finalTopAchievement = topAchievement;
+//                System.out.println("listAchievemnent: "+achievementList);
+                String FinalTopAchievement = topAchievemnent;
                 requireActivity().runOnUiThread(() -> {
                     if (achievementList == null || achievementList.isEmpty()) {
                         recyclerAchievements.setVisibility(View.GONE);
@@ -370,32 +362,26 @@ public class HomeFragment extends Fragment {
                         recyclerAchievements.setVisibility(View.VISIBLE);
                         layoutNoAchievements.setVisibility(View.GONE);
                     }
-
-                    tvTopAchievement.setText(finalTopAchievement);
-                    tvAchieveCount.setText(String.valueOf(data.length()));
-
+                    tvTopAchievement.setText(FinalTopAchievement);
+                    tvAchieveCount.setText(String.valueOf(data.size()));
                     achievementAdapter = new AchievementAdapter(requireContext(), achievementList);
                     recyclerAchievements.setAdapter(achievementAdapter);
                 });
             }
 
             @Override
-            public void onSuccess(JSONObject userObj) {
-                // Không dùng trong hàm này
-            }
+            public void onSuccess(JSONObject userObj) {}
 
             @Override
             public void onFailure(String errorMessage) {
                 requireActivity().runOnUiThread(() -> {
                     recyclerAchievements.setVisibility(View.GONE);
                     layoutNoAchievements.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), "Fetch achievement list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "fetch achievement list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
                 });
             }
         });
     }
-
-
     private void setupLeaderboardData() {
         leaderboardList = new ArrayList<>();
 
