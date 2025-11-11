@@ -157,7 +157,7 @@ public class CheckpointService {
         List<CheckpointResponse> responses = new ArrayList<>();
         
         for(Checkpoint cp : checkpoints) {
-            LocationResponse locationRes = locationMapper.toLocationResponse(cp.getLocation());
+            LocationResponse locationRes = locationService.getLocationDetailById(cp.getLocation().getId());
 
             ReviewResponse reviewRes = null;
             Optional<Review> reviewOpt = reviewRepository.findByUserIdAndLocationId(user.getId(), cp.getLocation().getId());
@@ -176,23 +176,33 @@ public class CheckpointService {
             responses.add(resp);
         }
 
-        if("reviewed".equalsIgnoreCase(view) || rating != null || date != null) {
+        // Filtering by view only (don't auto-filter when sorting by rating)
+        if ("review-only".equalsIgnoreCase(view)) {
             responses = responses.stream()
                 .filter(r -> r.getReview() != null)
                 .toList();
-        } else if ("unreviewed".equalsIgnoreCase(view)) {
+        } else if ("no review".equalsIgnoreCase(view)) {
             responses = responses.stream()
                 .filter(r -> r.getReview() == null)
                 .toList();
         }
 
+        // Sorting: treat null review (or null rating) as rating = 0
         if ("best".equalsIgnoreCase(rating)) {
             responses = responses.stream()
-                    .sorted((a,b) -> Integer.compare(b.getReview().getRating(),a.getReview().getRating()))
+                    .sorted((a, b) -> {
+                        int ra = (a.getReview() != null) ? a.getReview().getRating() : 0;
+                        int rb = (b.getReview() != null) ? b.getReview().getRating() : 0;
+                        return Integer.compare(rb, ra); // descending
+                    })
                     .toList();
         } else if ("worst".equalsIgnoreCase(rating)) {
             responses = responses.stream()
-                    .sorted((a,b) -> Integer.compare(a.getReview().getRating(),b.getReview().getRating()))
+                    .sorted((a, b) -> {
+                        int ra = (a.getReview() != null) ? a.getReview().getRating() : 0;
+                        int rb = (b.getReview() != null) ? b.getReview().getRating() : 0;
+                        return Integer.compare(ra, rb); // ascending
+                    })
                     .toList();
         } else if ("newest".equalsIgnoreCase(date)) {
             responses = responses.stream()

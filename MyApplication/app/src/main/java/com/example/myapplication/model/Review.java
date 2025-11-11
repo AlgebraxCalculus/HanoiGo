@@ -19,6 +19,13 @@ public class Review {
         this.imageResIds = imageResIds;
     }
 
+    public Review(String name, String content, String time, int rating){
+        this.name = name;
+        this.content = content;
+        this.time = time;
+        this.rating = rating;
+    }
+
     public String getName() { return name; }
     public String getSubtitle() { return subtitle; }
     public String getContent() { return content; }
