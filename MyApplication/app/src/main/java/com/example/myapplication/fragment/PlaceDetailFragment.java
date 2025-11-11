@@ -234,15 +234,15 @@ public class PlaceDetailFragment extends Fragment {
         List<Review> reviews = List.of(
                 new Review("Minh Đỗ", "Local Guide • 24 reviews",
                         "Quán có không gian đẹp, đồ uống ổn, phục vụ nhiệt tình. Mình thích nhất là phần trang trí và nhạc nhẹ nhàng.",
-                        "2 days ago", 4.5f, 32,
+                        "2 days ago", (int) 4.5, 32,
                         new int[]{R.drawable.review_sample_img1, R.drawable.review_sample_img2, R.drawable.review_sample_img3}),
                 new Review("Anh Phạm", "Traveler",
                         "Rất hài lòng, đồ ăn ngon, chỗ ngồi thoải mái. Giá hơi cao nhưng xứng đáng.",
-                        "1 week ago", 5f, 21,
+                        "1 week ago", 5, 21,
                         new int[]{R.drawable.review_sample_img4}),
                 new Review("Hà Lê", "Food Blogger",
                         "Không gian hơi ồn, nhưng đồ uống ngon, nhân viên thân thiện.",
-                        "3 weeks ago", 3.5f, 10,
+                        "3 weeks ago", (int) 3.5, 10,
                         new int[]{})
         );
 
