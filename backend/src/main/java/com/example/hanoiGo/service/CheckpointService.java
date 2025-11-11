@@ -15,9 +15,11 @@ import com.example.hanoiGo.mapper.CheckpointMapper;
 import com.example.hanoiGo.mapper.LocationMapper;
 import com.example.hanoiGo.model.Checkpoint;
 import com.example.hanoiGo.model.LocationDetail;
+import com.example.hanoiGo.model.Review;
 import com.example.hanoiGo.model.User;
 import com.example.hanoiGo.repository.CheckpointRepository;
 import com.example.hanoiGo.repository.LocationDetailRepository;
+import com.example.hanoiGo.repository.ReviewRepository;
 import com.example.hanoiGo.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,7 @@ public class CheckpointService {
 
     private final LocationDetailRepository locationDetailRepository;
     private final CheckpointRepository checkpointRepository;
+    private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final LocationService locationService;
     private final UserService userService;

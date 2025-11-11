@@ -13,6 +13,13 @@ public class Place implements Serializable {
 
     private String address;
 
+    public Place(String name, String description, String distance, String pictureURL) {
+        this.name = name;
+        this.description = description;
+        this.distance = distance;
+        this.pictureURL = pictureURL;
+    }
+
     public Place(String name, String description, String distance, String pictureURL, String address) {
         this.name = name;
         this.description = description;
