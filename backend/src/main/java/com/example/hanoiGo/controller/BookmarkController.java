@@ -20,10 +20,7 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
     private final JwtUtil jwtUtil;
 
-    /**
-     * Thêm bookmark vào 1 bookmark list
-     * POST /api/bookmarks/add
-     */
+  
     @PostMapping("/add")
     public ApiResponse<BookmarkResponse> addBookmark(
             @Valid @RequestBody BookmarkRequest request,
@@ -42,10 +39,7 @@ public class BookmarkController {
                 .build();
     }
 
-    /**
-     * Xóa bookmark khỏi bookmark list
-     * DELETE /api/bookmarks/remove
-     */
+
     @DeleteMapping("/remove")
     public ApiResponse<Void> removeBookmark(
             @Valid @RequestBody BookmarkRequest request,
@@ -63,10 +57,7 @@ public class BookmarkController {
                 .build();
     }
 
-    /**
-     * Lấy tất cả bookmarks trong 1 bookmark list
-     * GET /api/bookmarks/list/{listId}
-     */
+
     @GetMapping("/list/{listId}")
     public ApiResponse<List<BookmarkResponse>> getBookmarkListBookmarks(
             @PathVariable UUID listId,
@@ -84,10 +75,7 @@ public class BookmarkController {
                 .build();
     }
 
-    /**
-     * Lấy TẤT CẢ bookmarks của user (qua tất cả bookmark lists)
-     * GET /api/bookmarks/all
-     */
+
     @GetMapping("/all")
     public ApiResponse<List<BookmarkResponse>> getAllUserBookmarks(
             @RequestHeader("Authorization") String authHeader) {
@@ -104,10 +92,7 @@ public class BookmarkController {
                 .build();
     }
 
-    /**
-     * Kiểm tra location đã được bookmark trong list chưa
-     * GET /api/bookmarks/check?locationId=...&bookmarkListId=...
-     */
+
     @GetMapping("/check")
     public ApiResponse<Boolean> checkBookmark(
             @RequestParam String locationId,
@@ -126,10 +111,7 @@ public class BookmarkController {
                 .build();
     }
 
-    /**
-     * Đếm số bookmarks trong 1 bookmark list
-     * GET /api/bookmarks/count/{listId}
-     */
+
     @GetMapping("/count/{listId}")
     public ApiResponse<Long> countBookmarks(
             @PathVariable UUID listId,

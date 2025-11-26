@@ -179,6 +179,7 @@ public class CheckpointsFragment extends Fragment {
                 for(JSONObject a : data){
                     try {
                         Place p = new Place(a.getJSONObject("location").getString("name"), a.getJSONObject("location").getString("description"), null, a.getJSONObject("location").getString("defaultPicture"));
+                        p.setId(a.getJSONObject("location").getString("id"));
                         Review r = null;
                         if(!a.isNull("review")){
                             String time = getRelativeTime(a.getJSONObject("review").getString("createdAt")); //cần thêm hàm biến đổi về dạng khoảng time tới hiện tại (few seconds ago,...)

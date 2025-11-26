@@ -25,6 +25,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
     public interface OnBookmarkClickListener {
         void onBookmarkClick(JSONObject bookmark);
         void onEditNoteClick(JSONObject bookmark);
+        void onRemoveBookmark(JSONObject bookmark);
     }
 
     public BookmarkAdapter(List<JSONObject> bookmarks) {
@@ -56,8 +57,12 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
             holder.tvCategory.setText(locationAddress);
 
             // Description (note)
-            String description = bookmark.optString("description", "No note yet");
-            holder.tvNote.setText(description);
+            String description = bookmark.optString("description", "");
+            if (description == null || description.isEmpty() || description.equals("null")) {
+                holder.tvNote.setText("No note yet");
+            } else {
+                holder.tvNote.setText(description);
+            }
 
             // Rating (not in response, using placeholder)
             holder.tvRating.setText("4.5");
@@ -84,7 +89,7 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
 
             holder.btnEditBookmark.setOnClickListener(v -> {
                 if (listener != null) {
-                    listener.onEditNoteClick(bookmark);
+                    showBookmarkMenu(v, bookmark);
                 }
             });
 
@@ -96,6 +101,27 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
     @Override
     public int getItemCount() {
         return bookmarks.size();
+    }
+
+    private void showBookmarkMenu(View anchor, JSONObject bookmark) {
+        String[] options = {"Edit Note", "Remove from List"};
+
+        new android.app.AlertDialog.Builder(anchor.getContext())
+                .setTitle("Bookmark Options")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        // Edit Note
+                        if (listener != null) {
+                            listener.onEditNoteClick(bookmark);
+                        }
+                    } else if (which == 1) {
+                        // Remove
+                        if (listener != null) {
+                            listener.onRemoveBookmark(bookmark);
+                        }
+                    }
+                })
+                .show();
     }
 
     public static class BookmarkViewHolder extends RecyclerView.ViewHolder {

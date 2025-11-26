@@ -52,6 +52,15 @@ public class BookmarkListSelectorAdapter extends RecyclerView.Adapter<BookmarkLi
         }
 
         holder.listTitle.setText(list.getTitle());
+
+        // Show description if available
+        if (list.getDescription() != null && !list.getDescription().isEmpty()) {
+            holder.listDescription.setVisibility(View.VISIBLE);
+            holder.listDescription.setText(list.getDescription());
+        } else {
+            holder.listDescription.setVisibility(View.GONE);
+        }
+
         holder.listCount.setText(list.getPlaceCount() + " places");
 
         holder.itemView.setOnClickListener(v -> {
@@ -69,12 +78,14 @@ public class BookmarkListSelectorAdapter extends RecyclerView.Adapter<BookmarkLi
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView listIcon;
         TextView listTitle;
+        TextView listDescription;
         TextView listCount;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             listIcon = itemView.findViewById(R.id.listIcon);
             listTitle = itemView.findViewById(R.id.listTitle);
+            listDescription = itemView.findViewById(R.id.listDescription);
             listCount = itemView.findViewById(R.id.listCount);
         }
     }
