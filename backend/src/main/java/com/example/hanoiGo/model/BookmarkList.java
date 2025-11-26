@@ -29,6 +29,9 @@ public class BookmarkList {
     @Column(name = "icon")
     private String icon;  // Giá trị: "bookmark", "heart", "flag"
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @OneToMany(mappedBy = "bookmarkList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarks;
 }

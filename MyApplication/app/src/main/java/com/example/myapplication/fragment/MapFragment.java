@@ -133,13 +133,15 @@ public class MapFragment extends Fragment {
                     JSONObject placeData = markerMap.get(clickedMarker);
                     JSONObject locationResponse = placeData.optJSONObject("locationResponse");
                     if (placeData != null) {
-                        openPlaceDetailFragment(new Place(
+                        Place place = new Place(
                                 locationResponse.optString("name"),
                                 locationResponse.optString("description"),
                                 placeData.optString("distanceText"),
                                 locationResponse.optString("defaultPicture"),
                                 locationResponse.optString("address")
-                        ));
+                        );
+                        place.setId(locationResponse.optString("id"));
+                        openPlaceDetailFragment(place);
                         return true;
                     }
                     return false;
@@ -685,13 +687,15 @@ public class MapFragment extends Fragment {
             searchBar.setText(item.optString("name"));
             searchBar.addTextChangedListener(textWatcher);
 
-            openPlaceDetailFragment(new Place(
+            Place place = new Place(
                     item.optString("name"),
                     item.optString("description"),
                     "",
                     item.optString("defaultPicture"),
                     item.optString("address")
-            ));
+            );
+            place.setId(item.optString("id"));
+            openPlaceDetailFragment(place);
         });
 
         rvSearchSuggestions.setLayoutManager(new LinearLayoutManager(requireContext()));

@@ -6,12 +6,14 @@ public class SavedList {
     private String id;  // UUID from backend
     private String iconType;  // "bookmark", "heart", "flag"
     private String title;
+    private String description;
     private long placeCount;
 
-    public SavedList(String id, String iconType, String title, long placeCount) {
+    public SavedList(String id, String iconType, String title, String description, long placeCount) {
         this.id = id;
         this.iconType = iconType;
         this.title = title;
+        this.description = description;
         this.placeCount = placeCount;
     }
 
@@ -61,6 +63,14 @@ public class SavedList {
 
     public void setPlaceCount(long placeCount) {
         this.placeCount = placeCount;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     // Helper methods để convert giữa iconType (string) và iconResId (int)

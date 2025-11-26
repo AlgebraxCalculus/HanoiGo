@@ -11,7 +11,9 @@ public class BookmarkListRequest {
     @NotBlank(message = "Tên danh sách không được để trống")
     private String name;
 
-    private String icon;  // Giá trị: "bookmark", "heart", "flag"
+    private String icon;  // "bookmark", "heart", "flag"
 
-    private UUID userId;  // Sẽ set từ JWT
+    private String description;
+
+    private UUID userId;  //  JWT
 }

@@ -132,6 +132,7 @@ public class BookmarkFragment extends Fragment {
                                     json.getString("id"),
                                     json.optString("icon", "bookmark"),
                                     json.getString("name"),
+                                    json.optString("description", ""),
                                     json.getLong("bookmarkCount")
                             );
                             savedLists.add(list);
@@ -156,6 +157,7 @@ public class BookmarkFragment extends Fragment {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_bookmark_list, null);
 
         EditText editListName = dialogView.findViewById(R.id.editListName);
+        EditText editListDescription = dialogView.findViewById(R.id.editListDescription);
         ImageView iconBookmark = dialogView.findViewById(R.id.iconBookmark);
         ImageView iconHeart = dialogView.findViewById(R.id.iconHeart);
         ImageView iconFlag = dialogView.findViewById(R.id.iconFlag);
@@ -193,18 +195,19 @@ public class BookmarkFragment extends Fragment {
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnCreate).setOnClickListener(v -> {
             String listName = editListName.getText().toString().trim();
+            String listDescription = editListDescription.getText().toString().trim();
             if (listName.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter a list name", Toast.LENGTH_SHORT).show();
                 return;
             }
-            createNewList(listName, selectedIcon[0]);
+            createNewList(listName, selectedIcon[0], listDescription);
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void createNewList(String name, String icon) {
+    private void createNewList(String name, String icon, String description) {
         SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
         String jwtToken = prefs.getString("jwt_token", null);
 
@@ -213,7 +216,7 @@ public class BookmarkFragment extends Fragment {
             return;
         }
 
-        BookmarkApi.createBookmarkList(jwtToken, name, icon, requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
+        BookmarkApi.createBookmarkList(jwtToken, name, icon, description, requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
             @Override
             public void onSuccess(JSONObject bookmarkList) {
                 requireActivity().runOnUiThread(() -> {
@@ -243,14 +246,15 @@ public class BookmarkFragment extends Fragment {
 
         // Update detail info
         tvPlacesCount.setText(savedList.getPlaceCount() + " places");
-        tvDescription.setText("description bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"); // TODO: get from backend
+        String desc = savedList.getDescription();
+        tvDescription.setText(desc != null && !desc.isEmpty() ? desc : "No description");
 
         // Load bookmarks
         loadBookmarksForList(savedList.getId());
     }
 
     private void showListMenu(SavedList savedList) {
-        String[] options = {"Delete List", "Edit Name"};
+        String[] options = {"Delete List", "Edit List"};
 
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle(savedList.getTitle())
@@ -260,7 +264,7 @@ public class BookmarkFragment extends Fragment {
                         showDeleteListDialog(savedList);
                     } else if (which == 1) {
                         // Edit
-                        Toast.makeText(requireContext(), "Edit name feature coming soon", Toast.LENGTH_SHORT).show();
+                        showEditListDialog(savedList);
                     }
                 })
                 .show();
@@ -289,6 +293,11 @@ public class BookmarkFragment extends Fragment {
             public void onEditNoteClick(JSONObject bookmark) {
                 showEditNoteDialog(bookmark);
             }
+
+            @Override
+            public void onRemoveBookmark(JSONObject bookmark) {
+                showRemoveBookmarkDialog(bookmark);
+            }
         });
         recyclerBookmarks.setAdapter(bookmarkAdapter);
 
@@ -308,7 +317,9 @@ public class BookmarkFragment extends Fragment {
         });
 
         btnEdit.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Edit list feature coming soon", Toast.LENGTH_SHORT).show();
+            if (currentList != null) {
+                showEditListDialog(currentList);
+            }
         });
 
         btnBookmark.setOnClickListener(v -> {
@@ -432,6 +443,51 @@ public class BookmarkFragment extends Fragment {
         });
     }
 
+    private void showRemoveBookmarkDialog(JSONObject bookmark) {
+        try {
+            String locationName = bookmark.getString("locationName");
+            String locationId = bookmark.getString("locationId");
+
+            new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Remove Bookmark")
+                    .setMessage("Remove \"" + locationName + "\" from this list?")
+                    .setPositiveButton("Remove", (d, w) -> {
+                        removeBookmarkFromList(locationId);
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Error removing bookmark", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void removeBookmarkFromList(String locationId) {
+        if (currentList == null) return;
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+        String jwtToken = prefs.getString("jwt_token", null);
+
+        if (jwtToken == null) return;
+
+        BookmarkApi.removeBookmark(jwtToken, locationId, currentList.getId(), requireContext(), new BookmarkApi.VoidCallback() {
+            @Override
+            public void onSuccess() {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Bookmark removed!", Toast.LENGTH_SHORT).show();
+                    loadBookmarksForList(currentList.getId());
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Failed to remove bookmark: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
     private void showDeleteListDialog(SavedList savedList) {
         new android.app.AlertDialog.Builder(requireContext())
                 .setTitle("Delete List")
@@ -462,5 +518,84 @@ public class BookmarkFragment extends Fragment {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void showEditListDialog(SavedList savedList) {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_bookmark_list, null);
+
+        EditText editListName = dialogView.findViewById(R.id.editListName);
+        EditText editListDescription = dialogView.findViewById(R.id.editListDescription);
+        TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
+        android.widget.Button btnCreate = dialogView.findViewById(R.id.btnCreate);
+
+        // Change title and button text for edit mode
+        dialogTitle.setText("Edit List");
+        btnCreate.setText("Update");
+
+        // Pre-fill current values
+        editListName.setText(savedList.getTitle());
+        editListDescription.setText(savedList.getDescription());
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+        btnCreate.setOnClickListener(v -> {
+            String newName = editListName.getText().toString().trim();
+            String newDescription = editListDescription.getText().toString().trim();
+
+            if (newName.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter a list name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            updateBookmarkList(savedList.getId(), newName, newDescription);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void updateBookmarkList(String listId, String name, String description) {
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+        String jwtToken = prefs.getString("jwt_token", null);
+
+        if (jwtToken == null) {
+            Toast.makeText(requireContext(), "Please login first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        BookmarkApi.updateBookmarkList(jwtToken, listId, name, description, requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
+            @Override
+            public void onSuccess(JSONObject bookmarkList) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "List updated!", Toast.LENGTH_SHORT).show();
+
+                    // Update current list if in detail view
+                    if (currentList != null && currentList.getId().equals(listId)) {
+                        try {
+                            currentList.setTitle(bookmarkList.getString("name"));
+                            currentList.setDescription(bookmarkList.optString("description", ""));
+                            // Update description display
+                            String desc = currentList.getDescription();
+                            tvDescription.setText(desc != null && !desc.isEmpty() ? desc : "No description");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // Reload list
+                    loadBookmarkLists();
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Failed to update: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 }

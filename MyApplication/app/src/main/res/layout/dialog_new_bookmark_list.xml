@@ -7,6 +7,7 @@
     android:background="@android:color/white">
 
     <TextView
+        android:id="@+id/dialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New List"
@@ -22,6 +23,16 @@
         android:hint="List name"
         android:inputType="text"
         android:maxLines="1"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/editListDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Description (optional)"
+        android:inputType="textMultiLine"
+        android:maxLines="3"
+        android:gravity="top"
         android:layout_marginBottom="16dp"/>
 
     <TextView
@@ -44,6 +55,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_bookmark"
+            android:tint="#424242"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_margin="8dp"/>
@@ -53,6 +65,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_heart"
+            android:tint="#424242"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_margin="8dp"/>
@@ -62,6 +75,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_flag"
+            android:tint="#424242"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_margin="8dp"/>

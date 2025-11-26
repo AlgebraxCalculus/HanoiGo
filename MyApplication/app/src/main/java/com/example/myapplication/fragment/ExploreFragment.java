@@ -103,6 +103,7 @@ public class ExploreFragment extends Fragment {
                                 location.getString("defaultPicture"),
                                 location.getString("address")
                         );
+                        place.setId(location.getString("id"));
                         listIconic.add(place);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -138,6 +139,7 @@ public class ExploreFragment extends Fragment {
                                 location.getString("defaultPicture"),
                                 location.getString("address")
                         );
+                        place.setId(location.getString("id"));
                         listTopVisited.add(place);
                     } catch (JSONException e) {
                         e.printStackTrace();

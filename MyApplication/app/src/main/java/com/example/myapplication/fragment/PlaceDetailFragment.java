@@ -262,7 +262,7 @@ public class PlaceDetailFragment extends Fragment {
         btnDirections.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Opening directions...", Toast.LENGTH_SHORT).show());
 
-        btnSave.setOnClickListener(v -> showBookmarkListDialog());
+        btnSave.setOnClickListener(v -> showBookmarkListDialog()); //nút save
 
         btnWriteReview.setOnClickListener(v ->
                 Toast.makeText(getContext(), "Write your review", Toast.LENGTH_SHORT).show());
@@ -348,6 +348,7 @@ public class PlaceDetailFragment extends Fragment {
                                     json.getString("id"),
                                     json.optString("icon", "bookmark"),
                                     json.getString("name"),
+                                    json.optString("description", ""),
                                     json.getLong("bookmarkCount")
                             );
                             lists.add(list);
@@ -411,6 +412,7 @@ public class PlaceDetailFragment extends Fragment {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_bookmark_list, null);
 
         android.widget.EditText editListName = dialogView.findViewById(R.id.editListName);
+        android.widget.EditText editListDescription = dialogView.findViewById(R.id.editListDescription);
         ImageView iconBookmark = dialogView.findViewById(R.id.iconBookmark);
         ImageView iconHeart = dialogView.findViewById(R.id.iconHeart);
         ImageView iconFlag = dialogView.findViewById(R.id.iconFlag);
@@ -447,12 +449,13 @@ public class PlaceDetailFragment extends Fragment {
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnCreate).setOnClickListener(v -> {
             String listName = editListName.getText().toString().trim();
+            String listDescription = editListDescription.getText().toString().trim();
             if (listName.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter a list name", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            BookmarkApi.createBookmarkList(jwtToken, listName, selectedIcon[0], requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
+            BookmarkApi.createBookmarkList(jwtToken, listName, selectedIcon[0], listDescription, requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
                 @Override
                 public void onSuccess(JSONObject bookmarkList) {
                     requireActivity().runOnUiThread(() -> {
