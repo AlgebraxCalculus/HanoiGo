@@ -156,6 +156,43 @@ public class LocationApi {
         });
     }
 
+    public static void GetLocationById(String locationId, Context context, LocationDetailCallback callback) {
+        OkHttpClient client = new OkHttpClient();
+
+        HttpUrl url = HttpUrl.parse(LOCATION_URL + "/get-detail-by-id")
+                .newBuilder()
+                .addQueryParameter("locationId", locationId)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+
+        System.out.println("GET LOCATION BY ID URL: " + url);
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject json = new JSONObject(response.body().string());
+                        JSONObject result = json.getJSONObject("result");
+                        callback.onSuccess(result);
+                    } catch (JSONException e) {
+                        callback.onFailure("Failed to parse location detail");
+                    }
+                } else {
+                    callback.onFailure("Error: " + response.code());
+                }
+            }
+        });
+    }
 
     // Callback interface
     public interface LocationApiCallback {

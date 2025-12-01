@@ -96,16 +96,23 @@ public class BookmarkApi {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body().string();
                     if (response.isSuccessful()) {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             JSONObject result = jsonResponse.getJSONObject("result");
                             callback.onSuccess(result);
                         } catch (JSONException e) {
                             callback.onFailure("Failed to parse response");
                         }
                     } else {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            String message = jsonResponse.optString("message", "Error: " + response.code());
+                            callback.onFailure(message);
+                        } catch (JSONException e) {
                         callback.onFailure("Error: " + response.code());
+                        }
                     }
                 }
             });
@@ -147,16 +154,23 @@ public class BookmarkApi {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body().string();
                     if (response.isSuccessful()) {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             JSONObject result = jsonResponse.getJSONObject("result");
                             callback.onSuccess(result);
                         } catch (JSONException e) {
                             callback.onFailure("Failed to parse response");
                         }
                     } else {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            String message = jsonResponse.optString("message", "Error: " + response.code());
+                            callback.onFailure(message);
+                        } catch (JSONException e) {
                         callback.onFailure("Error: " + response.code());
+                        }
                     }
                 }
             });
@@ -274,16 +288,23 @@ public class BookmarkApi {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body().string();
                     if (response.isSuccessful()) {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             JSONObject result = jsonResponse.getJSONObject("result");
                             callback.onSuccess(result);
                         } catch (JSONException e) {
                             callback.onFailure("Failed to parse response");
                         }
                     } else {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            String message = jsonResponse.optString("message", "Error: " + response.code());
+                            callback.onFailure(message);
+                        } catch (JSONException e) {
                         callback.onFailure("Error: " + response.code());
+                        }
                     }
                 }
             });
