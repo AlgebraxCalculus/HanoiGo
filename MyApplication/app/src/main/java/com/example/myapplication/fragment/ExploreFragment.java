@@ -81,7 +81,7 @@ public class ExploreFragment extends Fragment {
     public void updateUserLocation(double lat, double lng) {
         this.userLat = lat;
         this.userLng = lng;
-//        setupPlaceData();
+        setupPlaceData();
     }
 
     private void setupPlaceData() {

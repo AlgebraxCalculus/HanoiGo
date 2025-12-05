@@ -75,4 +75,6 @@ dependencies {
 
     // MPAndroidChart for dashboard chart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
 }

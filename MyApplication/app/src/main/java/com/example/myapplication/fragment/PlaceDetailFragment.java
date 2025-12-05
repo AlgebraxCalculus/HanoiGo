@@ -189,9 +189,13 @@ public class PlaceDetailFragment extends Fragment {
                             if (parent instanceof MapFragment) {
                                 ((MapFragment) parent).showLocationMarker(lat, lng, result, true);
                             }
+
+                            // Kiểm tra địa điểm có enable check-in không
+                            checkIfCheckInAvailable(lat, lng, address);
                         }
-                        placeTitle.setText(result.optString("name", "Không có tên"));
-                        placeAddress.setText(result.optString("address", "Không có địa chỉ"));
+
+                        placeTitle.setText(result.optString("name", "No name"));
+                        placeAddress.setText(result.optString("address", "No address"));
                         List<String> imageUrls = new ArrayList<>();
                         String defaultPic = result.optString("defaultPicture", "");
                         if (!TextUtils.isEmpty(defaultPic)) imageUrls.add(defaultPic);
@@ -203,12 +207,11 @@ public class PlaceDetailFragment extends Fragment {
 
                         if (!imageUrls.isEmpty()) setupPlacePhotos(imageUrls);
 
-                        // Overall description và location text
-                        overallDescription.setText(result.optString("description", "Chưa có mô tả"));
-                        locationText.setText(result.optString("address", "Chưa có thông tin vị trí"));
+                        overallDescription.setText(result.optString("description", "No description"));
+                        locationText.setText(result.optString("address", "No location info"));
 
                     } catch (JSONException e) {
-                        Toast.makeText(getContext(), "Lỗi đọc dữ liệu chi tiết", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Error reading detail data", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -216,10 +219,56 @@ public class PlaceDetailFragment extends Fragment {
             @Override
             public void onFailure(String errorMessage) {
                 requireActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Lỗi khi tải chi tiết: " + errorMessage, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(getContext(), "Error loading details: " + errorMessage, Toast.LENGTH_SHORT).show()
                 );
             }
         });
+    }
+
+    private void checkIfCheckInAvailable(double lat, double lng, String address) {
+        if (jwtToken == null || jwtToken.isEmpty()) {
+            btnCheckin.setVisibility(View.GONE);
+            setDisabledBackground();
+            return;
+        }
+
+        CheckpointApi.GetEnableCheckIn(lat, lng, jwtToken, getContext(), new CheckpointApi.CheckpointApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> checkpointList) {
+                requireActivity().runOnUiThread(() -> {
+                    boolean isCheckpointAvailable = checkAddressInCheckpoints(address, checkpointList);
+                    if (isCheckpointAvailable) {
+                        btnCheckin.setVisibility(View.VISIBLE);
+                        setNormalBackground();
+                    } else {
+                        btnCheckin.setVisibility(View.GONE);
+                        setDisabledBackground();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    btnCheckin.setVisibility(View.GONE);
+                    setDisabledBackground();
+                });
+            }
+        });
+    }
+
+    private void setDisabledBackground() {
+        if (bottomSheetBehavior != null) {
+            View bottomSheet = getView().findViewById(R.id.bottomSheetPlaceDetail);
+            bottomSheet.setBackgroundResource(R.drawable.bg_gradient_disabled);
+        }
+    }
+
+    private void setNormalBackground() {
+        if (bottomSheetBehavior != null) {
+            View bottomSheet = getView().findViewById(R.id.bottomSheetPlaceDetail);
+            bottomSheet.setBackgroundResource(R.drawable.bg_bottom_sheet);
+        }
     }
 
     // Setup scroll photo
@@ -254,13 +303,22 @@ public class PlaceDetailFragment extends Fragment {
         Fragment parent = getParentFragment();
         if (parent instanceof MapFragment) {
             ((MapFragment) parent).onPlaceDetailClosed();
-            parent.getChildFragmentManager().popBackStack();  // quay lại ExploreFragment
+            parent.getChildFragmentManager().popBackStack();
         }
     }
 
     private void setupActions() {
-        btnDirections.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Opening directions...", Toast.LENGTH_SHORT).show());
+        btnDirections.setOnClickListener(v -> {
+            // Tạo instance DirectionFragment
+            DirectionFragment directionFragment = new DirectionFragment();
+
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.placeDetailContainer, directionFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
 
         btnSave.setOnClickListener(v -> showBookmarkListDialog());
 
