@@ -1,22 +1,27 @@
 package com.example.myapplication.model;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public class Review {
     private String name;
-    private String subtitle;
     private String content;
     private String time;
     private int rating;
     private int likeCount;
-    private int[] imageResIds;
+    private String avatar;
+    private List<String> imageUrls;
+    private boolean isLiked;
 
-    public Review(String name, String subtitle, String content, String time, int rating, int likeCount, int[] imageResIds) {
+    public Review(String name, String content, String time, int rating, int likeCount, String avatar, List<String> imageUrls) {
         this.name = name;
-        this.subtitle = subtitle;
         this.content = content;
         this.time = time;
         this.rating = rating;
         this.likeCount = likeCount;
-        this.imageResIds = imageResIds;
+        this.avatar = avatar;
+        this.imageUrls = imageUrls;
+        this.isLiked = false;
     }
 
     public Review(String name, String content, String time, int rating){
@@ -27,10 +32,13 @@ public class Review {
     }
 
     public String getName() { return name; }
-    public String getSubtitle() { return subtitle; }
     public String getContent() { return content; }
     public String getTime() { return time; }
     public int getRating() { return rating; }
     public int getLikeCount() { return likeCount; }
-    public int[] getImageResIds() { return imageResIds; }
+    public void setLikeCount(int likeCount) { this.likeCount = likeCount; } // 🌟 Thêm setter này
+    public List<String> getImageUrls() { return imageUrls; }
+    public boolean getIsLiked() { return isLiked; }
+    public void setIsLiked(boolean isLiked) { this.isLiked = isLiked; }
+    public String getAvatar() { return avatar; }
 }

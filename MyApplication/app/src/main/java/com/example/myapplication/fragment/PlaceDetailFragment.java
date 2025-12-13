@@ -1,13 +1,29 @@
 package com.example.myapplication.fragment;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,21 +31,31 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.colormoon.readmoretextview.ReadMoreTextView;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.BookmarkListSelectorAdapter;
 import com.example.myapplication.adapter.ImageAdapter;
+import com.example.myapplication.adapter.ImagePreviewAdapter;
+import com.example.myapplication.adapter.PersCheckpointAdapter;
 import com.example.myapplication.adapter.ReviewAdapter;
 import com.example.myapplication.api.BookmarkApi;
 import com.example.myapplication.api.CheckpointApi;
+import com.example.myapplication.api.CloudinaryUploadHelper;
 import com.example.myapplication.api.LocationApi;
+import com.example.myapplication.api.ReviewApi;
+import com.example.myapplication.api.UserApi;
+import com.example.myapplication.model.Checkpoint;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
 import com.example.myapplication.model.SavedList;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 
@@ -37,21 +63,30 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
-public class PlaceDetailFragment extends Fragment {
+public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyReviewLikedListener {
 
     private CoordinatorLayout placeDetailContainer;
     private BottomSheetBehavior<View> bottomSheetBehavior;
-    private TextView placeTitle, placeAddress, overallDescription, locationText;
-    private RatingBar ratingBar;
-    private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckin;
+    private TextView placeTitle, placeAddress, overallDescription, locationText, tvYourName, tvYourTime, tvYourLikeCount, tvOverallRating, tvOverallRatingCount, tvRatingNumber, tvReviewCount;
+    private TextView currentSelectedTag = null;
+    private RatingBar ratingBar, yourRatingBar, rtOverallRatingBar;
+    private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckin, btnUpdateReview, btnDeleteReview;
     private EditText searchBar;
-    private ImageView actionButton, btnClose;
-    private LinearLayout tagContainer;
+    private ImageView actionButton, btnClose, imgYourAvatar, btnYourLike;
+    private LinearLayout tagContainer, yourReviewLayout;
+    private View layoutNoReview, ratingBar1, ratingBar2, ratingBar3, ratingBar4, ratingBar5;
+    private ReadMoreTextView tvYourContent;
+    private GridLayout yourImageGrid;
 
     private ArrayList<JSONObject> availableCheckpoints;
+    private List<Review> reviewList, LikedReviewList;
     private Place placeData;
     private RecyclerView rvPlacePhotos;
     private RecyclerView rvReviews;
@@ -59,6 +94,17 @@ public class PlaceDetailFragment extends Fragment {
     private String username = "default";
     private String avatar = "";
     private String jwtToken = "";
+    private String dialogType = "";
+
+    // Khai báo constants và variables cho chức năng add review
+    private static final int PICK_IMAGES_REQUEST = 100;
+    private static final int MAX_IMAGES = 4;
+    private List<Uri> selectedImageUris = new ArrayList<>();
+    private android.app.AlertDialog currentReviewDialog;
+    private String tempReviewContent = "";
+    private float tempReviewRating = 0f;
+    private float overallRating = 0f;
+    private int maxRate = 0;
 
     public PlaceDetailFragment() {}
 
@@ -88,6 +134,8 @@ public class PlaceDetailFragment extends Fragment {
         placeDetailContainer = view.findViewById(R.id.placeDetailContainer);
         placeTitle = view.findViewById(R.id.placeTitle);
         ratingBar = view.findViewById(R.id.ratingBar);
+        tvRatingNumber = view.findViewById(R.id.tvRatingNumber);
+        tvReviewCount = view.findViewById(R.id.tvReviewCount);
         placeAddress = view.findViewById(R.id.placeAddress);
         overallDescription = view.findViewById(R.id.overallDescription);
         locationText = view.findViewById(R.id.locationText);
@@ -99,37 +147,84 @@ public class PlaceDetailFragment extends Fragment {
         actionButton = view.findViewById(R.id.actionButton);
         btnClose = view.findViewById(R.id.btnCloseExplore);
         tagContainer = view.findViewById(R.id.tagContainer);
+        layoutNoReview = view.findViewById(R.id.layoutNoReview);
+        yourReviewLayout = view.findViewById(R.id.yourReview);
+        btnUpdateReview = view.findViewById(R.id.btnUpdateReview);
+        btnDeleteReview = view.findViewById(R.id.btnDeleteReview);
+
+        tvOverallRating = view.findViewById(R.id.tvOverallRating);
+        rtOverallRatingBar = view.findViewById(R.id.rtOverallRatingBar);
+        tvOverallRatingCount = view.findViewById(R.id.tvOverallRatingCount);
+
+        imgYourAvatar = view.findViewById(R.id.imgYourAvatar);
+        tvYourName = view.findViewById(R.id.tvYourName);
+        tvYourTime = view.findViewById(R.id.tvYourTime);
+        tvYourLikeCount = view.findViewById(R.id.tvYourLikeCount);
+        btnYourLike = view.findViewById(R.id.btnYourLike);
+        tvYourContent = view.findViewById(R.id.tvYourContent); // Dùng ID này trong XML
+        yourRatingBar = view.findViewById(R.id.yourRatingBar);
+        yourImageGrid = view.findViewById(R.id.yourImageGrid);
+
+
 
         // --- Thiết lập dữ liệu tĩnh rating
-        View ratingBar5 = view.findViewById(R.id.ratingBar5);
+        ratingBar5 = view.findViewById(R.id.ratingBar5);
         TextView star5 = ratingBar5.findViewById(R.id.starNumber);
         star5.setText("5");
 
-        View ratingBar4 = view.findViewById(R.id.ratingBar4);
+        ratingBar4 = view.findViewById(R.id.ratingBar4);
         TextView star4 = ratingBar4.findViewById(R.id.starNumber);
         star4.setText("4");
 
-        View ratingBar3 = view.findViewById(R.id.ratingBar3);
+        ratingBar3 = view.findViewById(R.id.ratingBar3);
         TextView star3 = ratingBar3.findViewById(R.id.starNumber);
         star3.setText("3");
 
-        View ratingBar2 = view.findViewById(R.id.ratingBar2);
+        ratingBar2 = view.findViewById(R.id.ratingBar2);
         TextView star2 = ratingBar2.findViewById(R.id.starNumber);
         star2.setText("2");
 
-        View ratingBar1 = view.findViewById(R.id.ratingBar1);
+        ratingBar1 = view.findViewById(R.id.ratingBar1);
         TextView star1 = ratingBar1.findViewById(R.id.starNumber);
         star1.setText("1");
 
-        // --- Bottom sheet setup ---
-        View scrollView = view.findViewById(R.id.bottomSheetPlaceDetail);
-        bottomSheetBehavior = BottomSheetBehavior.from(scrollView);
-        bottomSheetBehavior.setPeekHeight(900);
+        // ⭐ Header mới (AppBarLayout)
+        AppBarLayout header = view.findViewById(R.id.placeHeader);
+        placeTitle = view.findViewById(R.id.placeTitle);
+        btnClose = view.findViewById(R.id.btnCloseExplore);
+
+        // ⭐ Content scroll
+        NestedScrollView scrollView = view.findViewById(R.id.scrollContent);
+
+        // ⭐ Bottom sheet mới
+        View bottomSheet = view.findViewById(R.id.bottomSheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        // Setup bottom sheet kiểu Google Maps
+        bottomSheetBehavior.setFitToContents(false);
+        bottomSheetBehavior.setExpandedOffset(120);
+        bottomSheetBehavior.setHalfExpandedRatio(0.45f);
+        bottomSheetBehavior.setPeekHeight(550);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setHideable(false);
+
+        // ⭐ Hiệu ứng Google Maps: header nổi khi kéo gần full
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View sheet, int newState) {}
+
+            @Override
+            public void onSlide(@NonNull View sheet, float slideOffset) {
+                if (slideOffset > 0.8f) {
+                    header.setElevation(12f);
+                } else {
+                    header.setElevation(0f);
+                }
+            }
+        });
 
         btnClose.setOnClickListener(v -> closeFragment());
         setupActions();
-        setupReviews();
 
         // --- Lấy dữ liệu place từ bundle ---
         if (getArguments() != null) {
@@ -139,15 +234,184 @@ public class PlaceDetailFragment extends Fragment {
             username = getArguments().getString("username");
             avatar = getArguments().getString("avatar");
         }
+        System.out.println("availableCheckpoint: "+availableCheckpoints);
 
+        // is checkin-able
         if (placeData != null && availableCheckpoints != null) {
             boolean isCheckpointAvailable = checkAddressInCheckpoints(placeData.getAddress(), availableCheckpoints);
             btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
         }
 
+        Runnable reviewCheckLogic = new Runnable() {
+            @Override
+            public void run() {
+                // is checked-in
+                requireActivity().runOnUiThread(() -> {
+                    if(isCheckedIn(placeData.getAddress())){
+                        Review myReview = getYourReview();
+                        System.out.println("ReviewList: "+reviewList);
+                        System.out.println("myReview: "+myReview);
+                        if(myReview != null) {
+                            // hiển thị phần review của user và 2 nút update, delete
+                            yourReviewLayout.setVisibility(View.VISIBLE);
+                            btnWriteReview.setVisibility(View.GONE);
+
+                            bindMyReviewData(myReview);
+                        }else{
+                            // hiển thị và active nút thêm review và visibility: gone cho review của user
+                            yourReviewLayout.setVisibility(View.GONE);
+                            btnWriteReview.setVisibility(View.VISIBLE);
+                            btnWriteReview.setEnabled(true);
+                        }
+                    }else{
+                        // vô hiệu hóa nút thêm review (đổi màu xám và khi bấm sẽ hiện toast "You have to check in before write a review")
+                        btnWriteReview.setEnabled(false);
+                        btnWriteReview.setBackgroundTintList(
+                                ColorStateList.valueOf(Color.parseColor("#808080"))
+                        );
+                        yourReviewLayout.setVisibility(View.GONE);
+                    }
+                });
+            }
+        };
+
+        setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
         fetchPlaceDetail(placeData.getAddress());
 
         return view;
+    }
+
+    private boolean isCheckedIn (String address) {
+        return true;
+    }
+
+    private Review getYourReview () {
+        if (reviewList == null) return null;
+        for (Review a : reviewList) {
+            if (a.getName().equalsIgnoreCase(username)) return a;
+        }
+        return null;
+    }
+
+    private void setupReviewsSummary() {
+        overallRating = 0f;
+        int[] starCounts = new int[5];
+        maxRate = 0;
+        int overallRatingCount = reviewList.size();
+        for(Review r:reviewList){
+            overallRating += r.getRating();
+            starCounts[r.getRating() - 1]++;
+            maxRate = Math.max(maxRate, starCounts[r.getRating() - 1]);
+        }
+        if(overallRatingCount > 0) overallRating /= overallRatingCount;
+
+        requireActivity().runOnUiThread(() -> {
+            tvOverallRating.setText(String.format(Locale.US, "%.1f", overallRating));
+            tvRatingNumber.setText(String.format(Locale.US, "%.1f", overallRating));
+            rtOverallRatingBar.setRating(overallRating);
+            ratingBar.setRating(overallRating);
+            NumberFormat nf = NumberFormat.getInstance(Locale.GERMANY);
+            String formattedCount = nf.format(overallRatingCount); // Kết quả: "11.291"
+            tvOverallRatingCount.setText("(" + formattedCount + ")");
+            tvReviewCount.setText("(" + formattedCount + ")");
+
+            if(maxRate > 0){
+                ProgressBar progressBar;
+                for(int i=0;i<starCounts.length;i++){
+                    switch (i){
+                        case 0:
+                            progressBar = ratingBar1.findViewById(R.id.progressBar);
+                            progressBar.setProgress((int) (starCounts[i]/(float)maxRate * 100f));
+                            break;
+                        case 1:
+                            progressBar = ratingBar2.findViewById(R.id.progressBar);
+                            progressBar.setProgress((int) (starCounts[i]/(float)maxRate * 100f));
+                            break;
+                        case 2:
+                            progressBar = ratingBar3.findViewById(R.id.progressBar);
+                            progressBar.setProgress((int) (starCounts[i]/(float)maxRate * 100f));
+                            break;
+                        case 3:
+                            progressBar = ratingBar4.findViewById(R.id.progressBar);
+                            progressBar.setProgress((int) (starCounts[i]/(float)maxRate * 100f));
+                            break;
+                        case 4:
+                            progressBar = ratingBar5.findViewById(R.id.progressBar);
+                            progressBar.setProgress((int) (starCounts[i]/(float)maxRate * 100f));
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void bindMyReviewData(Review review) {
+        Context context = getContext();
+        if (context == null || review == null) return;
+
+        tvYourName.setText(review.getName());
+        tvYourTime.setText(review.getTime());
+        tvYourLikeCount.setText(String.valueOf(review.getLikeCount()));
+        yourRatingBar.setRating(review.getRating());
+        tvYourContent.setText(review.getContent());
+        tvYourContent.setCollapsedText("More");
+        tvYourContent.setExpandedText("Less");
+        tvYourContent.setCollapsedTextColor(context.getColor(R.color.blue));
+        tvYourContent.setExpandedTextColor(context.getColor(R.color.blue));
+        tvYourContent.setTrimLines(2);
+
+        tempReviewContent = review.getContent();
+        tempReviewRating = review.getRating();
+
+        if(!review.getIsLiked()){
+            btnYourLike.setImageResource(R.drawable.ic_thumb_up);
+        }else{
+            btnYourLike.setImageResource(R.drawable.ic_liked_thumb_up);
+        }
+
+        yourImageGrid.removeAllViews();
+        List<String> imageUrls = review.getImageUrls();
+
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            yourImageGrid.setVisibility(View.VISIBLE);
+            int maxImages = Math.min(imageUrls.size(), 4);
+            float density = context.getResources().getDisplayMetrics().density;
+            int imageWidth = (int) (150 * density);   // 150dp
+            int imageHeight = (int) (100 * density);  // 100dp
+            int margin = (int) (8 * density); // 8dp margin
+
+            for (int i = 0; i < maxImages; i++) {
+                ImageView img = new ImageView(context);
+                GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+
+                params.width = imageWidth;
+                params.height = imageHeight;
+                params.setMargins(margin, margin, margin, margin);
+
+                img.setLayoutParams(params);
+                img.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                // Tải ảnh từ URL dùng Glide
+                Glide.with(context)
+                        .load(imageUrls.get(i))
+                        .into(img);
+
+                // --- Bo góc mềm mại hơn ---
+                img.setBackgroundResource(R.drawable.bg_rounded_image);
+                img.setClipToOutline(true);
+
+                yourImageGrid.addView(img);
+            }
+        } else {
+            yourImageGrid.setVisibility(View.GONE);
+        }
+
+        if (avatar != null && !avatar.isEmpty()) {
+            Glide.with(context)
+                    .load(avatar)
+                    .into(imgYourAvatar);
+        }
     }
 
     private boolean checkAddressInCheckpoints(String address, ArrayList<JSONObject> checkpointList) {
@@ -230,24 +494,113 @@ public class PlaceDetailFragment extends Fragment {
         rvPlacePhotos.setLayoutManager(layoutManager);
         rvPlacePhotos.setAdapter(new ImageAdapter(requireContext(), imageUrls));
     }
-    private void setupReviews() {
-        List<Review> reviews = List.of(
-                new Review("Minh Đỗ", "Local Guide • 24 reviews",
-                        "Quán có không gian đẹp, đồ uống ổn, phục vụ nhiệt tình. Mình thích nhất là phần trang trí và nhạc nhẹ nhàng.",
-                        "2 days ago", (int) 4.5, 32,
-                        new int[]{R.drawable.review_sample_img1, R.drawable.review_sample_img2, R.drawable.review_sample_img3}),
-                new Review("Anh Phạm", "Traveler",
-                        "Rất hài lòng, đồ ăn ngon, chỗ ngồi thoải mái. Giá hơi cao nhưng xứng đáng.",
-                        "1 week ago", 5, 21,
-                        new int[]{R.drawable.review_sample_img4}),
-                new Review("Hà Lê", "Food Blogger",
-                        "Không gian hơi ồn, nhưng đồ uống ngon, nhân viên thân thiện.",
-                        "3 weeks ago", (int) 3.5, 10,
-                        new int[]{})
-        );
 
-        rvReviews.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvReviews.setAdapter(new ReviewAdapter(requireContext(), reviews));
+
+    private void setupReviews(String address, String sortType, Runnable onComplete) {
+        reviewList = new ArrayList<>();
+        LikedReviewList = new ArrayList<>();
+        System.out.println("address: "+ address);
+        ReviewApi.GetLikedReviews(address, jwtToken, getContext(), new ReviewApi.ReviewApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> data) {
+                for(JSONObject a : data){
+                    try {
+                        // Lấy ra List pictureUrls
+                        JSONArray pictureUrlsArray = a.getJSONArray("pictureUrl");
+                        List<String> pictureUrlsList = new ArrayList<>();
+                        for (int i = 0; i < pictureUrlsArray.length(); i++) {
+                            pictureUrlsList.add(pictureUrlsArray.getString(i));
+                        }
+
+                        // Lấy ra relativeTime của review
+                        String time = CheckpointsFragment.getRelativeTime(a.getString("createdAt"));
+
+                        Review r = new Review(a.getJSONObject("userResponse").getString("username"), a.getString("content"), time, a.getInt("rating"), a.getInt("likeCount"), a.getJSONObject("userResponse").getString("profilePicture"), pictureUrlsList);
+                        LikedReviewList.add(r);
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("LikedReviewList: "+ data);
+
+                ReviewApi.GetReviewListByAddress(address, sortType, getContext(), new ReviewApi.ReviewApiCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> data) {
+                        for(JSONObject a : data){
+                            try {
+                                // Lấy ra List pictureUrls
+                                JSONArray pictureUrlsArray = a.getJSONArray("pictureUrl");
+                                List<String> pictureUrlsList = new ArrayList<>();
+                                for (int i = 0; i < pictureUrlsArray.length(); i++) {
+                                    pictureUrlsList.add(pictureUrlsArray.getString(i));
+                                }
+
+                                // Lấy ra relativeTime của review
+                                String time = CheckpointsFragment.getRelativeTime(a.getString("createdAt"));
+
+                                Review r = new Review(a.getJSONObject("userResponse").getString("username"), a.getString("content"), time, a.getInt("rating"), a.getInt("likeCount"), a.getJSONObject("userResponse").getString("profilePicture"), pictureUrlsList);
+                                reviewList.add(r);
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+                        System.out.println("listReview: "+ data);
+
+                        for (Review review : reviewList) {
+                            // Đây là cách đơn giản nhất: Lặp qua LikedReviewList
+                            for (Review likedReview : LikedReviewList) {
+                                if (review.getName().equalsIgnoreCase(likedReview.getName())) {
+                                    review.setIsLiked(true);
+                                    break;
+                                }
+                            }
+                        }
+
+                        setupReviewsSummary();
+
+                        requireActivity().runOnUiThread(() -> {
+                            if (reviewList == null || reviewList.isEmpty()) {
+                                rvReviews.setVisibility(View.GONE);
+                                layoutNoReview.setVisibility(View.VISIBLE);
+                            } else {
+                                rvReviews.setVisibility(View.VISIBLE);
+                                layoutNoReview.setVisibility(View.GONE);
+                            }
+                            rvReviews.setLayoutManager(new LinearLayoutManager(getContext()));
+                            rvReviews.setAdapter(new ReviewAdapter(requireContext(), reviewList, address, jwtToken, username, PlaceDetailFragment.this));
+                        });
+                        onComplete.run();
+                    }
+
+                    @Override
+                    public void onSuccess(String msg) {}
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        requireActivity().runOnUiThread(() -> {
+                            rvReviews.setVisibility(View.GONE);
+                            layoutNoReview.setVisibility(View.VISIBLE);
+                            Toast.makeText(getContext(), "fetch review list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            onComplete.run();
+                        });
+                    }
+                });
+            }
+
+            @Override
+            public void onSuccess(String msg) {}
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    rvReviews.setVisibility(View.GONE);
+                    layoutNoReview.setVisibility(View.VISIBLE);
+                    Toast.makeText(getContext(), "fetch liked review list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    onComplete.run();
+                });
+            }
+        });
+
     }
 
     private void closeFragment() {
@@ -264,16 +617,81 @@ public class PlaceDetailFragment extends Fragment {
 
         btnSave.setOnClickListener(v -> showBookmarkListDialog());
 
-        btnWriteReview.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Write your review", Toast.LENGTH_SHORT).show());
-
-        actionButton.setOnClickListener(v -> {
-            String query = searchBar.getText().toString().trim();
-            if (TextUtils.isEmpty(query)) {
-                Toast.makeText(getContext(), "Enter text to search", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), "Searching reviews for: " + query, Toast.LENGTH_SHORT).show();
+        btnWriteReview.setOnClickListener(v -> {
+                dialogType = "add";
+                showWriteReviewDialog();
             }
+        );
+
+        btnUpdateReview.setOnClickListener(v -> {
+                dialogType = "update";
+                showWriteReviewDialog();
+            }
+        );
+
+        btnDeleteReview.setOnClickListener(v -> {
+                deleteReview();
+            }
+        );
+
+        btnYourLike.setOnClickListener(v -> {
+                Review review = getYourReview();
+                boolean currentlyLiked = review.getIsLiked();
+
+                // 🌟 GỌI API LIKE/UNLIKE
+                ReviewApi.LikeReview(jwtToken, review.getName(), placeData.getAddress(), getContext(), new ReviewApi.ReviewApiCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> data) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(String msg) {
+                        requireActivity().runOnUiThread(() -> {
+                            // Cập nhật trạng thái
+                            review.setIsLiked(!currentlyLiked);
+                            review.setLikeCount(review.getIsLiked() ? review.getLikeCount() + 1 : review.getLikeCount() - 1); // Cập nhật LikeCount trong Model
+
+                            // Cập nhật UI
+                            if (!currentlyLiked) {
+                                btnYourLike.setImageResource(R.drawable.ic_liked_thumb_up);
+                            } else {
+                                btnYourLike.setImageResource(R.drawable.ic_thumb_up);
+                            }
+                            tvYourLikeCount.setText(String.valueOf(review.getLikeCount()));
+                            btnYourLike.setEnabled(true); // Kích hoạt lại nút
+
+                            setupReviews(placeData.getAddress(), currentSelectedTag.getText().toString().toLowerCase(), () -> {});
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        requireActivity().runOnUiThread(() -> {
+                            // Quay lại trạng thái ban đầu nếu thất bại
+                            Toast.makeText(getContext(), "Like your review failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            btnYourLike.setEnabled(true); // Kích hoạt lại nút
+                        });
+                    }
+                });
+            }
+        );
+
+        //hàm tìm kiếm trên thanh search
+        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String query = searchBar.getText().toString().trim();
+
+                // Ẩn bàn phím
+                InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+                }
+
+                filterReviews(query);
+                return true; // báo là đã xử lý hành động này
+            }
+            return false;
         });
 
         btnCheckin.setOnClickListener(v -> {
@@ -304,18 +722,568 @@ public class PlaceDetailFragment extends Fragment {
             });
         });
 
-        // Gắn sự kiện cho tag filter
+        //reviews filter action
         for (int i = 0; i < tagContainer.getChildCount(); i++) {
             View child = tagContainer.getChildAt(i);
             if (child instanceof TextView) {
-                child.setOnClickListener(v -> {
-                    String tagText = ((TextView) v).getText().toString();
+                TextView tagView = (TextView) child;
+
+                // Đặt tag đầu tiên là mặc định được chọn (Tùy chọn)
+                if (i == 0) {
+                    tagView.setBackgroundResource(R.drawable.bg_review_tag_selected);
+                    tagView.setTextColor(Color.parseColor("#1D2E3D"));
+                    currentSelectedTag = tagView;
+                }
+
+                tagView.setOnClickListener(v -> {
+                    TextView clickedTag = (TextView) v;
+
+                    if (clickedTag != currentSelectedTag) {
+                        if (currentSelectedTag != null) {
+                            currentSelectedTag.setBackgroundResource(R.drawable.bg_tag);
+                            currentSelectedTag.setTextColor(Color.parseColor("#FFFFFF"));
+                        }
+                        clickedTag.setBackgroundResource(R.drawable.bg_review_tag_selected);
+                        clickedTag.setTextColor(Color.parseColor("#1D2E3D"));
+                        setupReviews(placeData.getAddress(), clickedTag.getText().toString().toLowerCase(), () -> {});
+                        currentSelectedTag = clickedTag;
+                    }
+
+                    String tagText = clickedTag.getText().toString();
                     Toast.makeText(getContext(), "Filter: " + tagText, Toast.LENGTH_SHORT).show();
                 });
             }
         }
     }
 
+    private void filterReviews(String query) {
+        List<Review> filtered = new ArrayList<>();
+        System.out.println("query: "+query);
+        for (Review a : reviewList) {
+            if (a.getContent().toLowerCase().contains(query.toLowerCase())) {
+                System.out.println("review founded: "+a.getContent());
+                filtered.add(a);
+            }
+        }
+        requireActivity().runOnUiThread(() -> {
+            if (filtered.isEmpty()) {
+                rvReviews.setVisibility(View.GONE);
+                layoutNoReview.setVisibility(View.VISIBLE);
+            } else {
+                rvReviews.setVisibility(View.VISIBLE);
+                layoutNoReview.setVisibility(View.GONE);
+            }
+            rvReviews.setAdapter(new ReviewAdapter(requireContext(), filtered, placeData.getAddress(), jwtToken, username, PlaceDetailFragment.this));
+        });
+    }
+
+
+
+
+    //=========================================================================
+
+    //-----------------ADD/UPDATE/DELETE/LIKE REVIEW SECTION-------------------
+
+    //=========================================================================
+
+    // Method để hiển thị dialog viết review
+    private void showWriteReviewDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_write_review, null);
+        builder.setView(dialogView);
+
+        // Ánh xạ views
+        TextView tvDialogPlaceName = dialogView.findViewById(R.id.tvDialogPlaceName);
+        ImageView ivDialogUserAvatar = dialogView.findViewById(R.id.ivDialogUserAvatar);
+        TextView tvDialogUserName = dialogView.findViewById(R.id.tvDialogUserName);
+        RatingBar dialogRatingBar = dialogView.findViewById(R.id.dialogRatingBar);
+        EditText etDialogReviewContent = dialogView.findViewById(R.id.etDialogReviewContent);
+        MaterialButton btnAddPhotos = dialogView.findViewById(R.id.btnAddPhotos);
+        RecyclerView rvSelectedPhotos = dialogView.findViewById(R.id.rvSelectedPhotos);
+        MaterialButton btnCancelReview = dialogView.findViewById(R.id.btnCancelReview);
+        MaterialButton btnPostReview = dialogView.findViewById(R.id.btnPostReview);
+
+        currentReviewDialog = builder.create();
+        currentReviewDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        btnPostReview.setText(dialogType.equals("update") ? "Update" : "Post");
+
+        // Set dữ liệu
+        if (placeData != null) {
+            tvDialogPlaceName.setText(placeData.getName());
+        }
+        tvDialogUserName.setText(username);
+
+        // Load avatar
+        if (avatar != null && !avatar.isEmpty()) {
+            Glide.with(requireContext())
+                    .load(avatar)
+                    .into(ivDialogUserAvatar);
+        }
+
+        // Setup RecyclerView cho preview ảnh đã chọn
+        if (!selectedImageUris.isEmpty()) {
+            rvSelectedPhotos.setVisibility(View.VISIBLE);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(
+                    requireContext(), LinearLayoutManager.HORIZONTAL, false
+            );
+            rvSelectedPhotos.setLayoutManager(layoutManager);
+
+            // Adapter để hiển thị preview ảnh với nút xóa
+            ImagePreviewAdapter adapter = new ImagePreviewAdapter(
+                    requireContext(),
+                    selectedImageUris,
+                    position -> {
+                        selectedImageUris.remove(position);
+                        showWriteReviewDialog(); // Refresh dialog
+                    }
+            );
+            rvSelectedPhotos.setAdapter(adapter);
+
+            btnAddPhotos.setText("Add photos (" + selectedImageUris.size() + "/" + MAX_IMAGES + ")");
+        } else {
+            rvSelectedPhotos.setVisibility(View.GONE);
+            btnAddPhotos.setText("Add photos");
+        }
+
+        if (tempReviewRating > 0) {
+            dialogRatingBar.setRating(tempReviewRating);
+        }
+        if (!tempReviewContent.isEmpty()) {
+            etDialogReviewContent.setText(tempReviewContent);
+            // Di chuyển con trỏ về cuối (tùy chọn)
+            etDialogReviewContent.setSelection(tempReviewContent.length());
+        }
+
+        // Button chọn ảnh
+        btnAddPhotos.setOnClickListener(v -> {
+            if (selectedImageUris.size() >= MAX_IMAGES) {
+                Toast.makeText(requireContext(),
+                        "Maximum " + MAX_IMAGES + " photos allowed",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            tempReviewRating = dialogRatingBar.getRating();
+            tempReviewContent = etDialogReviewContent.getText().toString();
+            checkAndRequestPermission(); // Kiểm tra permission trước
+        });
+
+        // Button Cancel
+        btnCancelReview.setOnClickListener(v -> {
+            selectedImageUris.clear();
+//            tempReviewContent = "";  // Reset
+//            tempReviewRating = 0f;   // Reset
+            currentReviewDialog.dismiss();
+        });
+
+        // Button Post/Add Review
+        btnPostReview.setOnClickListener(v -> {
+            int rating = (int) dialogRatingBar.getRating();
+            String content = etDialogReviewContent.getText().toString().trim();
+
+            // Validation
+            if (rating == 0) {
+                Toast.makeText(requireContext(), "Please select a rating", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (content.isEmpty()) {
+                Toast.makeText(requireContext(), "Please write your review", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+//            tempReviewContent = "";  // Reset
+//            tempReviewRating = 0f;   // Reset
+            // Upload ảnh lên Cloudinary trước, sau đó gọi API
+            if (!selectedImageUris.isEmpty()) {
+                // Disable button để tránh spam
+                String act = dialogType.equals("add") ? "Posting..." : "Updating...";
+                btnPostReview.setEnabled(false);
+                btnPostReview.setText(act);
+                uploadImagesAndPostReview(rating, content);
+            } else {
+                // Không có ảnh thì gọi API luôn
+                if(dialogType.equals("add")) addReviewToServer(rating, content, new ArrayList<>());
+                else updateReviewToServer(rating, content, new ArrayList<>());
+            }
+        });
+
+        currentReviewDialog.show();
+    }
+
+
+    // Method để xử lý kết quả chọn ảnh
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGES_REQUEST && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                // Xử lý nhiều ảnh
+                if (data.getClipData() != null) {
+                    int count = Math.min(data.getClipData().getItemCount(), MAX_IMAGES - selectedImageUris.size());
+                    for (int i = 0; i < count; i++) {
+                        Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                        selectedImageUris.add(imageUri);
+                    }
+                }
+                // Xử lý 1 ảnh
+                else if (data.getData() != null && selectedImageUris.size() < MAX_IMAGES) {
+                    Uri imageUri = data.getData();
+                    selectedImageUris.add(imageUri);
+                }
+
+                // Giới hạn tối đa 4 ảnh
+                if (selectedImageUris.size() > MAX_IMAGES) {
+                    selectedImageUris = selectedImageUris.subList(0, MAX_IMAGES);
+                }
+
+                Toast.makeText(requireContext(),
+                        selectedImageUris.size() + " photo(s) selected",
+                        Toast.LENGTH_SHORT).show();
+
+                // Hiển thị lại dialog với ảnh đã chọn
+                showWriteReviewDialog();
+            }
+        }
+    }
+
+    // Method để upload ảnh lên Cloudinary và đăng review
+    private void uploadImagesAndPostReview(int rating, String content) {
+        // Hiển thị progress
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(requireContext());
+        progressDialog.setTitle("Uploading images...");
+        progressDialog.setMessage("Please wait");
+        progressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setMax(selectedImageUris.size());
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        CloudinaryUploadHelper.uploadImages(requireContext(), selectedImageUris,
+                new CloudinaryUploadHelper.UploadCallback() {
+                    @Override
+                    public void onSuccess(List<String> imageUrls) {
+                        requireActivity().runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            currentReviewDialog.dismiss();
+
+                            // Gọi API với các URL ảnh đã upload
+                            if(dialogType.equals("add")) addReviewToServer(rating, content, imageUrls);
+                            else updateReviewToServer(rating, content, imageUrls);
+
+                            // Clear selected images
+                            selectedImageUris.clear();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        requireActivity().runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(requireContext(),
+                                    "Failed to upload images: " + errorMessage,
+                                    Toast.LENGTH_LONG).show();
+
+                            // Re-enable button
+                            if (currentReviewDialog != null && currentReviewDialog.isShowing()) {
+                                View dialogView = currentReviewDialog.findViewById(android.R.id.content);
+                                MaterialButton btnPostReview = dialogView.findViewById(R.id.btnPostReview);
+                                if (btnPostReview != null) {
+                                    btnPostReview.setEnabled(true);
+                                    btnPostReview.setText(dialogType.equals("Update") ? "Update" : "Post");
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onProgress(int current, int total) {
+                        requireActivity().runOnUiThread(() -> {
+                            progressDialog.setProgress(current);
+                            progressDialog.setMessage("Uploading " + current + " of " + total);
+                        });
+                    }
+                });
+    }
+
+    // Method để gọi API thêm review
+    private void addReviewToServer(int rating, String content, List<String> pictureUrls) {
+        if (placeData == null || placeData.getAddress() == null) {
+            Toast.makeText(requireContext(), "No place selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (jwtToken == null || jwtToken.isEmpty()) {
+            Toast.makeText(requireContext(), "Please login first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Gọi API AddReview
+        ReviewApi.AddReview(jwtToken, placeData.getAddress(), rating, content, pictureUrls,
+                requireContext(), new ReviewApi.ReviewApiCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> data) {
+                        // Not used in this callback
+                    }
+
+                    @Override
+                    public void onSuccess(String msg) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "Review posted successfully!", Toast.LENGTH_SHORT).show();
+
+                            currentReviewDialog.dismiss();
+                            // Clear selected images
+                            selectedImageUris.clear();
+
+                            Runnable reviewCheckLogic = new Runnable() {
+                                @Override
+                                public void run() {
+                                    // is checked-in
+                                    requireActivity().runOnUiThread(() -> {
+                                        if(isCheckedIn(placeData.getAddress())){
+                                            Review myReview = getYourReview();
+                                            System.out.println("ReviewList: "+reviewList);
+                                            System.out.println("myReview: "+myReview);
+                                            if(myReview != null) {
+                                                // hiển thị phần review của user và 2 nút update, delete
+                                                yourReviewLayout.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setVisibility(View.GONE);
+
+                                                bindMyReviewData(myReview);
+                                            }else{
+                                                // hiển thị và active nút thêm review và visibility: gone cho review của user
+                                                yourReviewLayout.setVisibility(View.GONE);
+                                                btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setEnabled(true);
+                                            }
+                                        }else{
+                                            // vô hiệu hóa nút thêm review (đổi màu xám và khi bấm sẽ hiện toast "You have to check in before write a review")
+                                            btnWriteReview.setEnabled(false);
+                                            btnWriteReview.setBackgroundTintList(
+                                                    ColorStateList.valueOf(Color.parseColor("#808080"))
+                                            );
+                                            yourReviewLayout.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+                            };
+
+                            setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(),
+                                    "Failed to post review: " + errorMessage,
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
+    }
+
+    private void updateReviewToServer(int rating, String content, List<String> pictureUrls) {
+        if (placeData == null || placeData.getAddress() == null) {
+            Toast.makeText(requireContext(), "No place selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (jwtToken == null || jwtToken.isEmpty()) {
+            Toast.makeText(requireContext(), "Please login first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Gọi API AddReview
+        ReviewApi.UpdateReview(jwtToken, placeData.getAddress(), rating, content, pictureUrls,
+                requireContext(), new ReviewApi.ReviewApiCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> data) {
+                        // Not used in this callback
+                    }
+
+                    @Override
+                    public void onSuccess(String msg) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "Review updated successfully!", Toast.LENGTH_SHORT).show();
+
+                            currentReviewDialog.dismiss();
+                            // Clear selected images
+                            selectedImageUris.clear();
+
+                            Runnable reviewCheckLogic = new Runnable() {
+                                @Override
+                                public void run() {
+                                    // is checked-in
+                                    requireActivity().runOnUiThread(() -> {
+                                        if(isCheckedIn(placeData.getAddress())){
+                                            Review myReview = getYourReview();
+                                            if(myReview != null) {
+                                                // hiển thị phần review của user và 2 nút update, delete
+                                                yourReviewLayout.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setVisibility(View.GONE);
+
+                                                bindMyReviewData(myReview);
+                                            }else{
+                                                // hiển thị và active nút thêm review và visibility: gone cho review của user
+                                                yourReviewLayout.setVisibility(View.GONE);
+                                                btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setEnabled(true);
+                                            }
+                                        }else{
+                                            // vô hiệu hóa nút thêm review (đổi màu xám và khi bấm sẽ hiện toast "You have to check in before write a review")
+                                            btnWriteReview.setEnabled(false);
+                                            btnWriteReview.setBackgroundTintList(
+                                                    ColorStateList.valueOf(Color.parseColor("#808080"))
+                                            );
+                                            yourReviewLayout.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+                            };
+
+                            setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(),
+                                    "Failed to update review: " + errorMessage,
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
+    }
+
+    private void deleteReview() {
+        if (placeData == null || placeData.getAddress() == null) {
+            Toast.makeText(requireContext(), "No place selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (jwtToken == null || jwtToken.isEmpty()) {
+            Toast.makeText(requireContext(), "Please login first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Gọi API AddReview
+        ReviewApi.DeleteReview(jwtToken, placeData.getAddress(),
+                requireContext(), new ReviewApi.ReviewApiCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> data) {
+                        // Not used in this callback
+                    }
+
+                    @Override
+                    public void onSuccess(String msg) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "Review removed successfully!", Toast.LENGTH_SHORT).show();
+                            tempReviewContent = "";  // Reset
+                            tempReviewRating = 0f;   // Reset
+                            Runnable reviewCheckLogic = new Runnable() {
+                                @Override
+                                public void run() {
+                                    // is checked-in
+                                    requireActivity().runOnUiThread(() -> {
+                                        if(isCheckedIn(placeData.getAddress())){
+                                            Review myReview = getYourReview();
+                                            if(myReview != null) {
+                                                // hiển thị phần review của user và 2 nút update, delete
+                                                yourReviewLayout.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setVisibility(View.GONE);
+
+                                                bindMyReviewData(myReview);
+                                            }else{
+                                                // hiển thị và active nút thêm review và visibility: gone cho review của user
+                                                yourReviewLayout.setVisibility(View.GONE);
+                                                btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setEnabled(true);
+                                            }
+                                        }else{
+                                            // vô hiệu hóa nút thêm review (đổi màu xám và khi bấm sẽ hiện toast "You have to check in before write a review")
+                                            btnWriteReview.setEnabled(false);
+                                            btnWriteReview.setBackgroundTintList(
+                                                    ColorStateList.valueOf(Color.parseColor("#808080"))
+                                            );
+                                            yourReviewLayout.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+                            };
+
+                            setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(),
+                                    "Failed to delete review: " + errorMessage,
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
+    }
+
+    // Khai báo thêm constant
+    private static final int PERMISSION_REQUEST_CODE = 101;
+
+    // Method kiểm tra và request permission
+    private void checkAndRequestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        PERMISSION_REQUEST_CODE);
+            } else {
+                openImagePicker();
+            }
+        } else {
+            // Android 12 và thấp hơn
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+            } else {
+                openImagePicker();
+            }
+        }
+    }
+
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        startActivityForResult(intent, PICK_IMAGES_REQUEST);
+        if (currentReviewDialog != null) {
+            currentReviewDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker();
+            } else {
+                Toast.makeText(requireContext(),
+                        "Permission denied. Cannot access photos.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    //====================================================
+
+    //-----------------BOOKMARK SECTION-------------------
+
+    //====================================================
     private void showBookmarkListDialog() {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_select_bookmark_list, null);

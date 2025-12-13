@@ -19,9 +19,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class UserApi {
-    private static final String USER_URL = "http://192.168.1.174:8080/api/users";
-    private static final String ACHIEVEMENT_URL = "http://192.168.1.174:8080/api/achievements";
-    private static final String CHECKPOINT_URL = "http://192.168.1.174:8080/api/checkpoints";
+    private static final String USER_URL = "http://172.20.10.4:8080/api/users";
+    private static final String ACHIEVEMENT_URL = "http://172.20.10.4:8080/api/achievements";
+    private static final String CHECKPOINT_URL = "http://172.20.10.4:8080/api/checkpoints";
 
     public static void getMe(String jwt, Context context, UserApi.UserApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
@@ -37,6 +37,54 @@ public class UserApi {
             Request request = new Request.Builder()
                     .url(USER_URL + "/me")
                     .get()
+                    .addHeader("Authorization", "Bearer " + jwt)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onFailure(e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        try {
+                            JSONObject respJson = new JSONObject(response.body().string()).getJSONObject("result");
+                            JSONObject userObj = respJson;
+                            callback.onSuccess(userObj);
+                        } catch (JSONException e) {
+                            callback.onFailure("Failed to parse response");
+                        }
+                    } else {
+                        callback.onFailure("Error: " + response.code());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onFailure(e.getMessage());
+        }
+    }
+
+    public static void updateMyAvatar(String jwt, String avatarUrl, Context context, UserApi.UserApiCallback callback) {
+        OkHttpClient client = new OkHttpClient();
+
+        try {
+            JSONObject json = new JSONObject();
+
+            RequestBody body = RequestBody.create(
+                    json.toString(),
+                    MediaType.parse("application/json; charset=utf-8")
+            );
+
+            HttpUrl url = HttpUrl.parse(USER_URL + "/update-avatar")
+                    .newBuilder()
+                    .addQueryParameter("avatarUrl", avatarUrl)
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
                     .addHeader("Authorization", "Bearer " + jwt)
                     .build();
 

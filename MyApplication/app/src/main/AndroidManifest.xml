@@ -6,6 +6,8 @@
     <!-- Quyền truy cập Internet và mạng -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- Android 13+ -->
 
     <!-- Quyền truy cập vị trí -->
     
@@ -13,8 +15,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- Quyền truy cập Internet -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
@@ -44,6 +44,12 @@
             android:name=".MainActivity"
             android:exported="true">
         </activity>
+
+        <!-- UCrop Activity for image cropping -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:exported="true"
+            android:screenOrientation="portrait" />
 
         <!-- Mapbox/Goong API Key -->
         <meta-data

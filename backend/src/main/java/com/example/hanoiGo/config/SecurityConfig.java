@@ -19,7 +19,8 @@ public class SecurityConfig {
         "/api/locations/**",
         "/api/checkpoints/**",
         "/api/bookmarks/**",
-        "/api/bookmark-lists/**"
+        "/api/bookmark-lists/**",
+        "/api/reviews/**"
     };
     @Bean
     public PasswordEncoder passwordEncoder() {
