@@ -4,11 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#111"
+    android:background="@drawable/bg_bottom_border"
     android:padding="12dp"
     android:layout_marginBottom="12dp"
     android:clipToOutline="true"
-    android:elevation="2dp"
+    android:elevation="1dp"
     android:backgroundTintMode="add">
 
     <!-- Header -->
@@ -46,7 +46,7 @@
                 android:id="@+id/tvSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Local Guide - 300 reviews"
+                android:text="Local Guide"
                 android:textColor="#ccc"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -67,13 +67,14 @@
             android:layout_height="wrap_content"
             android:numStars="5"
             android:stepSize="0.5"
-            android:layout_marginTop="4dp"
             android:scaleX="0.8"
             android:scaleY="0.8"
+            android:layout_marginStart="-8dp"
             android:isIndicator="true"
             android:progressTint="@color/gold"
             android:secondaryProgressTint="@color/gold"
-            android:indeterminateTint="@color/gold"/>
+            android:indeterminateTint="@color/gold"
+            android:layout_gravity="center_vertical"/>
 
 
         <TextView
@@ -91,7 +92,7 @@
         android:id="@+id/tvContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="10dp"
         android:layout_gravity="center"
         android:text="@string/review_text_sample"
         android:textColor="#ddd"
@@ -114,7 +115,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="start"
-        android:layout_marginTop="6dp">
+        android:layout_marginTop="10dp">
 
         <ImageView
             android:id="@+id/btnLike"

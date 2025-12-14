@@ -21,6 +21,7 @@ import com.example.hanoiGo.repository.CheckpointRepository;
 import com.example.hanoiGo.repository.LocationDetailRepository;
 import com.example.hanoiGo.repository.ReviewRepository;
 import com.example.hanoiGo.repository.UserRepository;
+import com.example.hanoiGo.repository.UserLikeRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class CheckpointService {
     private final CheckpointMapper checkpointMapper;
     private final LocationMapper locationMapper;
     private final FirebaseService firebaseService;
+    private final UserLikeRepository userLikeRepository;
 
     // Get list of locations eligible for check-in
     public List<EnableCheckpointResponse> enableCheckIn(UUID userId, Double userLatitude, Double userLongitude) {
@@ -105,7 +107,7 @@ public class CheckpointService {
         LocationDetail loc = locationDetailRepository.findByAddress(request.getLocationAddress())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
         // Add points for check-in
-        int addedPoints = 3;
+        int addedPoints = 5;
         int newPoints = (userEntity.getPoints() == null ? 0 : userEntity.getPoints()) + addedPoints;
         userEntity.setPoints(newPoints);
         userRepository.save(userEntity);
@@ -157,18 +159,20 @@ public class CheckpointService {
         List<CheckpointResponse> responses = new ArrayList<>();
         
         for(Checkpoint cp : checkpoints) {
-            LocationResponse locationRes = locationMapper.toLocationResponse(cp.getLocation());
+            LocationResponse locationRes = locationService.getLocationDetailById(cp.getLocation().getId());
 
             ReviewResponse reviewRes = null;
             Optional<Review> reviewOpt = reviewRepository.findByUserIdAndLocationId(user.getId(), cp.getLocation().getId());
             if (reviewOpt.isPresent()) {
                 Review review = reviewOpt.get();
+                long likeCount = userLikeRepository.countByReviewId(review.getId());
                 reviewRes = ReviewResponse.builder()
                         .userResponse(userService.getUserById(user.getId()))
                         .rating(review.getRating())
                         .createdAt(review.getCreatedAt())
                         .content(review.getContent()) 
                         .pictureUrl(firebaseService.getReviewPictures(review.getId()))
+                        .likeCount(likeCount)
                         .build();           
             }
 
@@ -176,23 +180,33 @@ public class CheckpointService {
             responses.add(resp);
         }
 
-        if("reviewed".equalsIgnoreCase(view) || rating != null || date != null) {
+        // Filtering by view only (don't auto-filter when sorting by rating)
+        if ("review-only".equalsIgnoreCase(view)) {
             responses = responses.stream()
                 .filter(r -> r.getReview() != null)
                 .toList();
-        } else if ("unreviewed".equalsIgnoreCase(view)) {
+        } else if ("no review".equalsIgnoreCase(view)) {
             responses = responses.stream()
                 .filter(r -> r.getReview() == null)
                 .toList();
         }
 
+        // Sorting: treat null review (or null rating) as rating = 0
         if ("best".equalsIgnoreCase(rating)) {
             responses = responses.stream()
-                    .sorted((a,b) -> Integer.compare(b.getReview().getRating(),a.getReview().getRating()))
+                    .sorted((a, b) -> {
+                        int ra = (a.getReview() != null) ? a.getReview().getRating() : 0;
+                        int rb = (b.getReview() != null) ? b.getReview().getRating() : 0;
+                        return Integer.compare(rb, ra); // descending
+                    })
                     .toList();
         } else if ("worst".equalsIgnoreCase(rating)) {
             responses = responses.stream()
-                    .sorted((a,b) -> Integer.compare(a.getReview().getRating(),b.getReview().getRating()))
+                    .sorted((a, b) -> {
+                        int ra = (a.getReview() != null) ? a.getReview().getRating() : 0;
+                        int rb = (b.getReview() != null) ? b.getReview().getRating() : 0;
+                        return Integer.compare(ra, rb); // ascending
+                    })
                     .toList();
         } else if ("newest".equalsIgnoreCase(date)) {
             responses = responses.stream()

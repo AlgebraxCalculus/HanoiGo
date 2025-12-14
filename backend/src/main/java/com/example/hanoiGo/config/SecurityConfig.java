@@ -20,6 +20,7 @@ public class SecurityConfig {
         "/api/checkpoints/**",
         "/api/bookmarks/**",
         "/api/bookmark-lists/**",
+        "/api/reviews/**",
         "/api/directions/**"
     };
     @Bean

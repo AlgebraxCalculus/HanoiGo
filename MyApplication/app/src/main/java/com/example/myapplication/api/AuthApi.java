@@ -3,13 +3,21 @@ package com.example.myapplication.api;
 import android.content.Context;
 import android.widget.Toast;
 import okhttp3.*;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 
 public class AuthApi {
-    private static final String BASE_URL = "http://192.168.1.6:8080/api/users";
+    private static final String BASE_URL = "http://172.20.10.4:8080/api/users";
 
     public static void loginWithFirebase(String firebaseToken, Context context, AuthApiCallback callback) {
         OkHttpClient client = new OkHttpClient();

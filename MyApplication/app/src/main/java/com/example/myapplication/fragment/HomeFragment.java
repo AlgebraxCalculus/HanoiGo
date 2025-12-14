@@ -64,8 +64,9 @@ public class HomeFragment extends Fragment {
     private List<LeaderboardItem> leaderboardList;
 
 
-    TextView tvUsername, tvPoints, tvRank, tvAchieveCount, tvTopAchievement, tvTop1Name, tvTop2Name, tvTop3Name, tvTop1Points, tvTop2Points, tvTop3Points, tvCurRankPosition, tvCurRankUsername, tvCurRankPoints;
-    ImageView imgUserAvatar, imgTop1Avatar, imgTop2Avatar, imgTop3Avatar, imgCurRankAvatar;
+    TextView tvUsername, tvPoints, tvRank, tvAchieveCount, tvTopAchievement, tvTop1Name, tvTop2Name, tvTop3Name, tvTop1Points, tvTop2Points, tvTop3Points, tvCurRankPosition, tvCurRankUsername, tvCurRankPoints, tvViewAllAchievements;
+    ImageView imgUserAvatar, imgTop1Avatar, imgTop2Avatar, imgTop3Avatar, imgCurRankAvatar, icSettings;
+    ScrollView scrollView;
     String username = "default user";
     String avatar = "";
     String points = "0";
@@ -83,7 +84,7 @@ public class HomeFragment extends Fragment {
 
         // --- swipe refresh section ---
         SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
-        ScrollView scrollView = view.findViewById(R.id.scrollView);
+        scrollView = view.findViewById(R.id.scrollView);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             System.out.println("User pulled to refresh");
             reloadData();
@@ -104,25 +105,35 @@ public class HomeFragment extends Fragment {
         }
 
         // --- mapper thành phần UI section ---
-        tvUsername = view.findViewById(R.id.tvUserName);
-        tvPoints = view.findViewById(R.id.tvPointsCount);
-        imgUserAvatar = view.findViewById(R.id.imgUserAvatar);
-        tvRank = view.findViewById(R.id.tvRankCount);
-        tvAchieveCount = view.findViewById(R.id.tvAchievementCount);
-        tvTopAchievement = view.findViewById(R.id.tvTopAchievement);
-        tvTop1Name = view.findViewById(R.id.tvTop1Name);
-        tvTop2Name = view.findViewById(R.id.tvTop2Name);
-        tvTop3Name = view.findViewById(R.id.tvTop3Name);
-        tvTop1Points = view.findViewById(R.id.tvTop1Points);
-        tvTop2Points = view.findViewById(R.id.tvTop2Points);
-        tvTop3Points = view.findViewById(R.id.tvTop3Points);
-        imgTop1Avatar = view.findViewById(R.id.imgTop1Avatar);
-        imgTop2Avatar = view.findViewById(R.id.imgTop2Avatar);
-        imgTop3Avatar = view.findViewById(R.id.imgTop3Avatar);
+         tvUsername = view.findViewById(R.id.tvUserName);
+         tvPoints = view.findViewById(R.id.tvPointsCount);
+         imgUserAvatar = view.findViewById(R.id.imgUserAvatar);
+         tvRank = view.findViewById(R.id.tvRankCount);
+         tvAchieveCount = view.findViewById(R.id.tvAchievementCount);
+         tvTopAchievement = view.findViewById(R.id.tvTopAchievement);
+         tvViewAllAchievements = view.findViewById(R.id.tvViewAllAchievements);
+         tvTop1Name = view.findViewById(R.id.tvTop1Name);
+         tvTop2Name = view.findViewById(R.id.tvTop2Name);
+         tvTop3Name = view.findViewById(R.id.tvTop3Name);
+         tvTop1Points = view.findViewById(R.id.tvTop1Points);
+         tvTop2Points = view.findViewById(R.id.tvTop2Points);
+         tvTop3Points = view.findViewById(R.id.tvTop3Points);
+         imgTop1Avatar = view.findViewById(R.id.imgTop1Avatar);
+         imgTop2Avatar = view.findViewById(R.id.imgTop2Avatar);
+         imgTop3Avatar = view.findViewById(R.id.imgTop3Avatar);
         tvCurRankPosition = view.findViewById(R.id.tvCurRankPosition);
         tvCurRankUsername = view.findViewById(R.id.tvCurRankUsername);
         tvCurRankPoints = view.findViewById(R.id.tvCurRankPoints);
         imgCurRankAvatar = view.findViewById(R.id.imgCurRankAvatar);
+        icSettings = view.findViewById(R.id.icSettings);
+
+        // --- Setting section ---
+        icSettings.setOnClickListener(v -> {
+            SettingFragment settingFragment = new SettingFragment();
+            settingFragment.setArguments(getArguments());   // PHẢI gọi trước
+            settingFragment.setPreviousFragment(this);
+            ((MainActivity) getActivity()).switchFragment(settingFragment);
+        });
 
         // --- Place sections ---
         recyclerViewIconic = view.findViewById(R.id.recyclerViewIconic);
@@ -140,6 +151,15 @@ public class HomeFragment extends Fragment {
         recyclerAchievements = view.findViewById(R.id.recyclerAchievements);
         layoutNoAchievements = view.findViewById(R.id.layoutNoAchievements);
         recyclerAchievements.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        tvViewAllAchievements.setOnClickListener(v -> {
+            PersonalFragment personalFragment = new PersonalFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("jwtToken", jwtToken);
+            bundle.putString("targetTab", "achievements");
+            personalFragment.setArguments(bundle);
+            ((MainActivity) requireActivity()).switchFragment(personalFragment);
+        });
 //        setupAchievementData(jwtToken);
 
         // --- Full Leaderboard section ---
@@ -151,7 +171,7 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-    private void reloadData() {
+    public void reloadData() {
         setupUserData(() -> {
             setupAchievementData(jwtToken);
             setupLeaderboardData();
@@ -159,7 +179,7 @@ public class HomeFragment extends Fragment {
             //chỉ khi cập nhật xong user location mới setupPlaceData
             if (userLat != 0 && userLng != 0){
                 setupPlaceData();
-            } else{
+            }else{
                 System.out.println("reloadData(): userLat/lng not ready yet, skip place setup");
             }
         });
@@ -487,6 +507,14 @@ public class HomeFragment extends Fragment {
         // Gọi activity chứa fragment này
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).openPlaceDetailFromHome(place);
+        }
+    }
+
+    public void resetScroll() {
+        // Giả định bạn đã ánh xạ NestedScrollView:
+        if (scrollView != null) {
+            // Cuộn về vị trí (0, 0)
+            scrollView.scrollTo(0, 0);
         }
     }
 }

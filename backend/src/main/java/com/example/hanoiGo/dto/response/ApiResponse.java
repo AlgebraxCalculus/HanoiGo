@@ -48,5 +48,5 @@ public class ApiResponse<T> {
             .message(errorCode.getMessage())
             .result(data)
             .build();
-}
+    }
 }

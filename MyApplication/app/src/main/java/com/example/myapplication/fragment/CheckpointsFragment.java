@@ -33,7 +33,10 @@ import com.example.myapplication.MainActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,11 +44,14 @@ public class CheckpointsFragment extends Fragment {
     LinearLayout layoutNoCheckpoints;
     TextView tvCheckpointCount, filterHighestRate, filterNewest, filterLowestRate, filterOldest;
     EditText etSearchCheckpoint;
-    Spinner spinnerView;
+    Spinner spinner;
     String jwtToken = "";
     private RecyclerView rvCheckpoints;
     private PersCheckpointAdapter persCheckpointAdapter;
     private List<Checkpoint> checkpointList;
+    private String currentType = "date"; // "rating" hoặc "date"
+    private String currentSort = "newest"; // "best", "worst", "newest", "oldest"
+    private boolean isSpinnerInitialized = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,8 +87,18 @@ public class CheckpointsFragment extends Fragment {
             return false;
         });
 
+        // Setup spinner
+        spinner = view.findViewById(R.id.spinnerView);
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
+                getContext(), R.array.view_filter_options, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(spinnerAdapter);
+
+        //set event cho filter sort
         filterHighestRate.setOnClickListener(v -> {
-            setupCheckpointData(jwtToken, "tier","desc");
+            currentType = "rating";
+            currentSort = "best";
+            setupCheckpointData(jwtToken, currentType, currentSort, spinner.getSelectedItem().toString());
             filterHighestRate.setTextColor(Color.parseColor("#FFFFFF"));
             filterHighestRate.setBackground(getResources().getDrawable(R.drawable.bg_filter_selected));
             filterLowestRate.setTextColor(Color.parseColor("#000000"));
@@ -93,7 +109,9 @@ public class CheckpointsFragment extends Fragment {
             filterOldest.setBackground(getResources().getDrawable(R.drawable.bg_filter_unselected));
         });
         filterLowestRate.setOnClickListener(v -> {
-            setupCheckpointData(jwtToken, "tier","asc");
+            currentType = "rating";
+            currentSort = "worst";
+            setupCheckpointData(jwtToken, currentType, currentSort, spinner.getSelectedItem().toString());
             filterHighestRate.setTextColor(Color.parseColor("#000000"));
             filterHighestRate.setBackground(getResources().getDrawable(R.drawable.bg_filter_unselected));
             filterLowestRate.setTextColor(Color.parseColor("#FFFFFF"));
@@ -104,7 +122,9 @@ public class CheckpointsFragment extends Fragment {
             filterOldest.setBackground(getResources().getDrawable(R.drawable.bg_filter_unselected));
         });
         filterNewest.setOnClickListener(v -> {
-            setupCheckpointData(jwtToken, "earned_at","desc");
+            currentType = "date";
+            currentSort = "newest";
+            setupCheckpointData(jwtToken, currentType, currentSort, spinner.getSelectedItem().toString());
             filterHighestRate.setTextColor(Color.parseColor("#000000"));
             filterHighestRate.setBackground(getResources().getDrawable(R.drawable.bg_filter_unselected));
             filterLowestRate.setTextColor(Color.parseColor("#000000"));
@@ -115,7 +135,9 @@ public class CheckpointsFragment extends Fragment {
             filterOldest.setBackground(getResources().getDrawable(R.drawable.bg_filter_unselected));
         });
         filterOldest.setOnClickListener(v -> {
-            setupCheckpointData(jwtToken, "earned_at","asc");
+            currentType = "date";
+            currentSort = "oldest";
+            setupCheckpointData(jwtToken, currentType, currentSort, spinner.getSelectedItem().toString());
             filterHighestRate.setTextColor(Color.parseColor("#000000"));
             filterHighestRate.setBackground(getResources().getDrawable(R.drawable.bg_filter_unselected));
             filterLowestRate.setTextColor(Color.parseColor("#000000"));
@@ -126,13 +148,25 @@ public class CheckpointsFragment extends Fragment {
             filterOldest.setBackground(getResources().getDrawable(R.drawable.bg_filter_selected));
         });
 
-        // Setup spinner
-        Spinner spinner = view.findViewById(R.id.spinnerView);
-        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
-                getContext(), R.array.view_filter_options, android.R.layout.simple_spinner_item);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(spinnerAdapter);
+        //set event cho filter view
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!isSpinnerInitialized) {
+                    isSpinnerInitialized = true;
+                    return; // 🚫 bỏ lần gọi đầu tiên
+                }
 
+                String selectedView = parent.getItemAtPosition(position).toString();
+                // Gọi lại hàm setupCheckpointData với filter hiện tại
+                setupCheckpointData(jwtToken, currentType, currentSort, selectedView);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // không cần làm gì
+            }
+        });
 
 
         rvCheckpoints = view.findViewById(R.id.rvCheckpoints);
@@ -142,79 +176,86 @@ public class CheckpointsFragment extends Fragment {
         return view;
     }
 
-    public void setupCheckpointData(String jwt, String type, String sort) {
-//        checkpointList = new ArrayList<>();
-//
-//        UserApi.GetMyCheckpointList(jwt, type, sort, getContext(), new UserApi.UserApiCallback() {
-//            @Override
-//            public void onSuccess(ArrayList<JSONObject> data) {
-//                for(JSONObject a : data){
-//                    try {
-//                        checkpointList.add(new Checkpoint(a.getString("name"), a.getString("description"), "Tier "+a.getString("tier"), R.drawable.ic_medal, LocalDateTime.parse(a.getString("earned_at")).toLocalDate()));
-//                    }catch (JSONException e){
-//                        e.printStackTrace();
-//                    }
-//                }
-////                System.out.println("listAchievemnent: "+achievementList);
-//                requireActivity().runOnUiThread(() -> {
-//                    if (checkpointList == null || checkpointList.isEmpty()) {
-//                        rvCheckpoints.setVisibility(View.GONE);
-//                        layoutNoCheckpoints.setVisibility(View.VISIBLE);
-//                    } else {
-//                        rvCheckpoints.setVisibility(View.VISIBLE);
-//                        layoutNoCheckpoints.setVisibility(View.GONE);
-//                    }
-//                    tvCheckpointCount.setText(data.size() + " Achievements");
-//                    persCheckpointAdapter = new PersCheckpointAdapter(requireContext(), checkpointList, checkpoint -> openPlaceDetail(checkpoint));
-//                    rvCheckpoints.setAdapter(persCheckpointAdapter);
-//                });
-//            }
-//
-//            @Override
-//            public void onSuccess(JSONObject userObj) {}
-//
-//            @Override
-//            public void onFailure(String errorMessage) {
-//                requireActivity().runOnUiThread(() -> {
-//                    rvCheckpoints.setVisibility(View.GONE);
-//                    layoutNoCheckpoints.setVisibility(View.VISIBLE);
-//                    Toast.makeText(getContext(), "fetch checkpoint list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
-//                });
-//            }
-//        });
-
+    public void setupCheckpointData(String jwt, String type, String sort, String view) {
         checkpointList = new ArrayList<>();
-        checkpointList.add(new Checkpoint(
-                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
-                LocalDateTime.now(),
-                new Review(null, null, "Nice view, simple lovely", "few seconds ago", 5, 0, null)
-        ));
-        checkpointList.add(new Checkpoint(
-                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
-                LocalDateTime.now(),
-                new Review(null, null, "Nice view, simple ", "few seconds ago", 5, 0, null)
-        ));
-        checkpointList.add(new Checkpoint(
-                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
-                LocalDateTime.now(),
-                new Review(null, null, "Nice view, lovely", "few seconds ago", 5, 0, null)
-        ));
-        checkpointList.add(new Checkpoint(
-                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
-                LocalDateTime.now(),
-                null
-        ));
-        
-        if (checkpointList == null || checkpointList.isEmpty()) {
-            rvCheckpoints.setVisibility(View.GONE);
-            layoutNoCheckpoints.setVisibility(View.VISIBLE);
-        } else {
-            rvCheckpoints.setVisibility(View.VISIBLE);
-            layoutNoCheckpoints.setVisibility(View.GONE);
-        }
-        tvCheckpointCount.setText(checkpointList.size() + " Checkpoints");
-        persCheckpointAdapter = new PersCheckpointAdapter(requireContext(), checkpointList, checkpoint -> openPlaceDetail(checkpoint));
-        rvCheckpoints.setAdapter(persCheckpointAdapter);
+
+        UserApi.GetMyCheckpointList(jwt, type, sort, view, getContext(), new UserApi.UserApiCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> data) {
+                for(JSONObject a : data){
+                    try {
+                        Place p = new Place(a.getJSONObject("location").getString("name"), a.getJSONObject("location").getString("description"), null, a.getJSONObject("location").getString("defaultPicture"), a.getJSONObject("location").getString("address"));
+                        Review r = null;
+                        if(!a.isNull("review")){
+                            String time = getRelativeTime(a.getJSONObject("review").getString("createdAt")); //cần thêm hàm biến đổi về dạng khoảng time tới hiện tại (few seconds ago,...)
+                            r = new Review(a.getJSONObject("review").getJSONObject("userResponse").getString("username"), a.getJSONObject("review").getString("content"), time, a.getJSONObject("review").getInt("rating"));
+                        }
+                        LocalDateTime checkinTime = LocalDateTime.parse(a.getString("checkedInTime"));
+                        checkpointList.add(new Checkpoint(p, checkinTime, r));
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+//                System.out.println("listCheckpoint: "+ checkpointList);
+                requireActivity().runOnUiThread(() -> {
+                    if (checkpointList == null || checkpointList.isEmpty()) {
+                        rvCheckpoints.setVisibility(View.GONE);
+                        layoutNoCheckpoints.setVisibility(View.VISIBLE);
+                    } else {
+                        rvCheckpoints.setVisibility(View.VISIBLE);
+                        layoutNoCheckpoints.setVisibility(View.GONE);
+                    }
+                    tvCheckpointCount.setText(data.size() + " Checkpoints");
+                    persCheckpointAdapter = new PersCheckpointAdapter(requireContext(), checkpointList, checkpoint -> openPlaceDetail(checkpoint));
+                    rvCheckpoints.setAdapter(persCheckpointAdapter);
+                });
+            }
+
+            @Override
+            public void onSuccess(JSONObject userObj) {}
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    rvCheckpoints.setVisibility(View.GONE);
+                    layoutNoCheckpoints.setVisibility(View.VISIBLE);
+                    Toast.makeText(getContext(), "fetch checkpoint list failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+
+//        checkpointList = new ArrayList<>();
+//        checkpointList.add(new Checkpoint(
+//                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
+//                LocalDateTime.now(),
+//                new Review(null, null, "Nice view, simple lovely", "few seconds ago", 5, 0, null)
+//        ));
+//        checkpointList.add(new Checkpoint(
+//                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
+//                LocalDateTime.now(),
+//                new Review(null, null, "Nice view, simple ", "few seconds ago", 5, 0, null)
+//        ));
+//        checkpointList.add(new Checkpoint(
+//                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
+//                LocalDateTime.now(),
+//                new Review(null, null, "Nice view, lovely", "few seconds ago", 5, 0, null)
+//        ));
+//        checkpointList.add(new Checkpoint(
+//                new Place("Hồ Hoàn Kiếm", "Hồ Hoàn Kiếm là trái tim của Hà Nội, nổi bật với mặt nước xanh biếc, Tháp Rùa cổ kính và cầu Thê Húc đỏ rực dẫn vào đền Ngọc Sơn. Đây không chỉ là điểm tham quan nổi tiếng mà còn là nơi lưu giữ những giá trị lịch sử, văn hóa và không khí yên bình giữa lòng phố cổ", null, "https://res.cloudinary.com/dsm1uhecl/image/upload/v1759653241/ho_hoan_kiem_mgbnsy.jpg"),
+//                LocalDateTime.now(),
+//                null
+//        ));
+//
+//        if (checkpointList == null || checkpointList.isEmpty()) {
+//            rvCheckpoints.setVisibility(View.GONE);
+//            layoutNoCheckpoints.setVisibility(View.VISIBLE);
+//        } else {
+//            rvCheckpoints.setVisibility(View.VISIBLE);
+//            layoutNoCheckpoints.setVisibility(View.GONE);
+//        }
+//        tvCheckpointCount.setText(checkpointList.size() + " Checkpoints");
+//        persCheckpointAdapter = new PersCheckpointAdapter(requireContext(), checkpointList, checkpoint -> openPlaceDetail(checkpoint));
+//        rvCheckpoints.setAdapter(persCheckpointAdapter);
     }
 
 
@@ -237,6 +278,38 @@ public class CheckpointsFragment extends Fragment {
             persCheckpointAdapter = new PersCheckpointAdapter(requireContext(), filtered, checkpoint -> openPlaceDetail(checkpoint));
             rvCheckpoints.setAdapter(persCheckpointAdapter);
         });
+    }
+
+    public static String getRelativeTime(String isoTime) {
+        // Parse từ ISO string → LocalDateTime
+        LocalDateTime time = LocalDateTime.parse(isoTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        // Lấy thời gian hiện tại
+        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+
+        // Tính khoảng cách giữa hai thời điểm
+        Duration duration = Duration.between(time, now);
+
+        long seconds = duration.getSeconds();
+
+        if (seconds < 60) {
+            return "few seconds ago";
+        } else if (seconds < 3600) {
+            long minutes = seconds / 60;
+            return minutes + (minutes == 1 ? " minute ago" : " minutes ago");
+        } else if (seconds < 86400) {
+            long hours = seconds / 3600;
+            return hours + (hours == 1 ? " hour ago" : " hours ago");
+        } else if (seconds < 2592000) { // dưới 30 ngày
+            long days = seconds / 86400;
+            return days + (days == 1 ? " day ago" : " days ago");
+        } else if (seconds < 31536000) { // dưới 12 tháng
+            long months = seconds / 2592000;
+            return months + (months == 1 ? " month ago" : " months ago");
+        } else {
+            long years = seconds / 31536000;
+            return years + (years == 1 ? " year ago" : " years ago");
+        }
     }
 
     private void openPlaceDetail(Checkpoint checkpoint){

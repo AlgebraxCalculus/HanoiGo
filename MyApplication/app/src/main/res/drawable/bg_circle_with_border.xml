@@ -5,7 +5,7 @@
     <!-- Viền vàng -->
     <stroke
         android:width="3dp"
-        android:color="#FFD700" />
+        android:color="#FFF6C4" />
     <size
         android:width="80dp"
         android:height="80dp" />
