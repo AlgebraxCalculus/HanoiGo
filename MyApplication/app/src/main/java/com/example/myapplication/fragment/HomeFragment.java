@@ -105,22 +105,22 @@ public class HomeFragment extends Fragment {
         }
 
         // --- mapper thành phần UI section ---
-         tvUsername = view.findViewById(R.id.tvUserName);
-         tvPoints = view.findViewById(R.id.tvPointsCount);
-         imgUserAvatar = view.findViewById(R.id.imgUserAvatar);
-         tvRank = view.findViewById(R.id.tvRankCount);
-         tvAchieveCount = view.findViewById(R.id.tvAchievementCount);
-         tvTopAchievement = view.findViewById(R.id.tvTopAchievement);
-         tvViewAllAchievements = view.findViewById(R.id.tvViewAllAchievements);
-         tvTop1Name = view.findViewById(R.id.tvTop1Name);
-         tvTop2Name = view.findViewById(R.id.tvTop2Name);
-         tvTop3Name = view.findViewById(R.id.tvTop3Name);
-         tvTop1Points = view.findViewById(R.id.tvTop1Points);
-         tvTop2Points = view.findViewById(R.id.tvTop2Points);
-         tvTop3Points = view.findViewById(R.id.tvTop3Points);
-         imgTop1Avatar = view.findViewById(R.id.imgTop1Avatar);
-         imgTop2Avatar = view.findViewById(R.id.imgTop2Avatar);
-         imgTop3Avatar = view.findViewById(R.id.imgTop3Avatar);
+        tvUsername = view.findViewById(R.id.tvUserName);
+        tvPoints = view.findViewById(R.id.tvPointsCount);
+        imgUserAvatar = view.findViewById(R.id.imgUserAvatar);
+        tvRank = view.findViewById(R.id.tvRankCount);
+        tvAchieveCount = view.findViewById(R.id.tvAchievementCount);
+        tvTopAchievement = view.findViewById(R.id.tvTopAchievement);
+        tvViewAllAchievements = view.findViewById(R.id.tvViewAllAchievements);
+        tvTop1Name = view.findViewById(R.id.tvTop1Name);
+        tvTop2Name = view.findViewById(R.id.tvTop2Name);
+        tvTop3Name = view.findViewById(R.id.tvTop3Name);
+        tvTop1Points = view.findViewById(R.id.tvTop1Points);
+        tvTop2Points = view.findViewById(R.id.tvTop2Points);
+        tvTop3Points = view.findViewById(R.id.tvTop3Points);
+        imgTop1Avatar = view.findViewById(R.id.imgTop1Avatar);
+        imgTop2Avatar = view.findViewById(R.id.imgTop2Avatar);
+        imgTop3Avatar = view.findViewById(R.id.imgTop3Avatar);
         tvCurRankPosition = view.findViewById(R.id.tvCurRankPosition);
         tvCurRankUsername = view.findViewById(R.id.tvCurRankUsername);
         tvCurRankPoints = view.findViewById(R.id.tvCurRankPoints);
@@ -197,7 +197,7 @@ public class HomeFragment extends Fragment {
 
         // Chỉ gọi setupPlaceData() lần đầu khi fragment mới được load
         if (listIconic == null || listIconic.isEmpty()) {
-            setupPlaceData();
+//            setupPlaceData();
         }
     }
 

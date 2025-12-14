@@ -10,9 +10,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Layout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,15 +40,12 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.BookmarkListSelectorAdapter;
 import com.example.myapplication.adapter.ImageAdapter;
 import com.example.myapplication.adapter.ImagePreviewAdapter;
-import com.example.myapplication.adapter.PersCheckpointAdapter;
 import com.example.myapplication.adapter.ReviewAdapter;
 import com.example.myapplication.api.BookmarkApi;
 import com.example.myapplication.api.CheckpointApi;
 import com.example.myapplication.api.CloudinaryUploadHelper;
 import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.api.ReviewApi;
-import com.example.myapplication.api.UserApi;
-import com.example.myapplication.model.Checkpoint;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
 import com.example.myapplication.model.SavedList;
@@ -64,22 +58,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.NumberFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyReviewLikedListener {
-
-    private CoordinatorLayout placeDetailContainer;
     private BottomSheetBehavior<View> bottomSheetBehavior;
     private TextView placeTitle, placeAddress, overallDescription, locationText, tvYourName, tvYourTime, tvYourLikeCount, tvOverallRating, tvOverallRatingCount, tvRatingNumber, tvReviewCount;
     private TextView currentSelectedTag = null;
     private RatingBar ratingBar, yourRatingBar, rtOverallRatingBar;
     private MaterialButton btnDirections, btnSave, btnWriteReview, btnCheckin, btnUpdateReview, btnDeleteReview;
     private EditText searchBar;
-    private ImageView actionButton, btnClose, imgYourAvatar, btnYourLike;
+    private ImageView btnClose, imgYourAvatar, btnYourLike;
     private LinearLayout tagContainer, yourReviewLayout;
     private View layoutNoReview, ratingBar1, ratingBar2, ratingBar3, ratingBar4, ratingBar5;
     private ReadMoreTextView tvYourContent;
@@ -134,10 +124,8 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
 
         View view = inflater.inflate(R.layout.fragment_place_detail, container, false);
 
-        // --- Ánh xạ views ---
         rvPlacePhotos = view.findViewById(R.id.rvPlacePhotos);
         rvReviews = view.findViewById(R.id.rvReviews);
-        placeDetailContainer = view.findViewById(R.id.placeDetailContainer);
         placeTitle = view.findViewById(R.id.placeTitle);
         ratingBar = view.findViewById(R.id.ratingBar);
         tvRatingNumber = view.findViewById(R.id.tvRatingNumber);
@@ -150,7 +138,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         btnSave = view.findViewById(R.id.btnSave);
         btnWriteReview = view.findViewById(R.id.btnWriteReview);
         searchBar = view.findViewById(R.id.searchBar);
-        actionButton = view.findViewById(R.id.actionButton);
         btnClose = view.findViewById(R.id.btnCloseExplore);
         tagContainer = view.findViewById(R.id.tagContainer);
         layoutNoReview = view.findViewById(R.id.layoutNoReview);
@@ -162,18 +149,16 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         rtOverallRatingBar = view.findViewById(R.id.rtOverallRatingBar);
         tvOverallRatingCount = view.findViewById(R.id.tvOverallRatingCount);
 
+
         imgYourAvatar = view.findViewById(R.id.imgYourAvatar);
         tvYourName = view.findViewById(R.id.tvYourName);
         tvYourTime = view.findViewById(R.id.tvYourTime);
         tvYourLikeCount = view.findViewById(R.id.tvYourLikeCount);
         btnYourLike = view.findViewById(R.id.btnYourLike);
-        tvYourContent = view.findViewById(R.id.tvYourContent); // Dùng ID này trong XML
+        tvYourContent = view.findViewById(R.id.tvYourContent);
         yourRatingBar = view.findViewById(R.id.yourRatingBar);
         yourImageGrid = view.findViewById(R.id.yourImageGrid);
 
-
-
-        // --- Thiết lập dữ liệu tĩnh rating
         ratingBar5 = view.findViewById(R.id.ratingBar5);
         TextView star5 = ratingBar5.findViewById(R.id.starNumber);
         star5.setText("5");
@@ -194,18 +179,13 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         TextView star1 = ratingBar1.findViewById(R.id.starNumber);
         star1.setText("1");
 
-        // ⭐ Header mới (AppBarLayout)
+        // AppBarLayout
         AppBarLayout header = view.findViewById(R.id.placeHeader);
         placeTitle = view.findViewById(R.id.placeTitle);
         btnClose = view.findViewById(R.id.btnCloseExplore);
 
-        // ⭐ Content scroll
-        NestedScrollView scrollView = view.findViewById(R.id.scrollContent);
-
-        // ⭐ Bottom sheet mới
         View bottomSheet = view.findViewById(R.id.bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-
         // Setup bottom sheet kiểu Google Maps
         bottomSheetBehavior.setFitToContents(false);
         bottomSheetBehavior.setExpandedOffset(120);
@@ -214,7 +194,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setHideable(false);
 
-        // ⭐ Hiệu ứng Google Maps: header nổi khi kéo gần full
+        //  Hiệu ứng Google Maps: header nổi khi kéo gần full
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View sheet, int newState) {}
@@ -239,11 +219,10 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             username = getArguments().getString("username");
             avatar = getArguments().getString("avatar");
         }
-        System.out.println("availableCheckpoint: "+availableCheckpoints);
+        System.out.println("AvailableCheckpoint: "+ availableCheckpoints);
 
-        // is checkin-able
         if (placeData != null && availableCheckpoints != null) {
-            boolean isCheckpointAvailable = isCheckin(placeData.getAddress(), availableCheckpoints);
+            boolean isCheckpointAvailable = isCheckedIn(placeData.getAddress(), availableCheckpoints);
             btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
         }
 
@@ -252,9 +231,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             public void run() {
                 // is checked-in
                 requireActivity().runOnUiThread(() -> {
-                    if(isCheckedIn(placeData.getAddress())){
+                    if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
                         Review myReview = getYourReview();
-                        System.out.println("ReviewList: "+reviewList);
+                        System.out.println("ReviewList: "+ reviewList);
                         System.out.println("myReview: "+myReview);
                         if(myReview != null) {
                             // hiển thị phần review của user và 2 nút update, delete
@@ -284,10 +263,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         fetchPlaceDetail(placeData.getAddress());
 
         return view;
-    }
-
-    private boolean isCheckedIn (String address) {
-        return true;
     }
 
     private Review getYourReview () {
@@ -401,8 +376,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                 Glide.with(context)
                         .load(imageUrls.get(i))
                         .into(img);
-
-                // --- Bo góc mềm mại hơn ---
                 img.setBackgroundResource(R.drawable.bg_rounded_image);
                 img.setClipToOutline(true);
 
@@ -424,7 +397,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         this.userLng = lng;
     }
 
-    private boolean isCheckin(String address, ArrayList<JSONObject> checkpointList) {
+    private boolean isCheckedIn(String address, ArrayList<JSONObject> checkpointList) {
         if (address == null || checkpointList == null) return false;
 
         for (JSONObject checkpoint : checkpointList) {
@@ -507,8 +480,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         CheckpointApi.GetEnableCheckIn(lat, lng, jwtToken, getContext(), new CheckpointApi.CheckpointApiCallback() {
             @Override
             public void onSuccess(ArrayList<JSONObject> checkpointList) {
+                availableCheckpoints = checkpointList;
                 requireActivity().runOnUiThread(() -> {
-                    boolean isCheckpointAvailable = isCheckin(address, checkpointList);
+                    boolean isCheckpointAvailable = isCheckedIn(address, checkpointList);
                     if (isCheckpointAvailable) {
                         btnCheckin.setVisibility(View.VISIBLE);
                         setNormalBackground();
@@ -530,17 +504,17 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
     }
 
     private void setDisabledBackground() {
-        if (bottomSheetBehavior != null) {
-            View bottomSheet = getView().findViewById(R.id.bottomSheetPlaceDetail);
-            bottomSheet.setBackgroundResource(R.drawable.bg_gradient_disabled);
-        }
+        View content = getView().findViewById(R.id.bottomSheetContent);
+        content.setBackgroundResource(R.drawable.bg_gradient_disabled);
+        View header = getView().findViewById(R.id.placeHeader);
+        header.setBackgroundResource(R.drawable.bg_gradient_disabled);
     }
 
     private void setNormalBackground() {
-        if (bottomSheetBehavior != null) {
-            View bottomSheet = getView().findViewById(R.id.bottomSheetPlaceDetail);
-            bottomSheet.setBackgroundResource(R.drawable.bg_bottom_sheet);
-        }
+        View content = getView().findViewById(R.id.bottomSheetContent);
+        content.setBackgroundResource(R.drawable.bg_bottom_sheet);
+        View header = getView().findViewById(R.id.placeHeader);
+        header.setBackgroundResource(R.drawable.bg_bottom_sheet);
     }
 
     // Setup scroll photo
@@ -765,7 +739,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             }
         );
 
-        //hàm tìm kiếm trên thanh search
+        // Hàm tìm kiếm trên thanh search
         searchBar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 String query = searchBar.getText().toString().trim();
@@ -777,7 +751,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                 }
 
                 filterReviews(query);
-                return true; // báo là đã xử lý hành động này
+                return true;
             }
             return false;
         });
@@ -810,7 +784,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             });
         });
 
-        //reviews filter action
+        // Reviews filter action
         for (int i = 0; i < tagContainer.getChildCount(); i++) {
             View child = tagContainer.getChildAt(i);
             if (child instanceof TextView) {
@@ -864,10 +838,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             rvReviews.setAdapter(new ReviewAdapter(requireContext(), filtered, placeData.getAddress(), jwtToken, username, PlaceDetailFragment.this));
         });
     }
-
-
-
-
     //=========================================================================
 
     //-----------------ADD/UPDATE/DELETE/LIKE REVIEW SECTION-------------------
@@ -1128,7 +1098,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 public void run() {
                                     // is checked-in
                                     requireActivity().runOnUiThread(() -> {
-                                        if(isCheckedIn(placeData.getAddress())){
+                                        if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
                                             Review myReview = getYourReview();
                                             System.out.println("ReviewList: "+reviewList);
                                             System.out.println("myReview: "+myReview);
@@ -1204,7 +1174,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 public void run() {
                                     // is checked-in
                                     requireActivity().runOnUiThread(() -> {
-                                        if(isCheckedIn(placeData.getAddress())){
+                                        if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
                                             Review myReview = getYourReview();
                                             if(myReview != null) {
                                                 // hiển thị phần review của user và 2 nút update, delete
@@ -1275,7 +1245,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 public void run() {
                                     // is checked-in
                                     requireActivity().runOnUiThread(() -> {
-                                        if(isCheckedIn(placeData.getAddress())){
+                                        if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
                                             Review myReview = getYourReview();
                                             if(myReview != null) {
                                                 // hiển thị phần review của user và 2 nút update, delete

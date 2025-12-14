@@ -26,7 +26,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class FirebaseMessagingApi extends FirebaseMessagingService {
-    private static final String BASE_URL = "http://172.20.10.4:8080/api/users";
+    private static final String BASE_URL = "http://192.168.1.6:8080/api/users";
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);

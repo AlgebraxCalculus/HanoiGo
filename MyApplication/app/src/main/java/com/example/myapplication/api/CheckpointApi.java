@@ -18,7 +18,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CheckpointApi {
-    private static final String CHECKPOINT_URL = "http://172.20.10.4:8080/api/checkpoints";
+    private static final String CHECKPOINT_URL = "http://192.168.1.6:8080/api/checkpoints";
     public static void GetEnableCheckIn(double lat, double lng, String jwt, Context context, CheckpointApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
