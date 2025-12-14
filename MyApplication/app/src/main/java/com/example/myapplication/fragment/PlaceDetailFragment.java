@@ -201,11 +201,11 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
 
             @Override
             public void onSlide(@NonNull View sheet, float slideOffset) {
-                if (slideOffset > 0.8f) {
-                    header.setElevation(12f);
-                } else {
-                    header.setElevation(0f);
-                }
+//                if (slideOffset > 0.8f) {
+//                    header.setElevation(12f);
+//                } else {
+//                    header.setElevation(0f);
+//                }
             }
         });
 
@@ -219,12 +219,13 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             username = getArguments().getString("username");
             avatar = getArguments().getString("avatar");
         }
-        System.out.println("AvailableCheckpoint: "+ availableCheckpoints);
+//        System.out.println("AvailableCheckpoint: "+ availableCheckpoints);
 
         if (placeData != null && availableCheckpoints != null) {
             boolean isCheckpointAvailable = isCheckedIn(placeData.getAddress(), availableCheckpoints);
             btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
         }
+        System.out.println("AvailableCheckpoint: "+ availableCheckpoints);
 
         Runnable reviewCheckLogic = new Runnable() {
             @Override
@@ -398,6 +399,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
     }
 
     private boolean isCheckedIn(String address, ArrayList<JSONObject> checkpointList) {
+        System.out.println("checkpointList in isCheckedIn func :" + checkpointList);
         if (address == null || checkpointList == null) return false;
 
         for (JSONObject checkpoint : checkpointList) {
@@ -481,6 +483,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             @Override
             public void onSuccess(ArrayList<JSONObject> checkpointList) {
                 availableCheckpoints = checkpointList;
+                System.out.println("checkpointList in checkIfCheckInAvailable func :" + checkpointList);
                 requireActivity().runOnUiThread(() -> {
                     boolean isCheckpointAvailable = isCheckedIn(address, checkpointList);
                     if (isCheckpointAvailable) {
@@ -507,7 +510,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         View content = getView().findViewById(R.id.bottomSheetContent);
         content.setBackgroundResource(R.drawable.bg_gradient_disabled);
         View header = getView().findViewById(R.id.placeHeader);
-        header.setBackgroundResource(R.drawable.bg_gradient_disabled);
+        header.setBackgroundResource(R.drawable.bg_gradient_disabled_header);
     }
 
     private void setNormalBackground() {

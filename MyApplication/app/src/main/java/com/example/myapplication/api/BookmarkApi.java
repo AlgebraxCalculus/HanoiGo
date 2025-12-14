@@ -18,8 +18,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class BookmarkApi {
-    private static final String BOOKMARK_LIST_URL = "http://192.168.1.6:8080/api/bookmark-lists";
-    private static final String BOOKMARK_URL = "http://192.168.1.6:8080/api/bookmarks";
+    private static final String BOOKMARK_LIST_URL = "http://192.168.1.174:8080/api/bookmark-lists";
+    private static final String BOOKMARK_URL = "http://192.168.1.174:8080/api/bookmarks";
 
     /**
      * Lấy tất cả bookmark lists của user

@@ -19,9 +19,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class UserApi {
-    private static final String USER_URL = "http://192.168.1.6:8080/api/users";
-    private static final String ACHIEVEMENT_URL = "http://192.168.1.6:8080/api/achievements";
-    private static final String CHECKPOINT_URL = "http://192.168.1.6:8080/api/checkpoints";
+    private static final String USER_URL = "http://192.168.1.174:8080/api/users";
+    private static final String ACHIEVEMENT_URL = "http://192.168.1.174:8080/api/achievements";
+    private static final String CHECKPOINT_URL = "http://192.168.1.174:8080/api/checkpoints";
 
     public static void getMe(String jwt, Context context, UserApi.UserApiCallback callback) {
         OkHttpClient client = new OkHttpClient();

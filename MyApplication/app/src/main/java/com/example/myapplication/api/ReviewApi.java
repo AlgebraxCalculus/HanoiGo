@@ -20,7 +20,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ReviewApi {
-    private static final String REVIEW_URL = "http://192.168.1.6:8080/api/reviews";
+    private static final String REVIEW_URL = "http://192.168.1.174:8080/api/reviews";
 
     public static void GetReviewListByAddress(String address, String sort, Context context, ReviewApi.ReviewApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
