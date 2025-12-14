@@ -46,7 +46,15 @@ public class SearchSuggestionAdapter extends RecyclerView.Adapter<SearchSuggesti
         JSONObject obj = suggestionList.get(position);
         String name = obj.optString("name", "");
         String address = obj.optString("address", "");
-        holder.tvSuggestion.setText(name + " - " + address);
+
+        boolean isFixedLocation = obj.optBoolean("isYourLocation", false)
+                || obj.optBoolean("isDestination", false);
+
+        if (isFixedLocation || address.isEmpty()) {
+            holder.tvSuggestion.setText(name);
+        } else {
+            holder.tvSuggestion.setText(name + " - " + address);
+        }
 
         holder.itemView.setOnClickListener(v -> listener.onItemClick(obj));
     }

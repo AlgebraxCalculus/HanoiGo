@@ -19,7 +19,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.BookmarkListSelectorAdapter;
 import com.example.myapplication.adapter.ImageAdapter;
@@ -59,6 +58,13 @@ public class PlaceDetailFragment extends Fragment {
     private String username = "default";
     private String avatar = "";
     private String jwtToken = "";
+
+    double userLat = 0, userLng = 0;
+
+    private double placeLat = 0;
+    private double placeLng = 0;
+
+
 
     public PlaceDetailFragment() {}
 
@@ -121,7 +127,7 @@ public class PlaceDetailFragment extends Fragment {
         TextView star1 = ratingBar1.findViewById(R.id.starNumber);
         star1.setText("1");
 
-        // --- Bottom sheet setup ---
+        // Bottom sheet setup
         View scrollView = view.findViewById(R.id.bottomSheetPlaceDetail);
         bottomSheetBehavior = BottomSheetBehavior.from(scrollView);
         bottomSheetBehavior.setPeekHeight(900);
@@ -131,7 +137,6 @@ public class PlaceDetailFragment extends Fragment {
         setupActions();
         setupReviews();
 
-        // --- Lấy dữ liệu place từ bundle ---
         if (getArguments() != null) {
             placeData = (Place) getArguments().getSerializable("placeData");
             availableCheckpoints = (ArrayList<JSONObject>) getArguments().getSerializable("availableCheckpoints");
@@ -141,7 +146,7 @@ public class PlaceDetailFragment extends Fragment {
         }
 
         if (placeData != null && availableCheckpoints != null) {
-            boolean isCheckpointAvailable = checkAddressInCheckpoints(placeData.getAddress(), availableCheckpoints);
+            boolean isCheckpointAvailable = isCheckin(placeData.getAddress(), availableCheckpoints);
             btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
         }
 
@@ -150,7 +155,12 @@ public class PlaceDetailFragment extends Fragment {
         return view;
     }
 
-    private boolean checkAddressInCheckpoints(String address, ArrayList<JSONObject> checkpointList) {
+    public void updateUserLocation(double lat, double lng) {
+        this.userLat = lat;
+        this.userLng = lng;
+    }
+
+    private boolean isCheckin(String address, ArrayList<JSONObject> checkpointList) {
         if (address == null || checkpointList == null) return false;
 
         for (JSONObject checkpoint : checkpointList) {
@@ -164,7 +174,6 @@ public class PlaceDetailFragment extends Fragment {
         }
         return false;
     }
-
     // Gọi API chi tiết địa điểm
     private void fetchPlaceDetail(String address) {
         LocationApi.GetLocationByDetail(address, requireContext(), new LocationApi.LocationDetailCallback() {
@@ -176,22 +185,21 @@ public class PlaceDetailFragment extends Fragment {
                         String latStr = result.optString("latitude", "0");
                         String lngStr = result.optString("longitude", "0");
                         System.out.println("fetchPlaceDetail() → lat=" + latStr + ", lng=" + lngStr);
-                        double lat = 0, lng = 0;
                         try {
-                            lat = Double.parseDouble(latStr);
-                            lng = Double.parseDouble(lngStr);
+                            placeLat = Double.parseDouble(latStr);
+                            placeLng = Double.parseDouble(lngStr);
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
 
-                        if (lat != 0 && lng != 0) {
+                        if (placeLat != 0 && placeLng != 0) {
                             Fragment parent = getParentFragment();
                             if (parent instanceof MapFragment) {
-                                ((MapFragment) parent).showLocationMarker(lat, lng, result, true);
+                                ((MapFragment) parent).showLocationMarker(placeLat, placeLng, result, true);
                             }
 
                             // Kiểm tra địa điểm có enable check-in không
-                            checkIfCheckInAvailable(lat, lng, address);
+                            checkIfCheckInAvailable(placeLat, placeLng, address);
                         }
 
                         placeTitle.setText(result.optString("name", "No name"));
@@ -236,7 +244,7 @@ public class PlaceDetailFragment extends Fragment {
             @Override
             public void onSuccess(ArrayList<JSONObject> checkpointList) {
                 requireActivity().runOnUiThread(() -> {
-                    boolean isCheckpointAvailable = checkAddressInCheckpoints(address, checkpointList);
+                    boolean isCheckpointAvailable = isCheckin(address, checkpointList);
                     if (isCheckpointAvailable) {
                         btnCheckin.setVisibility(View.VISIBLE);
                         setNormalBackground();
@@ -309,15 +317,37 @@ public class PlaceDetailFragment extends Fragment {
 
     private void setupActions() {
         btnDirections.setOnClickListener(v -> {
-            // Tạo instance DirectionFragment
+            if (userLat == 0 || userLng == 0) {
+                Toast.makeText(requireContext(), "Waiting for location...", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (placeLat == 0 || placeLng == 0) {
+                Toast.makeText(requireContext(), "Place location not loaded yet", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             DirectionFragment directionFragment = new DirectionFragment();
 
-            requireActivity().getSupportFragmentManager()
+            Bundle args = new Bundle();
+            args.putDouble("destLat", placeLat);
+            args.putDouble("destLng", placeLng);
+            args.putString("destName", placeData.getName());
+            args.putDouble("userLat", userLat);
+            args.putDouble("userLng", userLng);
+            directionFragment.setArguments(args);
+
+            android.util.Log.d("PlaceDetailFragment", "Opening DirectionFragment:");
+            android.util.Log.d("PlaceDetailFragment", "  destLat=" + placeLat + ", destLng=" + placeLng);
+            android.util.Log.d("PlaceDetailFragment", "  userLat=" + userLat + ", userLng=" + userLng);
+
+            getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.placeDetailContainer, directionFragment)
+                    .replace(R.id.childFragmentContainer, directionFragment)
                     .addToBackStack(null)
                     .commit();
         });
+
 
 
         btnSave.setOnClickListener(v -> showBookmarkListDialog());

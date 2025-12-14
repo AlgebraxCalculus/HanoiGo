@@ -66,7 +66,7 @@ public class CheckpointService {
         for (LocationListResponse locRes : locationListResponses) {
             LocationResponse locationResponse = locRes.getLocationResponse();
             int distance = locRes.getDistanceValue();
-            if (distance > 3000) break;
+            if (distance > 2000) break;
 
             LocationDetail detail = locationDetailRepository.findByAddress(locationResponse.getAddress()).orElse(null);
             if (detail == null) continue;
