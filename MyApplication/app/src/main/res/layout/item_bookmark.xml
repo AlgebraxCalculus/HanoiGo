@@ -60,6 +60,7 @@
 
                 <!-- Rating and Distance -->
                 <LinearLayout
+                    android:id="@+id/ratingContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -69,11 +70,12 @@
                         android:id="@+id/tvRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="4.5"
+                        android:text="0.0"
                         android:textColor="#1A5F7A"
                         android:textSize="14sp"/>
 
                     <TextView
+                        android:id="@+id/starIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=" ⭐ "
@@ -83,16 +85,18 @@
                         android:id="@+id/tvReviewCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(10)"
+                        android:text="(0)"
                         android:textColor="#1A5F7A"
                         android:textSize="14sp"/>
 
                     <TextView
+                        android:id="@+id/distanceSeparator"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" - "
+                        android:text=" • "
                         android:textColor="#1A5F7A"
-                        android:textSize="14sp"/>
+                        android:textSize="14sp"
+                        android:visibility="gone"/>
 
                     <TextView
                         android:id="@+id/tvDistance"
@@ -100,7 +104,8 @@
                         android:layout_height="wrap_content"
                         android:text="1.5km"
                         android:textColor="#1A5F7A"
-                        android:textSize="14sp"/>
+                        android:textSize="14sp"
+                        android:visibility="gone"/>
 
                 </LinearLayout>
 
@@ -132,7 +137,20 @@
                     android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
                     android:textColor="#1A5F7A"
                     android:textSize="13sp"
-                    android:lineSpacingExtra="2dp"/>
+                    android:lineSpacingExtra="2dp"
+                    android:ellipsize="end"/>
+
+                <!-- See More/Less Button -->
+                <TextView
+                    android:id="@+id/tvSeeMore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="See more"
+                    android:textColor="#4A9B8E"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 

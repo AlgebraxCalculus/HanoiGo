@@ -85,4 +85,12 @@ public class SavedList {
         if ("flag".equals(type)) return R.drawable.ic_flag;
         return R.drawable.ic_bookmark;
     }
+
+    // Check if iconType is an emoji (not one of the old icon types)
+    public boolean isEmojiIcon() {
+        return iconType != null &&
+                !iconType.equals("bookmark") &&
+                !iconType.equals("heart") &&
+                !iconType.equals("flag");
+    }
 }

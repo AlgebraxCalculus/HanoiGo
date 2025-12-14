@@ -145,6 +145,9 @@ public class PlaceDetailFragment extends Fragment {
             btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
         }
 
+        // Check if location is saved and update button state
+        checkIfLocationIsSaved();
+
         fetchPlaceDetail(placeData.getAddress());
 
         return view;
@@ -328,6 +331,11 @@ public class PlaceDetailFragment extends Fragment {
 
         android.app.AlertDialog dialog = builder.create();
 
+        // Make dialog background transparent to show rounded corners
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
         // Load bookmark lists from backend
         android.content.SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
         String jwtToken = prefs.getString("jwt_token", null);
@@ -363,6 +371,11 @@ public class PlaceDetailFragment extends Fragment {
                         dialog.dismiss();
                     });
                     recyclerBookmarkLists.setAdapter(adapter);
+
+                    // Check which lists already contain this location
+                    if (placeData != null && placeData.getId() != null) {
+                        checkSavedLists(jwtToken, placeData.getId(), lists, adapter);
+                    }
                 });
             }
 
@@ -383,6 +396,130 @@ public class PlaceDetailFragment extends Fragment {
         dialog.show();
     }
 
+    private void checkSavedLists(String jwtToken, String locationId, List<SavedList> lists, BookmarkListSelectorAdapter adapter) {
+        java.util.Set<String> savedListIds = new java.util.HashSet<>();
+        java.util.concurrent.atomic.AtomicInteger checkedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        for (SavedList list : lists) {
+            BookmarkApi.getBookmarksInList(jwtToken, list.getId(), requireContext(), new BookmarkApi.BookmarkCallback() {
+                @Override
+                public void onSuccess(ArrayList<JSONObject> bookmarks) {
+                    // Check if this list contains the current location
+                    for (JSONObject bookmark : bookmarks) {
+                        try {
+                            if (bookmark.getString("locationId").equals(locationId)) {
+                                synchronized (savedListIds) {
+                                    savedListIds.add(list.getId());
+                                }
+                                break;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // Update adapter when all lists have been checked
+                    if (checkedCount.incrementAndGet() == lists.size()) {
+                        requireActivity().runOnUiThread(() -> {
+                            adapter.setSavedListIds(savedListIds);
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    // Still count this as checked, even if it failed
+                    if (checkedCount.incrementAndGet() == lists.size()) {
+                        requireActivity().runOnUiThread(() -> {
+                            adapter.setSavedListIds(savedListIds);
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    private void checkIfLocationIsSaved() {
+        if (placeData == null || placeData.getId() == null) {
+            return;
+        }
+
+        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+        String jwtToken = prefs.getString("jwt_token", null);
+
+        if (jwtToken == null) {
+            return;
+        }
+
+        BookmarkApi.getMyBookmarkLists(jwtToken, requireContext(), new BookmarkApi.BookmarkListCallback() {
+            @Override
+            public void onSuccess(ArrayList<JSONObject> bookmarkLists) {
+                java.util.concurrent.atomic.AtomicBoolean isSaved = new java.util.concurrent.atomic.AtomicBoolean(false);
+                java.util.concurrent.atomic.AtomicInteger checkedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+                int totalLists = bookmarkLists.size();
+
+                if (totalLists == 0) {
+                    requireActivity().runOnUiThread(() -> updateSaveButtonState(false));
+                    return;
+                }
+
+                for (JSONObject listJson : bookmarkLists) {
+                    try {
+                        String listId = listJson.getString("id");
+                        BookmarkApi.getBookmarksInList(jwtToken, listId, requireContext(), new BookmarkApi.BookmarkCallback() {
+                            @Override
+                            public void onSuccess(ArrayList<JSONObject> bookmarks) {
+                                if (!isSaved.get()) {
+                                    for (JSONObject bookmark : bookmarks) {
+                                        try {
+                                            if (bookmark.getString("locationId").equals(placeData.getId())) {
+                                                isSaved.set(true);
+                                                break;
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+
+                                if (checkedCount.incrementAndGet() == totalLists) {
+                                    requireActivity().runOnUiThread(() -> updateSaveButtonState(isSaved.get()));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                if (checkedCount.incrementAndGet() == totalLists) {
+                                    requireActivity().runOnUiThread(() -> updateSaveButtonState(isSaved.get()));
+                                }
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (checkedCount.incrementAndGet() == totalLists) {
+                            requireActivity().runOnUiThread(() -> updateSaveButtonState(isSaved.get()));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                // Keep default state
+            }
+        });
+    }
+
+    private void updateSaveButtonState(boolean isSaved) {
+        if (isSaved) {
+            btnSave.setText("Saved");
+            btnSave.setIconResource(R.drawable.ic_bookmark_filled);
+        } else {
+            btnSave.setText("Save");
+            btnSave.setIconResource(R.drawable.ic_bookmark);
+        }
+    }
+
     private void saveToBookmarkList(String listId, String jwtToken) {
         if (placeData == null) {
             Toast.makeText(requireContext(), "No location selected", Toast.LENGTH_SHORT).show();
@@ -396,6 +533,8 @@ public class PlaceDetailFragment extends Fragment {
             public void onSuccess(JSONObject bookmark) {
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "Saved to bookmark list!", Toast.LENGTH_SHORT).show();
+                    // Update save button state
+                    checkIfLocationIsSaved();
                 });
             }
 
@@ -413,38 +552,22 @@ public class PlaceDetailFragment extends Fragment {
 
         android.widget.EditText editListName = dialogView.findViewById(R.id.editListName);
         android.widget.EditText editListDescription = dialogView.findViewById(R.id.editListDescription);
-        ImageView iconBookmark = dialogView.findViewById(R.id.iconBookmark);
-        ImageView iconHeart = dialogView.findViewById(R.id.iconHeart);
-        ImageView iconFlag = dialogView.findViewById(R.id.iconFlag);
+        TextView selectedEmojiIcon = dialogView.findViewById(R.id.selectedEmojiIcon);
+        View iconPickerButton = dialogView.findViewById(R.id.iconPickerButton);
 
-        final String[] selectedIcon = {"bookmark"};
+        final String[] selectedIcon = {"😀"}; // Default emoji
 
-        iconBookmark.setBackgroundColor(android.graphics.Color.LTGRAY);
-
-        iconBookmark.setOnClickListener(v -> {
-            selectedIcon[0] = "bookmark";
-            iconBookmark.setBackgroundColor(android.graphics.Color.LTGRAY);
-            iconHeart.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-            iconFlag.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        });
-
-        iconHeart.setOnClickListener(v -> {
-            selectedIcon[0] = "heart";
-            iconHeart.setBackgroundColor(android.graphics.Color.LTGRAY);
-            iconBookmark.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-            iconFlag.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        });
-
-        iconFlag.setOnClickListener(v -> {
-            selectedIcon[0] = "flag";
-            iconFlag.setBackgroundColor(android.graphics.Color.LTGRAY);
-            iconBookmark.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-            iconHeart.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-        });
+        // Setup icon picker button
+        iconPickerButton.setOnClickListener(v -> showEmojiPicker(selectedEmojiIcon, selectedIcon));
 
         android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
+
+        // Make dialog background transparent to show rounded corners
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnCreate).setOnClickListener(v -> {
@@ -481,5 +604,15 @@ public class PlaceDetailFragment extends Fragment {
         });
 
         dialog.show();
+    }
+
+    private void showEmojiPicker(TextView selectedEmojiIcon, String[] selectedIcon) {
+        com.example.myapplication.dialog.EmojiPickerDialog emojiPicker =
+                com.example.myapplication.dialog.EmojiPickerDialog.newInstance(selectedIcon[0]);
+        emojiPicker.setOnEmojiSelectedListener(emoji -> {
+            selectedIcon[0] = emoji;
+            selectedEmojiIcon.setText(emoji);
+        });
+        emojiPicker.show(getParentFragmentManager(), "emoji_picker");
     }
 }

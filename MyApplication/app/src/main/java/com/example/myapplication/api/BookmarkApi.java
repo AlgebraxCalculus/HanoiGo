@@ -125,12 +125,15 @@ public class BookmarkApi {
      * Cập nhật bookmark list
      * PUT /api/bookmark-lists/{listId}
      */
-    public static void updateBookmarkList(String jwt, String listId, String name, String description, Context context, SingleBookmarkListCallback callback) {
+    public static void updateBookmarkList(String jwt, String listId, String name, String icon, String description, Context context, SingleBookmarkListCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
         try {
             JSONObject json = new JSONObject();
             json.put("name", name);
+            if (icon != null && !icon.isEmpty()) {
+                json.put("icon", icon);
+            }
             if (description != null && !description.isEmpty()) {
                 json.put("description", description);
             }

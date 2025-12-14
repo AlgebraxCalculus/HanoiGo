@@ -13,4 +13,10 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     @Query("SELECT r FROM Review r WHERE r.user.id = :userId AND r.location.id = :locationId")
     Optional<Review> findByUserIdAndLocationId(@Param("userId") UUID userId,
                                                @Param("locationId") String locationId);
+
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.location.id = :locationId")
+    Double getAverageRatingByLocationId(@Param("locationId") String locationId);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.location.id = :locationId")
+    Long getReviewCountByLocationId(@Param("locationId") String locationId);
 }

@@ -48,8 +48,10 @@ public class BookmarkFragment extends Fragment {
 
     // Detail view
     private View detailView;
+    private TextView tvListName;
     private TextView tvPlacesCount;
     private TextView tvDescription;
+    private TextView tvSeeMoreDescription;
     private RecyclerView recyclerBookmarks;
     private BookmarkAdapter bookmarkAdapter;
     private ArrayList<JSONObject> bookmarks = new ArrayList<>();
@@ -102,6 +104,11 @@ public class BookmarkFragment extends Fragment {
             @Override
             public void onMenuClick(SavedList savedList) {
                 showListMenu(savedList);
+            }
+
+            @Override
+            public void onIconClick(SavedList savedList) {
+                showEditListDialog(savedList);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -161,39 +168,22 @@ public class BookmarkFragment extends Fragment {
 
         EditText editListName = dialogView.findViewById(R.id.editListName);
         EditText editListDescription = dialogView.findViewById(R.id.editListDescription);
-        ImageView iconBookmark = dialogView.findViewById(R.id.iconBookmark);
-        ImageView iconHeart = dialogView.findViewById(R.id.iconHeart);
-        ImageView iconFlag = dialogView.findViewById(R.id.iconFlag);
+        TextView selectedEmojiIcon = dialogView.findViewById(R.id.selectedEmojiIcon);
+        View iconPickerButton = dialogView.findViewById(R.id.iconPickerButton);
 
-        final String[] selectedIcon = {"bookmark"}; // Default
+        final String[] selectedIcon = {"😀"}; // Default emoji
 
-        // Set default selection
-        iconBookmark.setBackgroundColor(Color.LTGRAY);
-
-        iconBookmark.setOnClickListener(v -> {
-            selectedIcon[0] = "bookmark";
-            iconBookmark.setBackgroundColor(Color.LTGRAY);
-            iconHeart.setBackgroundColor(Color.TRANSPARENT);
-            iconFlag.setBackgroundColor(Color.TRANSPARENT);
-        });
-
-        iconHeart.setOnClickListener(v -> {
-            selectedIcon[0] = "heart";
-            iconHeart.setBackgroundColor(Color.LTGRAY);
-            iconBookmark.setBackgroundColor(Color.TRANSPARENT);
-            iconFlag.setBackgroundColor(Color.TRANSPARENT);
-        });
-
-        iconFlag.setOnClickListener(v -> {
-            selectedIcon[0] = "flag";
-            iconFlag.setBackgroundColor(Color.LTGRAY);
-            iconBookmark.setBackgroundColor(Color.TRANSPARENT);
-            iconHeart.setBackgroundColor(Color.TRANSPARENT);
-        });
+        // Setup icon picker button
+        iconPickerButton.setOnClickListener(v -> showEmojiPicker(selectedEmojiIcon, selectedIcon));
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
+
+        // Make dialog background transparent to show rounded corners
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnCreate).setOnClickListener(v -> {
@@ -208,6 +198,16 @@ public class BookmarkFragment extends Fragment {
         });
 
         dialog.show();
+    }
+
+    private void showEmojiPicker(TextView selectedEmojiIcon, String[] selectedIcon) {
+        com.example.myapplication.dialog.EmojiPickerDialog emojiPicker =
+                com.example.myapplication.dialog.EmojiPickerDialog.newInstance(selectedIcon[0]);
+        emojiPicker.setOnEmojiSelectedListener(emoji -> {
+            selectedIcon[0] = emoji;
+            selectedEmojiIcon.setText(emoji);
+        });
+        emojiPicker.show(getParentFragmentManager(), "emoji_picker");
     }
 
     private void createNewList(String name, String icon, String description) {
@@ -248,9 +248,31 @@ public class BookmarkFragment extends Fragment {
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
 
         // Update detail info
+        tvListName.setText(savedList.getTitle());
         tvPlacesCount.setText(savedList.getPlaceCount() + " places");
         String desc = savedList.getDescription();
-        tvDescription.setText(desc != null && !desc.isEmpty() ? desc : "No description");
+        if (desc != null && !desc.isEmpty() && !desc.equals("null")) {
+            tvDescription.setText("Description: " + desc);
+        } else {
+            tvDescription.setText("Description: No description");
+        }
+
+        // Check if description needs "see more"
+        tvDescription.post(() -> {
+            // Temporarily remove maxLines to check actual line count
+            tvDescription.setMaxLines(Integer.MAX_VALUE);
+            tvDescription.post(() -> {
+                int lineCount = tvDescription.getLineCount();
+                tvDescription.setMaxLines(1); // Set back to 1 line
+
+                if (lineCount > 1) {
+                    tvSeeMoreDescription.setVisibility(View.VISIBLE);
+                    tvSeeMoreDescription.setText("see more");
+                } else {
+                    tvSeeMoreDescription.setVisibility(View.GONE);
+                }
+            });
+        });
 
         // Load bookmarks
         loadBookmarksForList(savedList.getId());
@@ -274,9 +296,25 @@ public class BookmarkFragment extends Fragment {
     }
 
     private void setupDetailView(View view) {
+        tvListName = view.findViewById(R.id.tvListName);
         tvPlacesCount = view.findViewById(R.id.tvPlacesCount);
         tvDescription = view.findViewById(R.id.tvDescription);
+        tvSeeMoreDescription = view.findViewById(R.id.tvSeeMoreDescription);
         recyclerBookmarks = view.findViewById(R.id.recyclerBookmarks);
+
+        // Setup "see more" functionality for description
+        View.OnClickListener toggleDescription = v -> {
+            if (tvDescription.getMaxLines() == 1) {
+                tvDescription.setMaxLines(Integer.MAX_VALUE);
+                tvSeeMoreDescription.setText("see less");
+            } else {
+                tvDescription.setMaxLines(1);
+                tvSeeMoreDescription.setText("see more");
+            }
+        };
+
+        tvDescription.setOnClickListener(toggleDescription);
+        tvSeeMoreDescription.setOnClickListener(toggleDescription);
 
         recyclerBookmarks.setLayoutManager(new LinearLayoutManager(requireContext()));
         bookmarkAdapter = new BookmarkAdapter(bookmarks);
@@ -388,20 +426,27 @@ public class BookmarkFragment extends Fragment {
             String currentNote = bookmark.optString("description", "");
             String locationId = bookmark.getString("locationId");
 
-            EditText editText = new EditText(requireContext());
-            editText.setText(currentNote);
-            editText.setHint("Enter your note");
-            editText.setPadding(50, 50, 50, 50);
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_note, null);
+            EditText editNote = dialogView.findViewById(R.id.editNote);
+            editNote.setText(currentNote);
 
-            new android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Edit Note")
-                    .setView(editText)
-                    .setPositiveButton("Save", (d, w) -> {
-                        String newNote = editText.getText().toString().trim();
-                        updateBookmarkNote(locationId, newNote);
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .create();
+
+            // Make dialog background transparent to show rounded corners
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            }
+
+            dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+            dialogView.findViewById(R.id.btnSave).setOnClickListener(v -> {
+                String newNote = editNote.getText().toString().trim();
+                updateBookmarkNote(locationId, newNote);
+                dialog.dismiss();
+            });
+
+            dialog.show();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -451,14 +496,26 @@ public class BookmarkFragment extends Fragment {
             String locationName = bookmark.getString("locationName");
             String locationId = bookmark.getString("locationId");
 
-            new android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Remove Bookmark")
-                    .setMessage("Remove \"" + locationName + "\" from this list?")
-                    .setPositiveButton("Remove", (d, w) -> {
-                        removeBookmarkFromList(locationId);
-                    })
-                    .setNegativeButton("Cancel", null)
-                    .show();
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_confirm_remove_bookmark, null);
+            TextView dialogMessage = dialogView.findViewById(R.id.dialogMessage);
+            dialogMessage.setText("Remove \"" + locationName + "\" from this list?");
+
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .create();
+
+            // Make dialog background transparent to show rounded corners
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            }
+
+            dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+            dialogView.findViewById(R.id.btnRemove).setOnClickListener(v -> {
+                removeBookmarkFromList(locationId);
+                dialog.dismiss();
+            });
+
+            dialog.show();
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(requireContext(), "Error removing bookmark", Toast.LENGTH_SHORT).show();
@@ -492,35 +549,51 @@ public class BookmarkFragment extends Fragment {
     }
 
     private void showDeleteListDialog(SavedList savedList) {
-        new android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Delete List")
-                .setMessage("Are you sure you want to delete \"" + savedList.getTitle() + "\"?")
-                .setPositiveButton("Delete", (d, w) -> {
-                    SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
-                    String jwtToken = prefs.getString("jwt_token", null);
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_confirm_delete_list, null);
+        TextView dialogMessage = dialogView.findViewById(R.id.dialogMessage);
+        dialogMessage.setText("Are you sure you want to delete \"" + savedList.getTitle() + "\"?");
 
-                    if (jwtToken == null) return;
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
 
-                    BookmarkApi.deleteBookmarkList(jwtToken, savedList.getId(), requireContext(), new BookmarkApi.VoidCallback() {
-                        @Override
-                        public void onSuccess() {
-                            requireActivity().runOnUiThread(() -> {
-                                Toast.makeText(requireContext(), "List deleted!", Toast.LENGTH_SHORT).show();
-                                backToListViewKeepPosition(); // Keep bottomsheet position
-                                loadBookmarkLists(); // Reload
-                            });
-                        }
+        // Make dialog background transparent to show rounded corners
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
-                        @Override
-                        public void onFailure(String errorMessage) {
-                            requireActivity().runOnUiThread(() -> {
-                                Toast.makeText(requireContext(), "Failed to delete: " + errorMessage, Toast.LENGTH_SHORT).show();
-                            });
-                        }
+        dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnDelete).setOnClickListener(v -> {
+            SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+            String jwtToken = prefs.getString("jwt_token", null);
+
+            if (jwtToken == null) {
+                dialog.dismiss();
+                return;
+            }
+
+            BookmarkApi.deleteBookmarkList(jwtToken, savedList.getId(), requireContext(), new BookmarkApi.VoidCallback() {
+                @Override
+                public void onSuccess() {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "List deleted!", Toast.LENGTH_SHORT).show();
+                        backToListViewKeepPosition(); // Keep bottomsheet position
+                        loadBookmarkLists(); // Reload
+                        dialog.dismiss();
                     });
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "Failed to delete: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    });
+                }
+            });
+        });
+
+        dialog.show();
     }
 
     private void showEditListDialog(SavedList savedList) {
@@ -530,6 +603,8 @@ public class BookmarkFragment extends Fragment {
         EditText editListDescription = dialogView.findViewById(R.id.editListDescription);
         TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
         android.widget.Button btnCreate = dialogView.findViewById(R.id.btnCreate);
+        TextView selectedEmojiIcon = dialogView.findViewById(R.id.selectedEmojiIcon);
+        View iconPickerButton = dialogView.findViewById(R.id.iconPickerButton);
 
         // Change title and button text for edit mode
         dialogTitle.setText("Edit List");
@@ -539,9 +614,26 @@ public class BookmarkFragment extends Fragment {
         editListName.setText(savedList.getTitle());
         editListDescription.setText(savedList.getDescription());
 
+        // Pre-fill current icon
+        final String[] selectedIcon = {savedList.getIconType()};
+        if (savedList.isEmojiIcon()) {
+            selectedEmojiIcon.setText(savedList.getIconType());
+        } else {
+            selectedEmojiIcon.setText("😀"); // Default emoji if old-style icon
+            selectedIcon[0] = "😀";
+        }
+
+        // Setup icon picker button
+        iconPickerButton.setOnClickListener(v -> showEmojiPicker(selectedEmojiIcon, selectedIcon));
+
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .create();
+
+        // Make dialog background transparent to show rounded corners
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         btnCreate.setOnClickListener(v -> {
@@ -553,14 +645,14 @@ public class BookmarkFragment extends Fragment {
                 return;
             }
 
-            updateBookmarkList(savedList.getId(), newName, newDescription);
+            updateBookmarkList(savedList.getId(), newName, selectedIcon[0], newDescription);
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void updateBookmarkList(String listId, String name, String description) {
+    private void updateBookmarkList(String listId, String name, String icon, String description) {
         SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
         String jwtToken = prefs.getString("jwt_token", null);
 
@@ -569,7 +661,7 @@ public class BookmarkFragment extends Fragment {
             return;
         }
 
-        BookmarkApi.updateBookmarkList(jwtToken, listId, name, description, requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
+        BookmarkApi.updateBookmarkList(jwtToken, listId, name, icon, description, requireContext(), new BookmarkApi.SingleBookmarkListCallback() {
             @Override
             public void onSuccess(JSONObject bookmarkList) {
                 requireActivity().runOnUiThread(() -> {
@@ -579,10 +671,33 @@ public class BookmarkFragment extends Fragment {
                     if (currentList != null && currentList.getId().equals(listId)) {
                         try {
                             currentList.setTitle(bookmarkList.getString("name"));
+                            currentList.setIconType(bookmarkList.optString("icon", "😀"));
                             currentList.setDescription(bookmarkList.optString("description", ""));
-                            // Update description display
+                            // Update display
+                            tvListName.setText(currentList.getTitle());
                             String desc = currentList.getDescription();
-                            tvDescription.setText(desc != null && !desc.isEmpty() ? desc : "No description");
+                            if (desc != null && !desc.isEmpty() && !desc.equals("null")) {
+                                tvDescription.setText("Description: " + desc);
+                            } else {
+                                tvDescription.setText("Description: No description");
+                            }
+
+                            // Check if description needs "see more"
+                            tvDescription.post(() -> {
+                                // Temporarily remove maxLines to check actual line count
+                                tvDescription.setMaxLines(Integer.MAX_VALUE);
+                                tvDescription.post(() -> {
+                                    int lineCount = tvDescription.getLineCount();
+                                    tvDescription.setMaxLines(1); // Set back to 1 line
+
+                                    if (lineCount > 1) {
+                                        tvSeeMoreDescription.setVisibility(View.VISIBLE);
+                                        tvSeeMoreDescription.setText("see more");
+                                    } else {
+                                        tvSeeMoreDescription.setVisibility(View.GONE);
+                                    }
+                                });
+                            });
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

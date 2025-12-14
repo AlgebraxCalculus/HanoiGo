@@ -22,6 +22,7 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
     public interface OnItemClickListener {
         void onItemClick(SavedList savedList);
         void onMenuClick(SavedList savedList);
+        void onIconClick(SavedList savedList);
     }
 
     public SavedListAdapter(List<SavedList> savedLists) {
@@ -42,13 +43,25 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
     @Override
     public void onBindViewHolder(@NonNull SavedListViewHolder holder, int position) {
         SavedList savedList = savedLists.get(position);
-        holder.listIcon.setImageResource(savedList.getIconResId());
 
-        // Set tint white for non-heart icons, no tint for heart to keep red color
-        if (savedList.getIconResId() == R.drawable.ic_heart) {
-            ImageViewCompat.setImageTintList(holder.listIcon, null);
+        // Check if it's an emoji or old-style icon
+        if (savedList.isEmojiIcon()) {
+            // Show emoji, hide icon
+            holder.listIcon.setVisibility(View.GONE);
+            holder.listEmojiIcon.setVisibility(View.VISIBLE);
+            holder.listEmojiIcon.setText(savedList.getIconType());
         } else {
-            ImageViewCompat.setImageTintList(holder.listIcon, ColorStateList.valueOf(Color.WHITE));
+            // Show icon, hide emoji
+            holder.listIcon.setVisibility(View.VISIBLE);
+            holder.listEmojiIcon.setVisibility(View.GONE);
+            holder.listIcon.setImageResource(savedList.getIconResId());
+
+            // Set tint white for non-heart icons, no tint for heart to keep red color
+            if (savedList.getIconResId() == R.drawable.ic_heart) {
+                ImageViewCompat.setImageTintList(holder.listIcon, null);
+            } else {
+                ImageViewCompat.setImageTintList(holder.listIcon, ColorStateList.valueOf(Color.WHITE));
+            }
         }
 
         holder.listTitle.setText(savedList.getTitle());
@@ -57,6 +70,12 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onItemClick(savedList);
+            }
+        });
+
+        holder.iconContainer.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onIconClick(savedList);
             }
         });
 
@@ -73,14 +92,18 @@ public class SavedListAdapter extends RecyclerView.Adapter<SavedListAdapter.Save
     }
 
     public static class SavedListViewHolder extends RecyclerView.ViewHolder {
+        View iconContainer;
         ImageView listIcon;
+        TextView listEmojiIcon;
         TextView listTitle;
         TextView placeCount;
         ImageView menuIcon;
 
         public SavedListViewHolder(@NonNull View itemView) {
             super(itemView);
+            iconContainer = itemView.findViewById(R.id.iconContainer);
             listIcon = itemView.findViewById(R.id.listIcon);
+            listEmojiIcon = itemView.findViewById(R.id.listEmojiIcon);
             listTitle = itemView.findViewById(R.id.listTitle);
             placeCount = itemView.findViewById(R.id.placeCount);
             menuIcon = itemView.findViewById(R.id.menuIcon);
