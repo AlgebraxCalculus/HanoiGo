@@ -28,7 +28,6 @@
         android:layout_margin="16dp"
         app:layout_insetEdge="top">
 
-        <!-- Location Card -->
         <LinearLayout
             android:id="@+id/locationCard"
             android:layout_width="match_parent"
@@ -39,15 +38,15 @@
             android:elevation="10dp">
 
             <LinearLayout
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <ImageView
-                    android:src="@drawable/ic_current_location"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:src="@drawable/ic_current_location"
                     app:tint="#4DA3FF"/>
 
                 <EditText
@@ -72,15 +71,15 @@
                 android:background="#334455"/>
 
             <LinearLayout
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <ImageView
-                    android:src="@drawable/routing"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
+                    android:src="@drawable/routing"
                     app:tint="#FF4D4D"/>
 
                 <EditText
@@ -104,9 +103,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:visibility="gone"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp"
-            android:visibility="gone"
             app:cardBackgroundColor="@android:color/white">
 
             <FrameLayout
@@ -118,12 +117,9 @@
                     android:id="@+id/rvSearchSuggestions"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:overScrollMode="always"
-                    android:scrollbars="vertical"
-                    android:background="@android:color/transparent"/>
+                    android:scrollbars="vertical"/>
             </FrameLayout>
         </androidx.cardview.widget.CardView>
-
     </LinearLayout>
 
     <!-- Navigate button -->
@@ -134,131 +130,121 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="300dp"
-        app:cardCornerRadius="26dp"
-        app:cardBackgroundColor="#001A2E"
         android:clickable="true"
         android:focusable="true"
-        android:elevation="8dp">
+        android:elevation="8dp"
+        app:cardCornerRadius="26dp"
+        app:cardBackgroundColor="#001A2E">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_navigation"
-            app:tint="#FFFFFF" />
+            app:tint="#FFFFFF"/>
     </androidx.cardview.widget.CardView>
 
     <!-- BottomSheet -->
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/bottomSheetDirection"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/bg_bottom_sheet"
         android:layout_gravity="bottom"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        android:layout_marginBottom="150dp" android:background="@drawable/bg_bottom_sheet"
+        android:clickable="true"
+        android:focusable="true"
         app:behavior_hideable="false"
-        app:behavior_fitToContents="false"
-        app:behavior_halfExpandedRatio="0.7">
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <androidx.core.widget.NestedScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="24dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_drag_handle"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="24dp">
-
-                <View
-                    android:layout_width="40dp"
-                    android:layout_height="4dp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/bg_drag_handle"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:id="@+id/tvDestinationName"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Hoan Kiem Lake"
-                        android:textSize="18sp"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"/>
-
-                    <ImageView
-                        android:id="@+id/btnCloseDirection"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:src="@drawable/ic_close"
-                        android:padding="4dp"
-                        app:tint="#FFFFFF"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="14dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <ImageView
-                        android:src="@drawable/ic_bike"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        app:tint="#FFFFFF"/>
-
-                    <TextView
-                        android:id="@+id/tvTravelInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="12 minutes - 2.9 km"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginStart="8dp"/>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:background="#40FFFFFF"/>
+                android:gravity="center_vertical">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tvDestinationName"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Các chặng"
-                    android:textSize="16sp"
-                    android:textColor="#B0B0B0"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_weight="1"
+                    android:text="Hoan Kiem Lake"
+                    android:textSize="18sp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"/>
 
-                <!-- RecyclerView for directions -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvDirections"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:clipToPadding="false"
-                    android:paddingBottom="60dp"/>
-
+                <ImageView
+                    android:id="@+id/btnCloseDirection"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_close"
+                    android:padding="4dp"
+                    app:tint="#FFFFFF"/>
             </LinearLayout>
 
-        </androidx.core.widget.NestedScrollView>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-    </LinearLayout>
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_bike"
+                    app:tint="#FFFFFF"/>
+
+                <TextView
+                    android:id="@+id/tvTravelInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="12 minutes - 2.9 km"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="#40FFFFFF"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="12dp"
+                android:text="Các chặng"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#B0B0B0"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDirections"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="60dp"/>
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

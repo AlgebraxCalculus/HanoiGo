@@ -16,7 +16,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class DirectionApi {
-    private static final String DIRECTION_URL = "http://192.168.1.174:8080/api/directions";
+    private static final String DIRECTION_URL = "http://192.168.1.6:8080/api/directions";
 
     public static void GetDirection(double originLat, double originLng, double destLat, double destLng,
                                      Context context, DirectionApiCallback callback) {
