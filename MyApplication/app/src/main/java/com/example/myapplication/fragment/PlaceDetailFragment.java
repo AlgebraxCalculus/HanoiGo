@@ -231,6 +231,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                     @Override
                     public void onSuccess(ArrayList<JSONObject> list) {
                         availableCheckpoints = list;
+                        System.out.println("availableCheckpoints: " + availableCheckpoints);
                         requireActivity().runOnUiThread(() -> updateCheckinUI());
                     }
 

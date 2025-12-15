@@ -58,7 +58,7 @@ public class ExploreFragment extends Fragment {
     private PlaceAdapter adapterPopularNearU;
 
     private EditText edtTravelDate, edtDurationDays, edtBudget;
-    private CheckBox cbFood, cbCulture, cbEntertainment, cbIconic;
+    private CheckBox cbCuisine, cbCulture, cbEntertaining, cbIconic;
     private Button btnSuggestRoute;
     private ProgressBar progressBarAiRoute;
     private RecyclerView rvSuggestedRoutes;
@@ -255,9 +255,9 @@ public class ExploreFragment extends Fragment {
         edtDurationDays = view.findViewById(R.id.edtDurationDays);
         edtBudget = view.findViewById(R.id.edtBudget);
 
-        cbFood = view.findViewById(R.id.cbFood);
+        cbCuisine = view.findViewById(R.id.cbCuisine);
         cbCulture = view.findViewById(R.id.cbCulture);
-        cbEntertainment = view.findViewById(R.id.cbEntertainment);
+        cbEntertaining = view.findViewById(R.id.cbEntertaining);
         cbIconic = view.findViewById(R.id.cbIconic);
 
         btnSuggestRoute = view.findViewById(R.id.btnSuggestRoute);
@@ -274,7 +274,8 @@ public class ExploreFragment extends Fragment {
 
         edtTravelDate.setText("2025-12-25");
         edtDurationDays.setText("1");
-        cbFood.setChecked(true);
+        cbCuisine.setChecked(true);
+        cbCuisine.setChecked(true);
         cbCulture.setChecked(true);
 
         btnSuggestRoute.setOnClickListener(v -> requestAiRoutes());
@@ -303,9 +304,9 @@ public class ExploreFragment extends Fragment {
         }
 
         List<String> interests = new ArrayList<>();
-        if (cbFood.isChecked()) interests.add("food");
+        if (cbCuisine.isChecked()) interests.add("cuisine");
         if (cbCulture.isChecked()) interests.add("culture");
-        if (cbEntertainment.isChecked()) interests.add("entertainment");
+        if (cbEntertaining.isChecked()) interests.add("entertaining");
         if (cbIconic.isChecked()) interests.add("iconic");
 
         if (interests.isEmpty()) {

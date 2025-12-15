@@ -266,18 +266,18 @@
                             android:orientation="vertical"
                             android:layout_marginTop="4dp">
 
-                            <!-- Row 1: Food + Culture -->
+                            <!-- Row 1: Cuisine + Culture -->
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal">
 
                                 <CheckBox
-                                    android:id="@+id/cbFood"
+                                    android:id="@+id/cbCuisine"
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="Food"
+                                    android:text="Cuisine"
                                     android:textColor="@color/explore_text_primary" />
 
                                 <CheckBox
@@ -289,7 +289,7 @@
                                     android:textColor="@color/explore_text_primary" />
                             </LinearLayout>
 
-                            <!-- Row 2: Entertainment + Iconic -->
+                            <!-- Row 2: Entertaining + Iconic -->
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -297,11 +297,11 @@
                                 android:layout_marginTop="4dp">
 
                                 <CheckBox
-                                    android:id="@+id/cbEntertainment"
+                                    android:id="@+id/cbEntertaining"
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="Entertainment"
+                                    android:text="Entertaining"
                                     android:textColor="@color/explore_text_primary" />
 
                                 <CheckBox
