@@ -57,6 +57,10 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.2")
 
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
     // UI components
     implementation("io.github.chaosleung:pinview:1.4.4")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

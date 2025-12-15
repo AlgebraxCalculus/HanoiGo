@@ -26,4 +26,13 @@
 
     <!-- Read more colors -->
     <color name="blue">#1E90FF</color>
+
+    <color name="explore_card_bg">#082030</color>        <!-- nền card tối hơn chút -->
+    <color name="explore_primary">#7C4DFF</color>        <!-- tím cho nút -->
+    <color name="explore_text_primary">#FFFFFFFF</color> <!-- chữ trắng -->
+    <color name="explore_text_hint">#B3FFFFFF</color>    <!-- trắng mờ -->
+    <color name="explore_divider">#33FFFFFF</color>      <!-- line / underline input -->
+
+    <color name="ai_route_card_bg">#044B5E</color>
+    <color name="teal_route_card">#0C3B4A</color>
 </resources>

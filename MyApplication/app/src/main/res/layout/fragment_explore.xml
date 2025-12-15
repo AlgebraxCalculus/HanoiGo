@@ -15,6 +15,9 @@
         android:layout_marginBottom="100dp" android:background="@drawable/bg_bottom_sheet"
         android:clickable="true"
         android:focusable="true"
+        android:fillViewport="true"
+        android:paddingBottom="80dp"
+        android:clipToPadding="true"
         app:behavior_hideable="false"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
@@ -147,74 +150,171 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="12dp"
-                    android:text="AI-Suggested routes"
+                    android:text="Exculsive route just for you"
                     android:textColor="@android:color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <HorizontalScrollView
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAiRoute"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:scrollbars="none">
+                    android:layout_margin="12dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardUseCompatPadding="true"
+                    app:cardBackgroundColor="@color/explore_card_bg"
+                    app:strokeWidth="0dp">
 
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/chipGroupFilters"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
-                        app:singleSelection="true"
-                        app:selectionRequired="true">
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipForYou"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                        <TextView
+                            android:id="@+id/tvAiTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="AI-Suggested routes"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="@color/explore_text_primary"
+                            android:paddingBottom="8dp" />
+
+                        <!-- Travel date -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Travel date (yyyy-MM-dd)"
+                            app:boxBackgroundMode="outline"
+                            app:boxBackgroundColor="@color/explore_card_bg"
+                            app:boxStrokeColor="@android:color/white"
+                            app:hintTextColor="@color/explore_text_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/edtTravelDate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/explore_text_primary"
+                                android:textColorHint="@color/explore_text_hint" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Duration days -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="Duration days"
+                            app:boxBackgroundMode="outline"
+                            app:boxBackgroundColor="@color/explore_card_bg"
+                            app:boxStrokeColor="@android:color/white"
+                            app:hintTextColor="@color/explore_text_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/edtDurationDays"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textColor="@color/explore_text_primary"
+                                android:textColorHint="@color/explore_text_hint" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="Budget (optional)"
+                            app:boxBackgroundMode="outline"
+                            app:boxBackgroundColor="@color/explore_card_bg"
+                            app:boxStrokeColor="@android:color/white"
+                            app:hintTextColor="@color/explore_text_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/edtBudget"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textColor="@color/explore_text_primary"
+                                android:textColorHint="@color/explore_text_hint" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:id="@+id/tvInterestsLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Interests"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="@color/explore_text_primary" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="4dp">
+
+                            <CheckBox
+                                android:id="@+id/cbFood"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Ẩm thực"
+                                android:textColor="@color/explore_text_primary" />
+
+                            <CheckBox
+                                android:id="@+id/cbCulture"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Văn hóa"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@color/explore_text_primary" />
+
+                            <CheckBox
+                                android:id="@+id/cbEntertainment"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Giải trí"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@color/explore_text_primary" />
+
+                            <CheckBox
+                                android:id="@+id/cbIconic"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Iconic"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@color/explore_text_primary" />
+                        </LinearLayout>
+
+                        <Button
+                            android:id="@+id/btnSuggestRoute"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Generate route"
+                            android:layout_marginTop="12dp"
+                            android:backgroundTint="@color/explore_primary"
+                            android:textColor="@android:color/white"
+                            android:textAllCaps="false" />
+
+                        <ProgressBar
+                            android:id="@+id/progressBarAiRoute"
+                            style="?android:attr/progressBarStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="For you"
-                            android:textColor="@color/chip_text_color"
-                            app:chipIcon="@drawable/ic_user"
-                            app:chipIconVisible="true"
-                            app:chipIconSize="18dp"
-                            app:chipIconTint="@color/chip_text_color"
-                            app:chipBackgroundColor="@color/chip_background_color"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="8dp"
+                            android:visibility="gone" />
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipTime"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
-                            android:layout_width="wrap_content"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvSuggestedRoutes"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Time"
-                            android:textColor="@color/chip_text_color"
-                            app:chipIcon="@drawable/ic_time"
-                            app:chipIconVisible="true"
-                            app:chipIconSize="18dp"
-                            app:chipIconTint="@color/chip_text_color"
-                            app:chipBackgroundColor="@color/chip_background_color"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
+                            android:nestedScrollingEnabled="false"
+                            android:layout_marginTop="8dp" />
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipEvents"
-                            style="@style/Widget.MaterialComponents.Chip.Choice"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Events"
-                            android:textColor="@color/chip_text_color"
-                            app:chipIcon="@drawable/ic_calendar"
-                            app:chipIconVisible="true"
-                            app:chipIconSize="18dp"
-                            app:chipIconTint="@color/chip_text_color"
-                            app:chipBackgroundColor="@color/chip_background_color"
-                            app:chipStrokeColor="@color/chip_stroke"
-                            app:chipStrokeWidth="1dp" />
+                    </LinearLayout>
 
-                    </com.google.android.material.chip.ChipGroup>
-                </HorizontalScrollView>
+                </com.google.android.material.card.MaterialCardView>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSuggestedRoutes"
