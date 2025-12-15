@@ -270,8 +270,16 @@ public class BookmarkFragment extends Fragment {
                 if (lineCount > 1) {
                     tvSeeMoreDescription.setVisibility(View.VISIBLE);
                     tvSeeMoreDescription.setText("see more");
+                    // Reset marginBottom when see more is visible
+                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) tvDescription.getLayoutParams();
+                    params.bottomMargin = (int) (4 * getResources().getDisplayMetrics().density);
+                    tvDescription.setLayoutParams(params);
                 } else {
                     tvSeeMoreDescription.setVisibility(View.GONE);
+                    // Increase marginBottom when see more is hidden
+                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) tvDescription.getLayoutParams();
+                    params.bottomMargin = (int) (24 * getResources().getDisplayMetrics().density);
+                    tvDescription.setLayoutParams(params);
                 }
             });
         });
@@ -697,8 +705,16 @@ public class BookmarkFragment extends Fragment {
                                     if (lineCount > 1) {
                                         tvSeeMoreDescription.setVisibility(View.VISIBLE);
                                         tvSeeMoreDescription.setText("see more");
+                                        // Reset marginBottom when see more is visible
+                                        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) tvDescription.getLayoutParams();
+                                        params.bottomMargin = (int) (4 * getResources().getDisplayMetrics().density);
+                                        tvDescription.setLayoutParams(params);
                                     } else {
                                         tvSeeMoreDescription.setVisibility(View.GONE);
+                                        // Increase marginBottom when see more is hidden
+                                        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) tvDescription.getLayoutParams();
+                                        params.bottomMargin = (int) (24 * getResources().getDisplayMetrics().density);
+                                        tvDescription.setLayoutParams(params);
                                     }
                                 });
                             });
