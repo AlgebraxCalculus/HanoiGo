@@ -20,7 +20,7 @@ public class SecurityConfig {
         "/api/checkpoints/**",
         "/api/bookmarks/**",
         "/api/bookmark-lists/**",
-        "/api/ai/**"
+        "/api/ai/**",
         "/api/reviews/**",
         "/api/directions/**"
     };
