@@ -74,12 +74,8 @@ public class BookmarkFragment extends Fragment {
     private void setupBottomSheet(View view) {
         View bottomSheet = view.findViewById(R.id.bookmarkBottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-
-        // IMPORTANT: Prevent bottomsheet from expanding to fullscreen automatically
-        bottomSheetBehavior.setFitToContents(false);
-        bottomSheetBehavior.setHalfExpandedRatio(0.6f);
-        bottomSheetBehavior.setPeekHeight(450);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setPeekHeight(450);
 
         listView = view.findViewById(R.id.listView);
         detailView = view.findViewById(R.id.detailView);
@@ -246,8 +242,13 @@ public class BookmarkFragment extends Fragment {
         listView.setVisibility(View.GONE);
         detailView.setVisibility(View.VISIBLE);
 
-        // Keep bottomsheet at half-expanded state (not fullscreen!)
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        // Scroll to top to show full header
+        View bottomSheet = getView().findViewById(R.id.bookmarkBottomSheet);
+        if (bottomSheet instanceof androidx.core.widget.NestedScrollView) {
+            ((androidx.core.widget.NestedScrollView) bottomSheet).scrollTo(0, 0);
+        }
+
+        // Don't change bottomsheet state - keep current position
 
         // Update detail info
         tvListName.setText(savedList.getTitle());
