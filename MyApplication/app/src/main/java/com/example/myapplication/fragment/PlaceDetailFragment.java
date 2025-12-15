@@ -46,6 +46,7 @@ import com.example.myapplication.api.CheckpointApi;
 import com.example.myapplication.api.CloudinaryUploadHelper;
 import com.example.myapplication.api.LocationApi;
 import com.example.myapplication.api.ReviewApi;
+import com.example.myapplication.api.UserApi;
 import com.example.myapplication.model.Place;
 import com.example.myapplication.model.Review;
 import com.example.myapplication.model.SavedList;
@@ -75,7 +76,8 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
     private ReadMoreTextView tvYourContent;
     private GridLayout yourImageGrid;
 
-    private ArrayList<JSONObject> availableCheckpoints;
+    private ArrayList<JSONObject> availableCheckpoints = new ArrayList<>();
+    private ArrayList<JSONObject> userCheckedInCheckpoints = new ArrayList<>();
     private List<Review> reviewList, LikedReviewList;
     private Place placeData;
     private RecyclerView rvPlacePhotos;
@@ -104,17 +106,17 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
 
     public PlaceDetailFragment() {}
 
-    public static PlaceDetailFragment newInstance(Place place, ArrayList<JSONObject> checkpoints, String jwtToken, String username, String avatar) {
+    public static PlaceDetailFragment newInstance(Place place, String jwtToken, String username, String avatar) {
         PlaceDetailFragment fragment = new PlaceDetailFragment();
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
-        args.putSerializable("availableCheckpoints", checkpoints);
         args.putString("jwtToken", jwtToken);
         args.putString("username", username);
         args.putString("avatar", avatar);
         fragment.setArguments(args);
         return fragment;
     }
+
     @Nullable
     @Override
     public View onCreateView(
@@ -214,42 +216,85 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
 
         if (getArguments() != null) {
             placeData = (Place) getArguments().getSerializable("placeData");
-            availableCheckpoints = (ArrayList<JSONObject>) getArguments().getSerializable("availableCheckpoints");
             jwtToken = getArguments().getString("jwtToken");
             username = getArguments().getString("username");
             avatar = getArguments().getString("avatar");
         }
-//        System.out.println("AvailableCheckpoint: "+ availableCheckpoints);
 
-        if (placeData != null && availableCheckpoints != null) {
-            boolean isCheckpointAvailable = isCheckedIn(placeData.getAddress(), availableCheckpoints);
-            btnCheckin.setVisibility(isCheckpointAvailable ? View.VISIBLE : View.GONE);
-        }
-        System.out.println("AvailableCheckpoint: "+ availableCheckpoints);
+        // Fetch available checkpoints for check-in
+        CheckpointApi.GetEnableCheckIn(
+                userLat,
+                userLng,
+                jwtToken,
+                requireContext(),
+                new CheckpointApi.CheckpointApiCallback() {
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> list) {
+                        availableCheckpoints = list;
+                        requireActivity().runOnUiThread(() -> updateCheckinUI());
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        availableCheckpoints = new ArrayList<>();
+                        System.out.println("AvailableCheckpoint: [] (API failed: " + errorMessage + ")");
+                        requireActivity().runOnUiThread(() -> updateCheckinUI());
+                    }
+                }
+        );
+
+        // Fetch user's checked-in list
+        UserApi.GetMyCheckpointList(
+                jwtToken,
+                "",
+                "newest",
+                "",
+                requireContext(),
+                new UserApi.UserApiCallback() {
+
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> dataList) {
+                        userCheckedInCheckpoints = (dataList != null)
+                                ? dataList
+                                : new ArrayList<>();
+
+                        System.out.println("UserCheckpoint: " + userCheckedInCheckpoints);
+                        requireActivity().runOnUiThread(() -> updateCheckinUI());
+                    }
+
+                    @Override
+                    public void onSuccess(JSONObject userObj) {
+                        // Not used
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        userCheckedInCheckpoints = new ArrayList<>();
+                        System.out.println("UserCheckpoint: [] (API failed: " + errorMessage + ")");
+                        requireActivity().runOnUiThread(() -> updateCheckinUI());
+                    }
+                }
+        );
+
+        System.out.println("AvailableCheckpoint: " + availableCheckpoints);
+        System.out.println("UserCheckpoint: " + userCheckedInCheckpoints);
 
         Runnable reviewCheckLogic = new Runnable() {
             @Override
             public void run() {
-                // is checked-in
                 requireActivity().runOnUiThread(() -> {
-                    if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
+                    if(isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints)){
                         Review myReview = getYourReview();
-                        System.out.println("ReviewList: "+ reviewList);
-                        System.out.println("myReview: "+myReview);
                         if(myReview != null) {
-                            // hiển thị phần review của user và 2 nút update, delete
                             yourReviewLayout.setVisibility(View.VISIBLE);
                             btnWriteReview.setVisibility(View.GONE);
-
                             bindMyReviewData(myReview);
                         }else{
-                            // hiển thị và active nút thêm review và visibility: gone cho review của user
                             yourReviewLayout.setVisibility(View.GONE);
                             btnWriteReview.setVisibility(View.VISIBLE);
                             btnWriteReview.setEnabled(true);
                         }
-                    }else{
-                        // vô hiệu hóa nút thêm review (đổi màu xám và khi bấm sẽ hiện toast "You have to check in before write a review")
+                    } else{
                         btnWriteReview.setEnabled(false);
                         btnWriteReview.setBackgroundTintList(
                                 ColorStateList.valueOf(Color.parseColor("#808080"))
@@ -398,10 +443,8 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         this.userLng = lng;
     }
 
-    private boolean isCheckedIn(String address, ArrayList<JSONObject> checkpointList) {
-        System.out.println("checkpointList in isCheckedIn func :" + checkpointList);
+    private boolean isPlaceAvailableForCheckin(String address, ArrayList<JSONObject> checkpointList) {
         if (address == null || checkpointList == null) return false;
-
         for (JSONObject checkpoint : checkpointList) {
             JSONObject location = checkpoint.optJSONObject("locationResponse");
             if (location != null) {
@@ -413,6 +456,21 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         }
         return false;
     }
+
+    private boolean isPlaceCheckedInByUser(String address, ArrayList<JSONObject> checkedInList) {
+        if (address == null || checkedInList == null) return false;
+        for (JSONObject checkpoint : checkedInList) {
+            JSONObject location = checkpoint.optJSONObject("location");
+            if (location != null) {
+                String checkpointAddress = location.optString("address", "");
+                if (checkpointAddress.equalsIgnoreCase(address)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Gọi API chi tiết địa điểm
     private void fetchPlaceDetail(String address) {
         LocationApi.GetLocationByDetail(address, requireContext(), new LocationApi.LocationDetailCallback() {
@@ -436,9 +494,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                             if (parent instanceof MapFragment) {
                                 ((MapFragment) parent).showLocationMarker(placeLat, placeLng, result, true);
                             }
-
-                            // Kiểm tra địa điểm có enable check-in không
-                            checkIfCheckInAvailable(placeLat, placeLng, address);
                         }
 
                         placeTitle.setText(result.optString("name", "No name"));
@@ -472,38 +527,20 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         });
     }
 
-    private void checkIfCheckInAvailable(double lat, double lng, String address) {
-        if (jwtToken == null || jwtToken.isEmpty()) {
+    private void updateCheckinUI() {
+        boolean isCheckedIn = isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints);
+        boolean isAvailableForCheckin = isPlaceAvailableForCheckin(placeData.getAddress(), availableCheckpoints);
+
+        if (isCheckedIn) {
             btnCheckin.setVisibility(View.GONE);
             setDisabledBackground();
-            return;
+        } else if (isAvailableForCheckin) {
+            btnCheckin.setVisibility(View.VISIBLE);
+            setNormalBackground();
+        } else {
+            btnCheckin.setVisibility(View.GONE);
+            setNormalBackground();
         }
-
-        CheckpointApi.GetEnableCheckIn(lat, lng, jwtToken, getContext(), new CheckpointApi.CheckpointApiCallback() {
-            @Override
-            public void onSuccess(ArrayList<JSONObject> checkpointList) {
-                availableCheckpoints = checkpointList;
-                System.out.println("checkpointList in checkIfCheckInAvailable func :" + checkpointList);
-                requireActivity().runOnUiThread(() -> {
-                    boolean isCheckpointAvailable = isCheckedIn(address, checkpointList);
-                    if (isCheckpointAvailable) {
-                        btnCheckin.setVisibility(View.VISIBLE);
-                        setNormalBackground();
-                    } else {
-                        btnCheckin.setVisibility(View.GONE);
-                        setDisabledBackground();
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                requireActivity().runOnUiThread(() -> {
-                    btnCheckin.setVisibility(View.GONE);
-                    setDisabledBackground();
-                });
-            }
-        });
     }
 
     private void setDisabledBackground() {
@@ -1101,7 +1138,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 public void run() {
                                     // is checked-in
                                     requireActivity().runOnUiThread(() -> {
-                                        if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
+                                        if(isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints)){
                                             Review myReview = getYourReview();
                                             System.out.println("ReviewList: "+reviewList);
                                             System.out.println("myReview: "+myReview);
@@ -1177,7 +1214,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 public void run() {
                                     // is checked-in
                                     requireActivity().runOnUiThread(() -> {
-                                        if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
+                                        if(isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints)){
                                             Review myReview = getYourReview();
                                             if(myReview != null) {
                                                 // hiển thị phần review của user và 2 nút update, delete
@@ -1248,7 +1285,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 public void run() {
                                     // is checked-in
                                     requireActivity().runOnUiThread(() -> {
-                                        if(isCheckedIn(placeData.getAddress(), availableCheckpoints)){
+                                        if(isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints)){
                                             Review myReview = getYourReview();
                                             if(myReview != null) {
                                                 // hiển thị phần review của user và 2 nút update, delete

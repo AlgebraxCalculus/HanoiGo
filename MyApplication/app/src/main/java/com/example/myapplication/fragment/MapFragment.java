@@ -78,9 +78,6 @@ public class MapFragment extends Fragment {
 
     private CardView searchSuggestionsCard;
     private TextWatcher textWatcher;
-
-    private ArrayList<JSONObject> checkpointList = new ArrayList<>();
-
     private final Map<Marker, JSONObject> markerMap = new HashMap<>();
 
     @Nullable
@@ -204,62 +201,61 @@ public class MapFragment extends Fragment {
     }
 
     private void fetchCheckpoints() {
-        CheckpointApi.GetEnableCheckIn(userLocation.getLatitude(), userLocation.getLongitude(), jwtToken, getContext(), new CheckpointApi.CheckpointApiCallback() {
-            @Override
-            public void onSuccess(ArrayList<JSONObject> list) {
-                requireActivity().runOnUiThread(() -> {
-                    checkpointList.clear();
-                    checkpointList.addAll(list);
-                    for (JSONObject checkpoint : checkpointList) {
-                        try {
-                            JSONObject location = checkpoint.optJSONObject("locationResponse");
-                            if (location == null) continue;
+        CheckpointApi.GetEnableCheckIn(
+                userLocation.getLatitude(),
+                userLocation.getLongitude(),
+                jwtToken,
+                getContext(),
+                new CheckpointApi.CheckpointApiCallback() {
 
-                            double cLat = location.optDouble("latitude", 0);
-                            double cLng = location.optDouble("longitude", 0);
-                            showLocationMarker(cLat, cLng, checkpoint, false);
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> list) {
+                        requireActivity().runOnUiThread(() -> {
 
-                        } catch (Exception e) {
-                            Log.e("MapFragment", "Lỗi parse checkpoint: " + e.getMessage());
-                        }
-                    }
+                            if (list == null || list.isEmpty()) {
+                                Log.d("MapFragment", "No checkpoints found");
+                                return;
+                            }
 
-                    // Zoom về vùng hiển thị đầu tiên nếu có ít nhất 1 checkpoint
-                    if (!checkpointList.isEmpty()) {
-                        try {
                             List<LatLng> allPoints = new ArrayList<>();
 
-                            for (JSONObject checkpoint : checkpointList) {
+                            for (JSONObject checkpoint : list) {
                                 JSONObject location = checkpoint.optJSONObject("locationResponse");
                                 if (location == null) continue;
 
                                 double lat = location.optDouble("latitude", 0);
                                 double lng = location.optDouble("longitude", 0);
-                                allPoints.add(new LatLng(lat, lng));
+
+                                LatLng pos = new LatLng(lat, lng);
+                                allPoints.add(pos);
+
+                                showLocationMarker(lat, lng, checkpoint, false);
                             }
 
+                            // Zoom map
                             if (!allPoints.isEmpty()) {
                                 LatLngBounds bounds = LatLngBounds.from(
-                                        getMaxLat(allPoints), getMaxLng(allPoints),
-                                        getMinLat(allPoints), getMinLng(allPoints)
+                                        getMaxLat(allPoints),
+                                        getMaxLng(allPoints),
+                                        getMinLat(allPoints),
+                                        getMinLng(allPoints)
                                 );
-                                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 80));
+                                map.animateCamera(
+                                        CameraUpdateFactory.newLatLngBounds(bounds, 80)
+                                );
                             }
-
-                        } catch (Exception e) {
-                            Log.e("MapFragment", "Zoom bounds error: " + e.getMessage());
-                        }
+                        });
                     }
-                });
-            }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                requireActivity().runOnUiThread(() ->
-                        Log.e("MapFragment", "Checkpoint API error: " + errorMessage)
-                );
-            }
-        });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() ->
+                                Log.e("MapFragment", "Checkpoint API error: " + errorMessage)
+                        );
+                    }
+                }
+        );
     }
 
     private void setActiveButton(CardView activeButton) {
@@ -292,10 +288,12 @@ public class MapFragment extends Fragment {
     // Mở chi tiết địa điểm
     public void openPlaceDetailFragment(Place place) {
         PlaceDetailFragment detailFragment =
-                PlaceDetailFragment.newInstance(place, checkpointList, jwtToken, username, avatar);
+                PlaceDetailFragment.newInstance(place, jwtToken, username, avatar);
+
         if (userLocation != null) {
             detailFragment.updateUserLocation(userLocation.getLatitude(), userLocation.getLongitude());
         }
+
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
         args.putString("jwtToken", jwtToken);
