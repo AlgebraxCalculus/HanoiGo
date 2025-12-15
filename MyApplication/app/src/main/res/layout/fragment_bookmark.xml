@@ -72,9 +72,13 @@
 
                     <ImageView
                         android:id="@+id/closeSavedButton"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_close"
+                        android:tint="@android:color/white"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_rounded_button"
+                        android:elevation="4dp"
                         android:contentDescription="Close" />
                 </LinearLayout>
 
@@ -201,10 +205,13 @@
 
                     <ImageView
                         android:id="@+id/btnCloseDetail"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_close"
                         android:tint="@android:color/white"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_rounded_button"
+                        android:elevation="4dp"
                         android:contentDescription="Close"/>
 
                 </LinearLayout>
@@ -238,7 +245,7 @@
                         android:textSize="14sp"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        android:layout_marginBottom="4dp"/>
+                        android:layout_marginBottom="24dp"/>
 
                     <!-- See More/Less Button -->
                     <TextView
@@ -250,7 +257,7 @@
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:visibility="gone"
-                        android:layout_marginBottom="24dp"/>
+                        android:layout_marginBottom="32dp"/>
 
                     <!-- Bookmarks RecyclerView -->
                     <androidx.recyclerview.widget.RecyclerView

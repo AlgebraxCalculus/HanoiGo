@@ -101,6 +101,27 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
                 });
             }
 
+            // Show rating (always visible, 0 if no data)
+            double avgRating = 0.0;
+            long reviewCount = 0;
+
+            if (bookmark.has("averageRating") && !bookmark.isNull("averageRating")) {
+                try {
+                    avgRating = bookmark.getDouble("averageRating");
+                    reviewCount = bookmark.optLong("reviewCount", 0);
+                } catch (JSONException e) {
+                    // Keep default values (0.0 and 0)
+                }
+            }
+
+            // Set rating on RatingBar and text
+            holder.tvRating.setText(String.format(Locale.US, "%.1f", avgRating));
+            holder.tvReviewCount.setText("(" + reviewCount + ")");
+
+            // Always show RatingBar
+            holder.ratingBar.setRating((float) avgRating);
+            holder.ratingBar.setVisibility(View.VISIBLE);
+
             // Calculate distance if user location available
             if (userLocation != null && bookmark.has("latitude") && bookmark.has("longitude")) {
                 try {
@@ -115,35 +136,13 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
                     float distanceInKm = distanceInMeters / 1000;
 
                     holder.tvDistance.setText(String.format(Locale.US, "%.1fkm", distanceInKm));
-                    holder.tvDistance.setVisibility(View.VISIBLE);
-                    holder.distanceSeparator.setVisibility(View.VISIBLE);
+                    holder.distanceContainer.setVisibility(View.VISIBLE);
                 } catch (JSONException e) {
-                    holder.tvDistance.setVisibility(View.GONE);
-                    holder.distanceSeparator.setVisibility(View.GONE);
+                    holder.distanceContainer.setVisibility(View.GONE);
                 }
             } else {
-                holder.tvDistance.setVisibility(View.GONE);
-                holder.distanceSeparator.setVisibility(View.GONE);
+                holder.distanceContainer.setVisibility(View.GONE);
             }
-
-            // Show rating (always visible, 0 if no data)
-            double avgRating = 0.0;
-            long reviewCount = 0;
-
-            if (bookmark.has("averageRating") && !bookmark.isNull("averageRating")) {
-                try {
-                    avgRating = bookmark.getDouble("averageRating");
-                    reviewCount = bookmark.optLong("reviewCount", 0);
-                } catch (JSONException e) {
-                    // Keep default values (0.0 and 0)
-                }
-            }
-
-            holder.tvRating.setText(String.format(Locale.US, "%.1f", avgRating));
-            holder.tvRating.setVisibility(View.VISIBLE);
-            holder.starIcon.setVisibility(View.VISIBLE);
-            holder.tvReviewCount.setText("(" + reviewCount + ")");
-            holder.tvReviewCount.setVisibility(View.VISIBLE);
 
             // Image
             String imageUrl = bookmark.optString("defaultPicture", "");
@@ -213,10 +212,10 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
     public static class BookmarkViewHolder extends RecyclerView.ViewHolder {
         ImageView imgLocation;
         TextView tvLocationName;
+        android.widget.RatingBar ratingBar;
         TextView tvRating;
         TextView tvReviewCount;
-        TextView starIcon;
-        TextView distanceSeparator;
+        View distanceContainer;
         TextView tvDistance;
         TextView tvCategory;
         TextView tvNote;
@@ -227,10 +226,10 @@ public class BookmarkAdapter extends RecyclerView.Adapter<BookmarkAdapter.Bookma
             super(itemView);
             imgLocation = itemView.findViewById(R.id.imgLocation);
             tvLocationName = itemView.findViewById(R.id.tvLocationName);
+            ratingBar = itemView.findViewById(R.id.ratingBar);
             tvRating = itemView.findViewById(R.id.tvRating);
             tvReviewCount = itemView.findViewById(R.id.tvReviewCount);
-            starIcon = itemView.findViewById(R.id.starIcon);
-            distanceSeparator = itemView.findViewById(R.id.distanceSeparator);
+            distanceContainer = itemView.findViewById(R.id.distanceContainer);
             tvDistance = itemView.findViewById(R.id.tvDistance);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvNote = itemView.findViewById(R.id.tvNote);

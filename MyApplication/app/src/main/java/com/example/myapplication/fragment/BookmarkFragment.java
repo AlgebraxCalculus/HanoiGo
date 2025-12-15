@@ -136,6 +136,8 @@ public class BookmarkFragment extends Fragment {
             public void onSuccess(ArrayList<JSONObject> bookmarkLists) {
                 requireActivity().runOnUiThread(() -> {
                     savedLists.clear();
+                    // Reverse to show newest first
+                    java.util.Collections.reverse(bookmarkLists);
                     for (JSONObject json : bookmarkLists) {
                         try {
                             SavedList list = new SavedList(
@@ -404,6 +406,8 @@ public class BookmarkFragment extends Fragment {
             public void onSuccess(ArrayList<JSONObject> bookmarkList) {
                 requireActivity().runOnUiThread(() -> {
                     bookmarks.clear();
+                    // Reverse to show newest first
+                    java.util.Collections.reverse(bookmarkList);
                     bookmarks.addAll(bookmarkList);
                     bookmarkAdapter.notifyDataSetChanged();
 

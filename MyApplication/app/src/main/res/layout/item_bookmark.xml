@@ -53,7 +53,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Nook Inside Book &amp; Coffee"
-                    android:textColor="#1A5F7A"
+                    android:textColor="#000000"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
@@ -63,49 +63,69 @@
                     android:id="@+id/ratingContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:layout_marginBottom="4dp">
 
-                    <TextView
-                        android:id="@+id/tvRating"
+                    <!-- Star Rating Bar -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0.0"
-                        android:textColor="#1A5F7A"
-                        android:textSize="14sp"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
 
-                    <TextView
-                        android:id="@+id/starIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" ⭐ "
-                        android:textSize="14sp"/>
+                        <TextView
+                            android:id="@+id/tvRating"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.0"
+                            android:textColor="#000000"
+                            android:textSize="14sp"/>
 
-                    <TextView
-                        android:id="@+id/tvReviewCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(0)"
-                        android:textColor="#1A5F7A"
-                        android:textSize="14sp"/>
+                        <RatingBar
+                            android:id="@+id/ratingBar"
+                            style="?android:attr/ratingBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:numStars="5"
+                            android:rating="0"
+                            android:stepSize="0.1"
+                            android:isIndicator="true"
+                            android:progressTint="#FFD700"
+                            android:secondaryProgressTint="#FFD700"
+                            android:layout_marginStart="8dp"/>
 
-                    <TextView
-                        android:id="@+id/distanceSeparator"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" • "
-                        android:textColor="#1A5F7A"
-                        android:textSize="14sp"
-                        android:visibility="gone"/>
+                        <TextView
+                            android:id="@+id/tvReviewCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="(0)"
+                            android:textColor="#000000"
+                            android:textSize="14sp"
+                            android:layout_marginStart="8dp"/>
 
-                    <TextView
-                        android:id="@+id/tvDistance"
+                    </LinearLayout>
+
+                    <!-- Distance -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1.5km"
-                        android:textColor="#1A5F7A"
-                        android:textSize="14sp"
-                        android:visibility="gone"/>
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        android:id="@+id/distanceContainer">
+
+                        <TextView
+                            android:id="@+id/tvDistance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1.5km"
+                            android:textColor="#000000"
+                            android:textSize="14sp"
+                            android:drawableStart="@android:drawable/ic_menu_mylocation"
+                            android:drawablePadding="4dp"
+                            android:drawableTint="#000000"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -115,7 +135,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Coffee shop"
-                    android:textColor="#1A5F7A"
+                    android:textColor="#000000"
                     android:textSize="14sp"
                     android:layout_marginBottom="12dp"/>
 
@@ -124,7 +144,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Your note"
-                    android:textColor="#1A5F7A"
+                    android:textColor="#000000"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
@@ -135,7 +155,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"
-                    android:textColor="#1A5F7A"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:lineSpacingExtra="2dp"
                     android:ellipsize="end"/>
