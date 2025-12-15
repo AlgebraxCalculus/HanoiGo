@@ -1,6 +1,5 @@
 package com.example.myapplication.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.model.Place;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RouteStopAdapter extends RecyclerView.Adapter<RouteStopAdapter.StopViewHolder> {
@@ -21,52 +21,68 @@ public class RouteStopAdapter extends RecyclerView.Adapter<RouteStopAdapter.Stop
     private final List<Place> stops;
 
     public RouteStopAdapter(List<Place> stops) {
-        this.stops = stops;
+        this.stops = (stops != null) ? stops : new ArrayList<>();
     }
 
     @NonNull
     @Override
     public StopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_route_stop, parent, false);
-        return new StopViewHolder(v);
+        return new StopViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull StopViewHolder holder, int position) {
-        holder.bind(stops.get(position), position);
+        holder.bind(stops.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return stops == null ? 0 : stops.size();
+        return stops.size();
     }
 
     static class StopViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvOrder, tvName, tvAddress;
-        ImageView ivImage;
+        ImageView ivStopThumbnail;
+        TextView tvStopName;
+        TextView tvStopAddress;
+        TextView tvStopDistance;
 
         public StopViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvOrder = itemView.findViewById(R.id.tvStopOrder);
-            tvName = itemView.findViewById(R.id.tvStopName);
-            tvAddress = itemView.findViewById(R.id.tvStopAddress);
-            ivImage = itemView.findViewById(R.id.ivStopImage);
+            ivStopThumbnail = itemView.findViewById(R.id.ivStopThumbnail);
+            tvStopName = itemView.findViewById(R.id.tvStopName);
+            tvStopAddress = itemView.findViewById(R.id.tvStopAddress);
+            tvStopDistance = itemView.findViewById(R.id.tvStopDistance);
         }
 
-        public void bind(Place place, int position) {
-            Context ctx = itemView.getContext();
+        public void bind(Place place) {
+            tvStopName.setText(place.getName());
 
-            tvOrder.setText(String.valueOf(position + 1));
-            tvName.setText(place.getName());
-            tvAddress.setText(place.getAddress());
+            if (place.getAddress() != null && !place.getAddress().isEmpty()) {
+                tvStopAddress.setText(place.getAddress());
+            } else if (place.getDescription() != null) {
+                tvStopAddress.setText(place.getDescription());
+            } else {
+                tvStopAddress.setText("");
+            }
 
-            Glide.with(ctx)
-                    .load(place.getPictureURL())
-                    .placeholder(R.drawable.ic_placeholder)
-                    .error(R.drawable.ic_placeholder)
-                    .into(ivImage);
+            if (place.getDistance() != null && !place.getDistance().isEmpty()) {
+                tvStopDistance.setVisibility(View.VISIBLE);
+                tvStopDistance.setText(place.getDistance());
+            } else {
+                tvStopDistance.setVisibility(View.GONE);
+            }
+
+            if (place.getPictureURL() != null && !place.getPictureURL().isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(place.getPictureURL())
+                        .placeholder(R.drawable.ic_placeholder)
+                        .into(ivStopThumbnail);
+            } else {
+                ivStopThumbnail.setImageResource(R.drawable.ic_placeholder);
+            }
         }
     }
 }

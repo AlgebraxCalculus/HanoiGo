@@ -25,14 +25,13 @@ import okhttp3.Response;
 
 public class AiRouteApi {
 
-    private static final String BASE_URL = "http://192.168.1.12:8080/api/ai/routes";
+    private static final String BASE_URL = "http://192.168.1.8:8080/api/ai/routes";
     private static final MediaType JSON
             = MediaType.get("application/json; charset=utf-8");
 
     private final OkHttpClient client = new OkHttpClient();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    // Callback để trả kết quả về Fragment
     public interface AiRouteCallback {
         void onSuccess(List<AIRoute> routes);
         void onError(Throwable t);
@@ -41,7 +40,6 @@ public class AiRouteApi {
     public void getSuggestedRoutes(String bearerToken,
                                    TravelPlan plan,
                                    AiRouteCallback callback) {
-        // 1. Build JSON body từ TravelPlan
         JSONObject json = new JSONObject();
         try {
             json.put("travelDate", plan.getTravelDate());
@@ -65,7 +63,6 @@ public class AiRouteApi {
 
         RequestBody body = RequestBody.create(json.toString(), JSON);
 
-        // 2. Tạo request OkHttp
         Request.Builder builder = new Request.Builder()
                 .url(BASE_URL)
                 .post(body);
@@ -76,7 +73,6 @@ public class AiRouteApi {
 
         Request request = builder.build();
 
-        // 3. Gửi async
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -105,7 +101,6 @@ public class AiRouteApi {
         });
     }
 
-    // Parse JSON -> List<AIRoute>
     private List<AIRoute> parseRoutes(JSONArray arr) throws JSONException {
         List<AIRoute> result = new ArrayList<>();
 
@@ -117,7 +112,6 @@ public class AiRouteApi {
             double distanceKm = obj.optDouble("distanceKm", 0.0);
             String duration = obj.optString("duration");
 
-            // Parse stops -> List<Place>
             List<Place> stops = new ArrayList<>();
             JSONArray stopsArray = obj.optJSONArray("stops");
             if (stopsArray != null) {
@@ -132,7 +126,6 @@ public class AiRouteApi {
                     double latitude    = stopObj.optDouble("latitude");
                     double longitude   = stopObj.optDouble("longitude");
 
-                    // Dùng model Place sẵn có
                     Place place = new Place(stopName, stopDesc, "", pictureUrl, address);
                     place.setId(stopId);
                     place.setLatitude(latitude);

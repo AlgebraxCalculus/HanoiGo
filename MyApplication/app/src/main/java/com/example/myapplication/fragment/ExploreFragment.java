@@ -1,5 +1,8 @@
 package com.example.myapplication.fragment;
 
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,7 +18,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,11 +39,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ExploreFragment extends Fragment {
 
     private BottomSheetBehavior<View> bottomSheetBehavior;
+    private NestedScrollView nestedScrollExplore;
 
     private RecyclerView rvIconicPlaces;
     private RecyclerView rvTopVisited;
@@ -54,7 +57,6 @@ public class ExploreFragment extends Fragment {
     private PlaceAdapter adapterTopVisited;
     private PlaceAdapter adapterPopularNearU;
 
-    // ====== PHẦN UI & DATA CHO AI ROUTE ======
     private EditText edtTravelDate, edtDurationDays, edtBudget;
     private CheckBox cbFood, cbCulture, cbEntertainment, cbIconic;
     private Button btnSuggestRoute;
@@ -75,16 +77,16 @@ public class ExploreFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         setupBottomSheet(view);
-        // Nếu bạn muốn khi có location mới rồi mới load thì gọi setupPlaceData() ở updateUserLocation
-        // setupPlaceData();
+
         setupSuggestedRoutes(view);
 
         return view;
     }
 
     private void setupBottomSheet(View view) {
-        View bottomSheet = view.findViewById(R.id.bottomSheetExplore);
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        // bottomSheetExplore trong XML là NestedScrollView
+        nestedScrollExplore = view.findViewById(R.id.bottomSheetExplore);
+        bottomSheetBehavior = BottomSheetBehavior.from(nestedScrollExplore);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setPeekHeight(450);
 
@@ -107,18 +109,15 @@ public class ExploreFragment extends Fragment {
     public void updateUserLocation(double lat, double lng) {
         this.userLat = lat;
         this.userLng = lng;
-        // Khi đã có location thật, bạn có thể mở comment dòng dưới để load list địa điểm:
+        // Khi có location thật, nếu muốn load place list:
         // setupPlaceData();
     }
-
-    // ================== LOAD CÁC LIST PLACE ===============
 
     private void setupPlaceData() {
         listIconic = new ArrayList<>();
         listTopVisited = new ArrayList<>();
         listPopularNearU = new ArrayList<>();
 
-        //setUp listIconic
         LocationApi.GetLocationList(userLat, userLng, "Iconic", false, false, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -158,7 +157,6 @@ public class ExploreFragment extends Fragment {
                     }
                 });
 
-        //setUp listTopVisited
         LocationApi.GetLocationList(userLat, userLng, "", true, false, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -198,7 +196,6 @@ public class ExploreFragment extends Fragment {
                     }
                 });
 
-        //setUp listPopularNearU
         LocationApi.GetLocationList(userLat, userLng, "", false, true, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -238,11 +235,7 @@ public class ExploreFragment extends Fragment {
                     }
                 });
     }
-
-    // ================== PHẦN AI SUGGEST ROUTE ===============
-
     private void setupSuggestedRoutes(View view) {
-        // bind view
         edtTravelDate = view.findViewById(R.id.edtTravelDate);
         edtDurationDays = view.findViewById(R.id.edtDurationDays);
         edtBudget = view.findViewById(R.id.edtBudget);
@@ -259,15 +252,11 @@ public class ExploreFragment extends Fragment {
         rvSuggestedRoutes.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
 
-        aiRouteAdapter = new AiRouteAdapter(route -> {
-            // Khi user ấn vào card -> mở popup chi tiết route (có hình từng điểm dừng)
-            showRouteDetailsDialog(route);
-        });
+        aiRouteAdapter = new AiRouteAdapter(route -> showRouteDetailDialog(route));
         rvSuggestedRoutes.setAdapter(aiRouteAdapter);
 
         aiRouteApi = new AiRouteApi();
 
-        // Optional: set sẵn default để test nhanh
         edtTravelDate.setText("2025-12-25");
         edtDurationDays.setText("1");
         cbFood.setChecked(true);
@@ -283,7 +272,7 @@ public class ExploreFragment extends Fragment {
 
         if (TextUtils.isEmpty(date) || TextUtils.isEmpty(durationStr)) {
             Toast.makeText(requireContext(),
-                    "Vui lòng nhập ngày đi và số ngày",
+                    "Please enter travel date and duration",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -293,16 +282,25 @@ public class ExploreFragment extends Fragment {
             durationDays = Integer.parseInt(durationStr);
         } catch (NumberFormatException e) {
             Toast.makeText(requireContext(),
-                    "Số ngày không hợp lệ",
+                    "Duration is invalid",
                     Toast.LENGTH_SHORT).show();
             return;
         }
 
         List<String> interests = new ArrayList<>();
-        if (cbFood.isChecked()) interests.add("ẩm thực");
-        if (cbCulture.isChecked()) interests.add("văn hóa");
-        if (cbEntertainment.isChecked()) interests.add("giải trí");
+        if (cbFood.isChecked()) interests.add("food");
+        if (cbCulture.isChecked()) interests.add("culture");
+        if (cbEntertainment.isChecked()) interests.add("entertainment");
         if (cbIconic.isChecked()) interests.add("iconic");
+
+        if (interests.isEmpty()) {
+            Toast.makeText(
+                    requireContext(),
+                    "Please select at least one interest",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
 
         Long budget = null;
         if (!TextUtils.isEmpty(budgetStr)) {
@@ -314,8 +312,7 @@ public class ExploreFragment extends Fragment {
 
         TravelPlan plan = new TravelPlan(date, durationDays, interests, budget);
 
-        // Nếu /api/ai/routes đang permitAll thì cho null
-        String bearerToken = getAuthTokenOrNull();
+        String bearerToken = getAuthTokenOrNull(); // hiện đang trả null
 
         progressBarAiRoute.setVisibility(View.VISIBLE);
 
@@ -326,10 +323,18 @@ public class ExploreFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     progressBarAiRoute.setVisibility(View.GONE);
                     aiRouteAdapter.setRoutes(routes);
+
                     if (routes.isEmpty()) {
                         Toast.makeText(requireContext(),
-                                "Không tìm thấy lộ trình phù hợp",
+                                "No suitable routes found",
                                 Toast.LENGTH_SHORT).show();
+                    } else if (nestedScrollExplore != null && rvSuggestedRoutes != null) {
+
+                        nestedScrollExplore.post(() -> {
+                            int y = rvSuggestedRoutes.getTop() - 32;
+                            if (y < 0) y = 0;
+                            nestedScrollExplore.smoothScrollTo(0, y);
+                        });
                     }
                 });
             }
@@ -340,7 +345,7 @@ public class ExploreFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     progressBarAiRoute.setVisibility(View.GONE);
                     Toast.makeText(requireContext(),
-                            "Lỗi AI Route: " + t.getMessage(),
+                            "AI Route error: " + t.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
             }
@@ -348,57 +353,49 @@ public class ExploreFragment extends Fragment {
     }
 
     private String getAuthTokenOrNull() {
-        // Hiện tại endpoint /api/ai/routes bạn đang để public (permitAll) -> return null
         return null;
-
-        // Nếu sau này yêu cầu JWT thì đọc token từ SharedPreferences:
-        /*
-        SharedPreferences prefs = requireContext()
-                .getSharedPreferences("auth", Context.MODE_PRIVATE);
-        String raw = prefs.getString("access_token", null);
-        return raw != null ? "Bearer " + raw : null;
-        */
     }
 
-    private void showRouteDetailsDialog(AIRoute route) {
+
+
+    private void showRouteDetailDialog(AIRoute route) {
         if (!isAdded()) return;
 
-        View dialogView = LayoutInflater.from(requireContext())
-                .inflate(R.layout.dialog_route_details, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        View dialogView = inflater.inflate(R.layout.dialog_route_detail, null, false);
 
         TextView tvRouteTitle = dialogView.findViewById(R.id.tvRouteTitle);
         TextView tvRouteSummary = dialogView.findViewById(R.id.tvRouteSummary);
         RecyclerView rvRouteStops = dialogView.findViewById(R.id.rvRouteStops);
-        Button btnClose = dialogView.findViewById(R.id.btnCloseRoute);
+        Button btnCloseRoute = dialogView.findViewById(R.id.btnCloseRoute);
 
         tvRouteTitle.setText(route.getTitle());
 
         String summary = String.format(
-                Locale.getDefault(),
-                "Tổng: %.2f km · %s",
+                java.util.Locale.getDefault(),
+                "Total: %.2f km • %s",
                 route.getDistanceKm(),
                 route.getDuration()
         );
         tvRouteSummary.setText(summary);
 
-        rvRouteStops.setLayoutManager(new LinearLayoutManager(requireContext()));
-        RouteStopAdapter stopAdapter = new RouteStopAdapter(route.getStops());
-        rvRouteStops.setAdapter(stopAdapter);
+        rvRouteStops.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        );
+        rvRouteStops.setAdapter(new RouteStopAdapter(route.getStops()));
 
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setView(dialogView)
-                .create();
-
-        dialog.show();
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
 
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setLayout(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
 
-        btnClose.setOnClickListener(v -> dialog.dismiss());
+        btnCloseRoute.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void openPlaceDetail(Place place) {

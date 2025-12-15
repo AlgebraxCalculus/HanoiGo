@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- nền tối giống explore -->
+    <solid android:color="#01101E" />
+
+    <!-- bo tròn cả 4 góc -->
+    <corners android:radius="18dp" />
+
+    <!-- viền mảnh màu tím (optional) -->
+    <stroke
+        android:width="1dp"
+        android:color="#664B5CFF" />
+</shape>

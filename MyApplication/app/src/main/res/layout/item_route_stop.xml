@@ -1,60 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    android:layout_marginBottom="6dp">
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/teal_700">
 
-    <!-- STT -->
-    <TextView
-        android:id="@+id/tvStopOrder"
-        android:layout_width="24dp"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="1"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="#333333" />
-
-    <!-- Ảnh -->
-    <ImageView
-        android:id="@+id/ivStopImage"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_placeholder" />
-
-    <!-- Text -->
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvStopName"
+        <!-- Thumbnail full width on top -->
+        <ImageView
+            android:id="@+id/ivStopThumbnail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tên địa điểm"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:textColor="#111111"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:layout_height="160dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/app_name" />
 
-        <TextView
-            android:id="@+id/tvStopAddress"
+        <!-- Text block with teal background -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Địa chỉ"
-            android:textSize="13sp"
-            android:textColor="#666666"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:layout_marginTop="2dp" />
+            android:orientation="vertical"
+            android:background="@color/explore_card_bg"
+            android:paddingStart="12dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/tvStopName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Place name"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tvStopAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Short description or address"
+                android:textColor="@color/explore_primary"
+                android:textSize="13sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tvStopDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="3.6 km"
+                android:textColor="@android:color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+</androidx.cardview.widget.CardView>

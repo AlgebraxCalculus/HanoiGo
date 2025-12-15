@@ -11,7 +11,7 @@
     app:cardCornerRadius="18dp"
     app:cardUseCompatPadding="false"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="@color/teal_route_card">
+    app:cardBackgroundColor="@color/explore_card_bg">
 
     <!-- Hàng ngang: bên trái là ảnh full-height, bên phải là text -->
     <LinearLayout
