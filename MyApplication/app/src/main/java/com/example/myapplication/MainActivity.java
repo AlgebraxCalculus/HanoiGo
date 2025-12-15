@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ====== HÀM CHUYỂN FRAGMENT ======
-    private void switchFragment(Fragment targetFragment) {
+    public void switchFragment(Fragment targetFragment) {
         if (targetFragment == activeFragment) return;
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -274,10 +274,25 @@ public class MainActivity extends AppCompatActivity {
             transaction.hide(activeFragment);
         }
 
+        // Nếu fragment chưa được add → add
+        if (!targetFragment.isAdded()) {
+            transaction.add(R.id.fragment_container, targetFragment);
+        } else {
+            transaction.show(targetFragment);
+        }
+
         transaction.show(targetFragment);
         transaction.commit();
 
         activeFragment = targetFragment;
+        if (targetFragment == personalFragment) {
+            // Ép kiểu (cast) sang PersonalFragment và gọi hàm reloadData()
+            ((PersonalFragment) personalFragment).reloadData();
+            ((PersonalFragment) personalFragment).resetScroll();
+        } else if (targetFragment == homeFragment) {
+            ((HomeFragment) homeFragment).reloadData();
+            ((HomeFragment) homeFragment).resetScroll();
+        }
     }
 
     // ====== ẨN / HIỆN FOOTER ======

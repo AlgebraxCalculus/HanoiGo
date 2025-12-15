@@ -142,6 +142,19 @@ public class UserController {
                 .build();
     }
 
+    // Cập nhật avatar user
+    @PostMapping("/update-avatar")
+    public ApiResponse<UserResponse> updateAvatar(@RequestHeader("Authorization") String authHeader, @RequestParam(required = true) String avatarUrl) {
+        String token = jwtUtil.extractToken(authHeader); // helper method: cắt "Bearer "
+        String username = jwtUtil.getUsernameFromToken(token);
+        UserResponse response = userService.updateAvatar(username, avatarUrl);
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .message("Cập nhật avatar thành công")
+                .result(response)
+                .build();
+    }
+
     // Test API
     @GetMapping("/test")
     public ApiResponse<String> test() {

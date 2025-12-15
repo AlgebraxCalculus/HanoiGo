@@ -78,9 +78,6 @@ public class MapFragment extends Fragment {
 
     private CardView searchSuggestionsCard;
     private TextWatcher textWatcher;
-
-    private ArrayList<JSONObject> checkpointList = new ArrayList<>();
-
     private final Map<Marker, JSONObject> markerMap = new HashMap<>();
 
     @Nullable
@@ -122,7 +119,7 @@ public class MapFragment extends Fragment {
             imgAvatar.setImageResource(R.drawable.avatar);
         }
 
-        // --- MAP SETUP ---
+        // MAP SETUP
         mapView = view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> {
@@ -146,14 +143,13 @@ public class MapFragment extends Fragment {
                     }
                     return false;
                 });
-                // Nếu userLocation có sẵn, show marker user
+                // Show marker user
                 if (userLocation != null) {
                     showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here", false);
                 }
             });
         });
 
-        // Child fragment
         ExploreFragment exploreFragment = new ExploreFragment();
         Bundle childArgs = new Bundle();
         childArgs.putString("jwtToken", jwtToken);
@@ -161,7 +157,6 @@ public class MapFragment extends Fragment {
         childArgs.putString("avatar", avatar);
         loadChildFragment(exploreFragment);
 
-        // Button
         btnCheckpoint = view.findViewById(R.id.btnCheckpoint);
         btnBookmark = view.findViewById(R.id.btnBookmark);
         btnCompass = view.findViewById(R.id.btnCompass);
@@ -194,7 +189,7 @@ public class MapFragment extends Fragment {
         for (CardView btn : allButtons) {
             btn.setOnClickListener(buttonClickListener);
         }
-        // Search autocomplete
+
         EditText searchBar = view.findViewById(R.id.searchBar);
         ImageView ivClear = view.findViewById(R.id.ivClear);
         rvSearchSuggestions = view.findViewById(R.id.rvSearchSuggestions);
@@ -208,69 +203,67 @@ public class MapFragment extends Fragment {
     }
 
     private void fetchCheckpoints() {
-        CheckpointApi.GetEnableCheckIn(userLocation.getLatitude(), userLocation.getLongitude(), jwtToken, getContext(), new CheckpointApi.CheckpointApiCallback() {
-            @Override
-            public void onSuccess(ArrayList<JSONObject> list) {
-                requireActivity().runOnUiThread(() -> {
-                    checkpointList.clear();
-                    checkpointList.addAll(list);
-                    // Thêm marker mới
-                    for (JSONObject checkpoint : checkpointList) {
-                        try {
-                            JSONObject location = checkpoint.optJSONObject("locationResponse");
-                            if (location == null) continue;
+        CheckpointApi.GetEnableCheckIn(
+                userLocation.getLatitude(),
+                userLocation.getLongitude(),
+                jwtToken,
+                getContext(),
+                new CheckpointApi.CheckpointApiCallback() {
 
-                            double cLat = location.optDouble("latitude", 0);
-                            double cLng = location.optDouble("longitude", 0);
-                            showLocationMarker(cLat, cLng, checkpoint, false);
+                    @Override
+                    public void onSuccess(ArrayList<JSONObject> list) {
+                        requireActivity().runOnUiThread(() -> {
 
-                        } catch (Exception e) {
-                            Log.e("MapFragment", "Lỗi parse checkpoint: " + e.getMessage());
-                        }
-                    }
+                            if (list == null || list.isEmpty()) {
+                                Log.d("MapFragment", "No checkpoints found");
+                                return;
+                            }
 
-                    // Zoom về vùng hiển thị đầu tiên nếu có ít nhất 1 checkpoint
-                    if (!checkpointList.isEmpty()) {
-                        try {
                             List<LatLng> allPoints = new ArrayList<>();
 
-                            for (JSONObject checkpoint : checkpointList) {
+                            for (JSONObject checkpoint : list) {
                                 JSONObject location = checkpoint.optJSONObject("locationResponse");
                                 if (location == null) continue;
 
                                 double lat = location.optDouble("latitude", 0);
                                 double lng = location.optDouble("longitude", 0);
-                                allPoints.add(new LatLng(lat, lng));
+
+                                LatLng pos = new LatLng(lat, lng);
+                                allPoints.add(pos);
+
+                                showLocationMarker(lat, lng, checkpoint, false);
                             }
 
+                            // Zoom map
                             if (!allPoints.isEmpty()) {
                                 LatLngBounds bounds = LatLngBounds.from(
-                                        getMaxLat(allPoints), getMaxLng(allPoints),
-                                        getMinLat(allPoints), getMinLng(allPoints)
+                                        getMaxLat(allPoints),
+                                        getMaxLng(allPoints),
+                                        getMinLat(allPoints),
+                                        getMinLng(allPoints)
                                 );
-                                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 80));
+                                map.animateCamera(
+                                        CameraUpdateFactory.newLatLngBounds(bounds, 80)
+                                );
                             }
-
-                        } catch (Exception e) {
-                            Log.e("MapFragment", "Zoom bounds error: " + e.getMessage());
-                        }
+                        });
                     }
-                });
-            }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                requireActivity().runOnUiThread(() ->
-                        Log.e("MapFragment", "Checkpoint API error: " + errorMessage)
-                );
-            }
-        });
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() ->
+                                Log.e("MapFragment", "Checkpoint API error: " + errorMessage)
+                        );
+                    }
+                }
+        );
     }
 
     private void setActiveButton(CardView activeButton) {
         int activeColor = Color.parseColor("#007AFF");
         int inactiveColor = Color.parseColor("#001A2E");
-        // Reset tất cả button về màu mặc định
+
         List<CardView> allButtons = Arrays.asList(btnCheckpoint, btnBookmark, btnCompass, btnNavigate);
         for (CardView btn : allButtons) {
             btn.setCardBackgroundColor(inactiveColor);
@@ -297,7 +290,12 @@ public class MapFragment extends Fragment {
     // Mở chi tiết địa điểm
     public void openPlaceDetailFragment(Place place) {
         PlaceDetailFragment detailFragment =
-                PlaceDetailFragment.newInstance(place, checkpointList, jwtToken, username, avatar);
+                PlaceDetailFragment.newInstance(place, jwtToken, username, avatar);
+
+        if (userLocation != null) {
+            detailFragment.updateUserLocation(userLocation.getLatitude(), userLocation.getLongitude());
+        }
+
         Bundle args = new Bundle();
         args.putSerializable("placeData", place);
         args.putString("jwtToken", jwtToken);
@@ -343,7 +341,6 @@ public class MapFragment extends Fragment {
         if (map == null) return;
         LatLng position = new LatLng(lat, lng);
 
-        // Nếu marker user đã tồn tại → chỉ cập nhật vị trí, không xóa/clear map
         if (userMarker != null) {
             userMarker.setPosition(position);
         } else {
@@ -357,19 +354,16 @@ public class MapFragment extends Fragment {
         }
     }
 
-    // Cập nhật Location người dùng từ MainActivity
     public void updateUserLocation(double lat, double lng) {
         if (lat == 0.0 && lng == 0.0) return;
 
         userLocation = new LatLng(lat, lng);
         System.out.println("updateUserLocation() → lat=" + lat + ", lng=" + lng);
 
-        // Nếu map đã sẵn sàng thì hiển thị marker luôn
         if (map != null) {
             showMarker(lat, lng, "You are here", false);
         }
 
-        // Gửi vị trí xuống ExploreFragment
         Fragment child = getChildFragmentManager().findFragmentById(R.id.childFragmentContainer);
         if (child instanceof ExploreFragment) {
             ((ExploreFragment) child).updateUserLocation(lat, lng);
@@ -380,7 +374,6 @@ public class MapFragment extends Fragment {
         if (map == null || !isAdded()) return;
         LatLng position = new LatLng(lat, lng);
 
-        // Lấy tên: ưu tiên locationResponse.name, nếu không có thì dùng placeData.name
         String name = "";
         if (placeData != null) {
             JSONObject locationResponse = placeData.optJSONObject("locationResponse");
@@ -389,7 +382,7 @@ public class MapFragment extends Fragment {
             }
         }
 
-        // Kiểm tra đã có marker tại vị trí này chưa (tránh trùng lặp)
+        // Kiểm tra đã có marker tại vị trí này chưa
         final double EPS = 1e-5;
         Marker existing = null;
         for (Marker m : map.getMarkers()) {
@@ -400,9 +393,8 @@ public class MapFragment extends Fragment {
             }
         }
 
-        // Nếu đã tồn tại marker tại vị trí này
         if (existing != null) {
-            // Cập nhật dữ liệu vào markerMap để sử dụng khi click
+            // Cập nhật dữ liệu vào markerMap
             if (placeData != null) {
                 markerMap.put(existing, placeData);
             }
@@ -423,7 +415,6 @@ public class MapFragment extends Fragment {
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setShadowLayer(5f, 0f, 0f, Color.WHITE);
 
-        // Xử lý text nhiều dòng
         int maxTextWidth = 300;
         List<String> lines = new ArrayList<>();
         if (name == null) name = "";
@@ -444,7 +435,6 @@ public class MapFragment extends Fragment {
                 TypedValue.COMPLEX_UNIT_DIP, 35, requireContext().getResources().getDisplayMetrics());
         Bitmap scaledIcon = Bitmap.createScaledBitmap(iconBitmap, iconSizePx, iconSizePx, true);
 
-        // Tính kích thước tổng thể
         Paint.FontMetrics fm = textPaint.getFontMetrics();
         float lineHeight = fm.bottom - fm.top + 10;
         int textHeight = (int) (lines.size() * lineHeight);
@@ -456,7 +446,6 @@ public class MapFragment extends Fragment {
         Bitmap combined = Bitmap.createBitmap(totalWidth, totalHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(combined);
 
-        // Vẽ icon và chữ lên canvas
         int iconX = (totalWidth - iconSizePx) / 2;
         canvas.drawBitmap(scaledIcon, iconX, 0, null);
 
@@ -482,7 +471,6 @@ public class MapFragment extends Fragment {
             y += lineHeight;
         }
 
-        // Tạo marker
         IconFactory iconFactory = IconFactory.getInstance(requireContext());
         Icon icon = iconFactory.fromBitmap(combined);
 
@@ -511,7 +499,6 @@ public class MapFragment extends Fragment {
                             .replaceAll("[^\\p{L}\\p{N}\\s]", "")
                             .trim();
 
-                    // Nếu bấm lại tag đang chọn -> bỏ chọn
                     if (selectedTag.equals(currentSelectedTag)) {
                         currentSelectedTag = null;
                         resetAllTagBackgrounds();
@@ -519,10 +506,8 @@ public class MapFragment extends Fragment {
                         return;
                     }
 
-                    // Bỏ chọn tất cả tag trước đó
                     resetAllTagBackgrounds();
 
-                    // Chọn tag mới
                     tagView.setBackgroundResource(R.drawable.bg_tag_selected);
                     currentSelectedTag = selectedTag;
 
@@ -533,7 +518,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    // Reset toàn bộ background về mặc định
     private void resetAllTagBackgrounds() {
         for (int j = 0; j < tagContainer.getChildCount(); j++) {
             View other = tagContainer.getChildAt(j);
@@ -556,7 +540,6 @@ public class MapFragment extends Fragment {
             markerMap.remove(m);
         }
 
-        // Zoom về vị trí user
         if (userLocation != null) {
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
         }
@@ -605,7 +588,6 @@ public class MapFragment extends Fragment {
 
         if (map == null) return;
 
-        // Xóa marker cũ (không xóa userMarker)
         List<Marker> toRemove = new ArrayList<>();
         for (Marker m : map.getMarkers()) {
             if (!m.equals(userMarker)) toRemove.add(m);
@@ -636,7 +618,6 @@ public class MapFragment extends Fragment {
             }
         }
 
-        // Zoom marker
         if (!allPoints.isEmpty()) {
             LatLngBounds bounds = LatLngBounds.from(
                     getMaxLat(allPoints), getMaxLng(allPoints),
@@ -646,7 +627,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    // Hàm tiện ích tính min/max
     private double getMinLat(List<LatLng> points) {
         double min = Double.MAX_VALUE;
         for (LatLng p : points) min = Math.min(min, p.getLatitude());
@@ -761,7 +741,6 @@ public class MapFragment extends Fragment {
         });
     }
 
-    // --- Hiệu ứng ẩn/hiện nút ---
     private void fadeOut(View v) {
         v.animate().alpha(0f).setDuration(200).withEndAction(() -> v.setVisibility(View.GONE)).start();
     }
@@ -772,7 +751,7 @@ public class MapFragment extends Fragment {
         v.animate().alpha(1f).setDuration(200).start();
     }
 
-    // --- MAPVIEW LIFECYCLE ---
+    // MAPVIEW LIFECYCLE
     @Override public void onStart() { super.onStart(); mapView.onStart(); }
     @Override public void onResume() { super.onResume(); mapView.onResume(); }
     @Override public void onPause() { super.onPause(); mapView.onPause(); }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
@@ -14,9 +15,6 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     Optional<Review> findByUserIdAndLocationId(@Param("userId") UUID userId,
                                                @Param("locationId") String locationId);
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.location.id = :locationId")
-    Double getAverageRatingByLocationId(@Param("locationId") String locationId);
-
-    @Query("SELECT COUNT(r) FROM Review r WHERE r.location.id = :locationId")
-    Long getReviewCountByLocationId(@Param("locationId") String locationId);
+    @Query("SELECT r FROM Review r WHERE r.location.id = :locationId")
+    List<Review> findByLocationId(@Param("locationId") String locationId);
 }

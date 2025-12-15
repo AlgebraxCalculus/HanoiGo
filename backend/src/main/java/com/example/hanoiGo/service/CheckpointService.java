@@ -21,6 +21,7 @@ import com.example.hanoiGo.repository.CheckpointRepository;
 import com.example.hanoiGo.repository.LocationDetailRepository;
 import com.example.hanoiGo.repository.ReviewRepository;
 import com.example.hanoiGo.repository.UserRepository;
+import com.example.hanoiGo.repository.UserLikeRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class CheckpointService {
     private final CheckpointMapper checkpointMapper;
     private final LocationMapper locationMapper;
     private final FirebaseService firebaseService;
+    private final UserLikeRepository userLikeRepository;
 
     // Get list of locations eligible for check-in
     public List<EnableCheckpointResponse> enableCheckIn(UUID userId, Double userLatitude, Double userLongitude) {
@@ -66,7 +68,7 @@ public class CheckpointService {
         for (LocationListResponse locRes : locationListResponses) {
             LocationResponse locationResponse = locRes.getLocationResponse();
             int distance = locRes.getDistanceValue();
-            if (distance > 3000) break;
+            if (distance > 2000) break;
 
             LocationDetail detail = locationDetailRepository.findByAddress(locationResponse.getAddress()).orElse(null);
             if (detail == null) continue;
@@ -105,7 +107,7 @@ public class CheckpointService {
         LocationDetail loc = locationDetailRepository.findByAddress(request.getLocationAddress())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
         // Add points for check-in
-        int addedPoints = 3;
+        int addedPoints = 5;
         int newPoints = (userEntity.getPoints() == null ? 0 : userEntity.getPoints()) + addedPoints;
         userEntity.setPoints(newPoints);
         userRepository.save(userEntity);
@@ -163,12 +165,14 @@ public class CheckpointService {
             Optional<Review> reviewOpt = reviewRepository.findByUserIdAndLocationId(user.getId(), cp.getLocation().getId());
             if (reviewOpt.isPresent()) {
                 Review review = reviewOpt.get();
+                long likeCount = userLikeRepository.countByReviewId(review.getId());
                 reviewRes = ReviewResponse.builder()
                         .userResponse(userService.getUserById(user.getId()))
                         .rating(review.getRating())
                         .createdAt(review.getCreatedAt())
                         .content(review.getContent()) 
                         .pictureUrl(firebaseService.getReviewPictures(review.getId()))
+                        .likeCount(likeCount)
                         .build();           
             }
 

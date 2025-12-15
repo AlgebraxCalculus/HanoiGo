@@ -51,6 +51,7 @@ public class CheckpointsFragment extends Fragment {
     private List<Checkpoint> checkpointList;
     private String currentType = "date"; // "rating" hoặc "date"
     private String currentSort = "newest"; // "best", "worst", "newest", "oldest"
+    private boolean isSpinnerInitialized = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -151,6 +152,11 @@ public class CheckpointsFragment extends Fragment {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!isSpinnerInitialized) {
+                    isSpinnerInitialized = true;
+                    return; // 🚫 bỏ lần gọi đầu tiên
+                }
+
                 String selectedView = parent.getItemAtPosition(position).toString();
                 // Gọi lại hàm setupCheckpointData với filter hiện tại
                 setupCheckpointData(jwtToken, currentType, currentSort, selectedView);
@@ -178,8 +184,7 @@ public class CheckpointsFragment extends Fragment {
             public void onSuccess(ArrayList<JSONObject> data) {
                 for(JSONObject a : data){
                     try {
-                        Place p = new Place(a.getJSONObject("location").getString("name"), a.getJSONObject("location").getString("description"), null, a.getJSONObject("location").getString("defaultPicture"));
-                        p.setId(a.getJSONObject("location").getString("id"));
+                        Place p = new Place(a.getJSONObject("location").getString("name"), a.getJSONObject("location").getString("description"), null, a.getJSONObject("location").getString("defaultPicture"), a.getJSONObject("location").getString("address"));
                         Review r = null;
                         if(!a.isNull("review")){
                             String time = getRelativeTime(a.getJSONObject("review").getString("createdAt")); //cần thêm hàm biến đổi về dạng khoảng time tới hiện tại (few seconds ago,...)
@@ -200,7 +205,7 @@ public class CheckpointsFragment extends Fragment {
                         rvCheckpoints.setVisibility(View.VISIBLE);
                         layoutNoCheckpoints.setVisibility(View.GONE);
                     }
-                    tvCheckpointCount.setText(data.size() + " Achievements");
+                    tvCheckpointCount.setText(data.size() + " Checkpoints");
                     persCheckpointAdapter = new PersCheckpointAdapter(requireContext(), checkpointList, checkpoint -> openPlaceDetail(checkpoint));
                     rvCheckpoints.setAdapter(persCheckpointAdapter);
                 });

@@ -213,4 +213,13 @@ public class ExploreFragment extends Fragment {
             ((MapFragment) parentFragment).openPlaceDetailFragment(place);
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (userLat != 0 && userLng != 0) {
+            setupPlaceData();
+        }
+    }
 }
