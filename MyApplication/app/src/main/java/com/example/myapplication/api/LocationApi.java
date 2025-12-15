@@ -20,7 +20,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LocationApi {
-    private static final String LOCATION_URL = "http://192.168.100.135:8080/api/locations";
+    private static final String LOCATION_URL = "http://192.168.134.5:8080/api/locations";
     public static void GetLocationList(double lat, double lng, String tag, boolean topVisited, boolean popularNearU, Context context, LocationApi.LocationApiCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
@@ -156,6 +156,43 @@ public class LocationApi {
         });
     }
 
+    public static void GetLocationById(String locationId, Context context, LocationDetailCallback callback) {
+        OkHttpClient client = new OkHttpClient();
+
+        HttpUrl url = HttpUrl.parse(LOCATION_URL + "/get-detail-by-id")
+                .newBuilder()
+                .addQueryParameter("locationId", locationId)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+
+        System.out.println("GET LOCATION BY ID URL: " + url);
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject json = new JSONObject(response.body().string());
+                        JSONObject result = json.getJSONObject("result");
+                        callback.onSuccess(result);
+                    } catch (JSONException e) {
+                        callback.onFailure("Failed to parse location detail");
+                    }
+                } else {
+                    callback.onFailure("Error: " + response.code());
+                }
+            }
+        });
+    }
 
     // Callback interface
     public interface LocationApiCallback {

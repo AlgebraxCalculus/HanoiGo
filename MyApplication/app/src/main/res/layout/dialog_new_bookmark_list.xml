@@ -1,70 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@android:color/white">
+    android:background="@drawable/dialog_background_dark">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/dialogTitle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="New List"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"/>
 
     <EditText
         android:id="@+id/editListName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="List name"
+        android:textColorHint="#9E9E9E"
+        android:textColor="#FFFFFF"
         android:inputType="text"
         android:maxLines="1"
+        android:padding="16dp"
+        android:background="@drawable/edittext_background_dark"
         android:layout_marginBottom="16dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Choose an icon"
-        android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="12dp"/>
-
-    <LinearLayout
+    <EditText
+        android:id="@+id/editListDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:hint="Description (optional)"
+        android:textColorHint="#9E9E9E"
+        android:textColor="#FFFFFF"
+        android:inputType="textMultiLine"
+        android:maxLines="3"
+        android:minHeight="80dp"
+        android:gravity="top|start"
+        android:padding="16dp"
+        android:background="@drawable/edittext_background_dark"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Icon Picker Button -->
+    <LinearLayout
+        android:id="@+id/iconPickerButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginBottom="24dp">
+        android:padding="24dp"
+        android:layout_marginBottom="24dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
 
-        <ImageView
-            android:id="@+id/iconBookmark"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/ic_bookmark"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_margin="8dp"/>
+        <!-- Icon Display with background -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginBottom="16dp">
 
-        <ImageView
-            android:id="@+id/iconHeart"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/ic_heart"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_margin="8dp"/>
+            <!-- Background with gradient/colors like Google Maps -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:background="@android:color/white">
 
-        <ImageView
-            android:id="@+id/iconFlag"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/ic_flag"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_margin="8dp"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#90CAF9"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#C5CAE9"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#A5D6A7"/>
+
+            </LinearLayout>
+
+            <!-- Emoji Icon in center -->
+            <TextView
+                android:id="@+id/selectedEmojiIcon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:background="@android:color/white"
+                android:gravity="center"
+                android:text="😀"
+                android:textSize="48sp"
+                android:elevation="2dp"/>
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose icon"
+            android:textSize="16sp"
+            android:textColor="#E0E0E0"/>
 
     </LinearLayout>
 
@@ -78,18 +125,23 @@
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cancel"
+            android:text="CANCEL"
             style="@style/Widget.AppCompat.Button.Borderless"
-            android:textColor="@android:color/black"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:layout_marginEnd="8dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCreate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create"
+            android:text="CREATE"
             android:textColor="@android:color/white"
-            android:backgroundTint="#4CAF50"/>
+            android:textStyle="bold"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:background="@drawable/button_primary_green"
+            app:backgroundTint="@null"/>
 
     </LinearLayout>
 

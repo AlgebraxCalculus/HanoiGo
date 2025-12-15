@@ -24,4 +24,6 @@ public class BookmarkResponse {
     private double longitude;
     private String description;
     private LocalDateTime bookmarkedAt;
+    private Double averageRating;
+    private Long reviewCount;
 }

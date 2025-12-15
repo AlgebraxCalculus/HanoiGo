@@ -17,9 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.BookmarkAdapter;
 import com.example.myapplication.api.BookmarkApi;
+import com.example.myapplication.api.LocationApi;
+import com.example.myapplication.model.Place;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,18 +92,23 @@ public class BookmarkListDetailFragment extends Fragment {
         adapter.setOnBookmarkClickListener(new BookmarkAdapter.OnBookmarkClickListener() {
             @Override
             public void onBookmarkClick(JSONObject bookmark) {
-                // TODO: Open location detail
                 try {
-                    String locationName = bookmark.getString("locationName");
-                    Toast.makeText(requireContext(), "Opening " + locationName, Toast.LENGTH_SHORT).show();
+                    String locationId = bookmark.getString("locationId");
+                    openLocationDetail(locationId);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    Toast.makeText(requireContext(), "Error opening location", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onEditNoteClick(JSONObject bookmark) {
                 showEditNoteDialog(bookmark);
+            }
+
+            @Override
+            public void onRemoveBookmark(JSONObject bookmark) {
+                showRemoveBookmarkDialog(bookmark);
             }
         });
         recyclerBookmarks.setAdapter(adapter);
@@ -268,6 +276,49 @@ public class BookmarkListDetailFragment extends Fragment {
         });
     }
 
+    private void showRemoveBookmarkDialog(JSONObject bookmark) {
+        try {
+            String locationName = bookmark.getString("locationName");
+            String locationId = bookmark.getString("locationId");
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Remove Bookmark")
+                    .setMessage("Remove \"" + locationName + "\" from this list?")
+                    .setPositiveButton("Remove", (d, w) -> {
+                        removeBookmarkFromList(locationId);
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Error removing bookmark", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void removeBookmarkFromList(String locationId) {
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+        String jwtToken = prefs.getString("jwt_token", null);
+
+        if (jwtToken == null) return;
+
+        BookmarkApi.removeBookmark(jwtToken, locationId, listId, requireContext(), new BookmarkApi.VoidCallback() {
+            @Override
+            public void onSuccess() {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Bookmark removed!", Toast.LENGTH_SHORT).show();
+                    loadBookmarks();
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Failed to remove bookmark: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
     private void showEditListDialog() {
         EditText editText = new EditText(requireContext());
         editText.setText(listName);
@@ -285,5 +336,51 @@ public class BookmarkListDetailFragment extends Fragment {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void openLocationDetail(String locationId) {
+        SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE);
+        String jwtToken = prefs.getString("jwt_token", null);
+        String username = prefs.getString("username", "");
+        String avatar = prefs.getString("avatar", "");
+
+        LocationApi.GetLocationById(locationId, requireContext(), new LocationApi.LocationDetailCallback() {
+            @Override
+            public void onSuccess(JSONObject locationDetail) {
+                requireActivity().runOnUiThread(() -> {
+                    try {
+                        // Parse location detail to Place object
+                        String id = locationDetail.getString("id");
+                        String name = locationDetail.getString("name");
+                        String description = locationDetail.optString("description", "");
+                        String address = locationDetail.getString("address");
+                        String pictureURL = locationDetail.optString("defaultPicture", "");
+                        double latitude = locationDetail.getDouble("latitude");
+                        double longitude = locationDetail.getDouble("longitude");
+
+                        Place place = new Place(name, description, "0km", pictureURL, address);
+                        place.setId(id);
+                        place.setLatitude(latitude);
+                        place.setLongitude(longitude);
+
+                        // Open PlaceDetail through MainActivity (which switches to Map and opens detail)
+                        if (getActivity() instanceof MainActivity) {
+                            ((MainActivity) getActivity()).openPlaceDetailFromHome(place);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(requireContext(), "Error parsing location data", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Failed to load location: " + errorMessage, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">HanoiGo</string>
     <string name="client_id">252380724311-5gonosnpqs2g2uruilf6q6rqgv6ear2t.apps.googleusercontent.com</string>
 
     <!-- Search -->
@@ -19,7 +19,7 @@
     <string name="new_list">New list</string>
 
     <!-- Reviews -->
-    <string name="hint_review_search">Search review by author</string>
+    <string name="hint_review_search">Search review by content</string>
     <string name="tag_most_approved">Most approved</string>
     <string name="tag_newest">Newest</string>
     <string name="tag_highest_rate">Highest rate</string>

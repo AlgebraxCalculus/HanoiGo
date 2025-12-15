@@ -6,12 +6,14 @@ public class SavedList {
     private String id;  // UUID from backend
     private String iconType;  // "bookmark", "heart", "flag"
     private String title;
+    private String description;
     private long placeCount;
 
-    public SavedList(String id, String iconType, String title, long placeCount) {
+    public SavedList(String id, String iconType, String title, String description, long placeCount) {
         this.id = id;
         this.iconType = iconType;
         this.title = title;
+        this.description = description;
         this.placeCount = placeCount;
     }
 
@@ -63,6 +65,14 @@ public class SavedList {
         this.placeCount = placeCount;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     // Helper methods để convert giữa iconType (string) và iconResId (int)
     private static String iconResIdToType(int resId) {
         if (resId == R.drawable.ic_heart) return "heart";
@@ -74,5 +84,13 @@ public class SavedList {
         if ("heart".equals(type)) return R.drawable.ic_heart;
         if ("flag".equals(type)) return R.drawable.ic_flag;
         return R.drawable.ic_bookmark;
+    }
+
+    // Check if iconType is an emoji (not one of the old icon types)
+    public boolean isEmojiIcon() {
+        return iconType != null &&
+                !iconType.equals("bookmark") &&
+                !iconType.equals("heart") &&
+                !iconType.equals("flag");
     }
 }

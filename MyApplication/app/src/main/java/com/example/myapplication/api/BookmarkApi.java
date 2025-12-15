@@ -18,8 +18,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class BookmarkApi {
-    private static final String BOOKMARK_LIST_URL = "http://127.0.0.1:8080/api/bookmark-lists";
-    private static final String BOOKMARK_URL = "http://127.0.0.1:8080/api/bookmarks";
+    private static final String BOOKMARK_LIST_URL = "http://192.168.134.5:8080/api/bookmark-lists";
+    private static final String BOOKMARK_URL = "http://192.168.134.5:8080/api/bookmarks";
 
     /**
      * Lấy tất cả bookmark lists của user
@@ -66,13 +66,16 @@ public class BookmarkApi {
      * Tạo bookmark list mới
      * POST /api/bookmark-lists/create
      */
-    public static void createBookmarkList(String jwt, String name, String icon, Context context, SingleBookmarkListCallback callback) {
+    public static void createBookmarkList(String jwt, String name, String icon, String description, Context context, SingleBookmarkListCallback callback) {
         OkHttpClient client = new OkHttpClient();
 
         try {
             JSONObject json = new JSONObject();
             json.put("name", name);
             json.put("icon", icon);
+            if (description != null && !description.isEmpty()) {
+                json.put("description", description);
+            }
 
             RequestBody body = RequestBody.create(
                     json.toString(),
@@ -93,16 +96,84 @@ public class BookmarkApi {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body().string();
                     if (response.isSuccessful()) {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             JSONObject result = jsonResponse.getJSONObject("result");
                             callback.onSuccess(result);
                         } catch (JSONException e) {
                             callback.onFailure("Failed to parse response");
                         }
                     } else {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            String message = jsonResponse.optString("message", "Error: " + response.code());
+                            callback.onFailure(message);
+                        } catch (JSONException e) {
                         callback.onFailure("Error: " + response.code());
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onFailure(e.getMessage());
+        }
+    }
+
+    /**
+     * Cập nhật bookmark list
+     * PUT /api/bookmark-lists/{listId}
+     */
+    public static void updateBookmarkList(String jwt, String listId, String name, String icon, String description, Context context, SingleBookmarkListCallback callback) {
+        OkHttpClient client = new OkHttpClient();
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("name", name);
+            if (icon != null && !icon.isEmpty()) {
+                json.put("icon", icon);
+            }
+            if (description != null && !description.isEmpty()) {
+                json.put("description", description);
+            }
+
+            RequestBody body = RequestBody.create(
+                    json.toString(),
+                    MediaType.parse("application/json; charset=utf-8")
+            );
+
+            Request request = new Request.Builder()
+                    .url(BOOKMARK_LIST_URL + "/" + listId)
+                    .put(body)
+                    .addHeader("Authorization", "Bearer " + jwt)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onFailure(e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body().string();
+                    if (response.isSuccessful()) {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            JSONObject result = jsonResponse.getJSONObject("result");
+                            callback.onSuccess(result);
+                        } catch (JSONException e) {
+                            callback.onFailure("Failed to parse response");
+                        }
+                    } else {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            String message = jsonResponse.optString("message", "Error: " + response.code());
+                            callback.onFailure(message);
+                        } catch (JSONException e) {
+                        callback.onFailure("Error: " + response.code());
+                        }
                     }
                 }
             });
@@ -190,12 +261,16 @@ public class BookmarkApi {
         OkHttpClient client = new OkHttpClient();
 
         try {
+            android.util.Log.d("BookmarkApi", "Adding bookmark - locationId: " + locationId + ", listId: " + bookmarkListId);
+
             JSONObject json = new JSONObject();
             json.put("locationId", locationId);
             json.put("bookmarkListId", bookmarkListId);
             if (description != null && !description.isEmpty()) {
                 json.put("description", description);
             }
+
+            android.util.Log.d("BookmarkApi", "Request JSON: " + json.toString());
 
             RequestBody body = RequestBody.create(
                     json.toString(),
@@ -216,16 +291,23 @@ public class BookmarkApi {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    String responseBody = response.body().string();
                     if (response.isSuccessful()) {
                         try {
-                            JSONObject jsonResponse = new JSONObject(response.body().string());
+                            JSONObject jsonResponse = new JSONObject(responseBody);
                             JSONObject result = jsonResponse.getJSONObject("result");
                             callback.onSuccess(result);
                         } catch (JSONException e) {
                             callback.onFailure("Failed to parse response");
                         }
                     } else {
+                        try {
+                            JSONObject jsonResponse = new JSONObject(responseBody);
+                            String message = jsonResponse.optString("message", "Error: " + response.code());
+                            callback.onFailure(message);
+                        } catch (JSONException e) {
                         callback.onFailure("Error: " + response.code());
+                        }
                     }
                 }
             });

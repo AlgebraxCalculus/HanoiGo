@@ -109,8 +109,7 @@ public class ExploreFragment extends Fragment {
     public void updateUserLocation(double lat, double lng) {
         this.userLat = lat;
         this.userLng = lng;
-        // Khi có location thật, nếu muốn load place list:
-        // setupPlaceData();
+        setupPlaceData(); // Gọi hàm load dữ liệu khi có vị trí
     }
 
     private void setupPlaceData() {
@@ -118,6 +117,7 @@ public class ExploreFragment extends Fragment {
         listTopVisited = new ArrayList<>();
         listPopularNearU = new ArrayList<>();
 
+        // 1. Get Iconic Places
         LocationApi.GetLocationList(userLat, userLng, "Iconic", false, false, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -132,6 +132,10 @@ public class ExploreFragment extends Fragment {
                                         location.getString("defaultPicture"),
                                         location.getString("address")
                                 );
+                                // FIX: Thêm setId từ nhánh bookmark-fix
+                                if (location.has("id")) {
+                                    place.setId(location.getString("id"));
+                                }
                                 listIconic.add(place);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -150,13 +154,14 @@ public class ExploreFragment extends Fragment {
                         if (isAdded()) {
                             requireActivity().runOnUiThread(() ->
                                     Toast.makeText(requireContext(),
-                                            "fetch location list failed: " + errorMessage,
+                                            "fetch iconic failed: " + errorMessage,
                                             Toast.LENGTH_SHORT).show()
                             );
                         }
                     }
                 });
 
+        // 2. Get Top Visited Places
         LocationApi.GetLocationList(userLat, userLng, "", true, false, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -171,6 +176,10 @@ public class ExploreFragment extends Fragment {
                                         location.getString("defaultPicture"),
                                         location.getString("address")
                                 );
+                                // FIX: Thêm setId
+                                if (location.has("id")) {
+                                    place.setId(location.getString("id"));
+                                }
                                 listTopVisited.add(place);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -189,13 +198,14 @@ public class ExploreFragment extends Fragment {
                         if (isAdded()) {
                             requireActivity().runOnUiThread(() ->
                                     Toast.makeText(requireContext(),
-                                            "fetch location list failed: " + errorMessage,
+                                            "fetch top visited failed: " + errorMessage,
                                             Toast.LENGTH_SHORT).show()
                             );
                         }
                     }
                 });
 
+        // 3. Get Popular Near You Places
         LocationApi.GetLocationList(userLat, userLng, "", false, true, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -210,6 +220,10 @@ public class ExploreFragment extends Fragment {
                                         location.getString("defaultPicture"),
                                         location.getString("address")
                                 );
+                                // FIX: Thêm setId
+                                if (location.has("id")) {
+                                    place.setId(location.getString("id"));
+                                }
                                 listPopularNearU.add(place);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -228,13 +242,14 @@ public class ExploreFragment extends Fragment {
                         if (isAdded()) {
                             requireActivity().runOnUiThread(() ->
                                     Toast.makeText(requireContext(),
-                                            "fetch location list failed: " + errorMessage,
+                                            "fetch popular failed: " + errorMessage,
                                             Toast.LENGTH_SHORT).show()
                             );
                         }
                     }
                 });
     }
+
     private void setupSuggestedRoutes(View view) {
         edtTravelDate = view.findViewById(R.id.edtTravelDate);
         edtDurationDays = view.findViewById(R.id.edtDurationDays);
@@ -356,8 +371,6 @@ public class ExploreFragment extends Fragment {
         return null;
     }
 
-
-
     private void showRouteDetailDialog(AIRoute route) {
         if (!isAdded()) return;
 
@@ -402,6 +415,15 @@ public class ExploreFragment extends Fragment {
         Fragment parentFragment = getParentFragment();
         if (parentFragment instanceof MapFragment) {
             ((MapFragment) parentFragment).openPlaceDetailFragment(place);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Giữ lại logic reload khi resume từ nhánh bookmark-fix
+        if (userLat != 0 && userLng != 0) {
+            setupPlaceData();
         }
     }
 }

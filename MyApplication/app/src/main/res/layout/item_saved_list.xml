@@ -34,6 +34,15 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_bookmark"
                 android:contentDescription="@string/desc_list_icon" />
+
+            <TextView
+                android:id="@+id/listEmojiIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="28sp"
+                android:textColor="#FFFFFF"
+                android:visibility="gone"/>
         </androidx.cardview.widget.CardView>
 
         <!-- Title and place count -->

@@ -39,6 +39,7 @@ public class BookmarkListService {
         bookmarkList.setUser(user);
         bookmarkList.setName(request.getName());
         bookmarkList.setIcon(request.getIcon() != null ? request.getIcon() : "bookmark");
+        bookmarkList.setDescription(request.getDescription());
 
         BookmarkList saved = bookmarkListRepository.save(bookmarkList);
 
@@ -50,6 +51,29 @@ public class BookmarkListService {
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BookmarkListResponse updateBookmarkList(UUID listId, BookmarkListRequest request) {
+        BookmarkList bookmarkList = bookmarkListRepository.findById(listId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKMARK_LIST_NOT_FOUND));
+
+        // Kiểm tra quyền sở hữu
+        if (!bookmarkList.getUser().getId().equals(request.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Cập nhật thông tin
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            bookmarkList.setName(request.getName());
+        }
+        if (request.getIcon() != null) {
+            bookmarkList.setIcon(request.getIcon());
+        }
+        bookmarkList.setDescription(request.getDescription());
+
+        BookmarkList updated = bookmarkListRepository.save(bookmarkList);
+        return mapToResponse(updated);
     }
 
     @Transactional
@@ -70,6 +94,7 @@ public class BookmarkListService {
                 .id(bookmarkList.getId())
                 .name(bookmarkList.getName())
                 .icon(bookmarkList.getIcon())
+                .description(bookmarkList.getDescription())
                 .bookmarkCount(bookmarkList.getBookmarks() != null ? bookmarkList.getBookmarks().size() : 0)
                 .build();
     }

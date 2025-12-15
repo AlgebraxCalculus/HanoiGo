@@ -32,6 +32,7 @@ import java.util.List;
 
 public class AchievementsFragment extends Fragment {
     LinearLayout layoutNoAchievements;
+    private boolean hasLoaded = false;   // 👈 khai báo ở đây
     TextView tvAchievementCount, filterHighestTier, filterNewest, filterLowestTier, filterOldest;
     EditText etSearchAchievement;
     String jwtToken = "";

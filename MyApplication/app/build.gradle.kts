@@ -71,11 +71,13 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     // Glide for image loading
-    implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     // TextViewMoreLess for expandable text views
     implementation("com.github.colourmoon:readmore-textview:v1.0.2")
+
+    // uCrop for image cropping
+    implementation("com.github.yalantis:ucrop:2.2.8")
 
     // MPAndroidChart for dashboard chart
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")

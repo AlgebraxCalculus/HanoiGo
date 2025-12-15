@@ -15,6 +15,7 @@ public class BookmarkListResponse {
 
     private UUID id;
     private String name;
-    private String icon;  // Giá trị: "bookmark", "heart", "flag"
-    private long bookmarkCount;  // Số lượng bookmark trong list
+    private String icon;
+    private String description;
+    private long bookmarkCount;  
 }

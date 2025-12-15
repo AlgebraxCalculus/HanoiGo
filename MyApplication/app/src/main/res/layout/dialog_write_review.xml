@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- File: res/layout/dialog_write_review.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_rounded"
+    android:padding="24dp">
+
+    <!-- Place Title -->
+    <TextView
+        android:id="@+id/tvDialogPlaceName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Place name here..."
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- User Info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/ivDialogUserAvatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/avatar"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_round"
+            android:clipToOutline="true" />
+
+        <TextView
+            android:id="@+id/tvDialogUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username here..."
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="12dp" />
+    </LinearLayout>
+
+    <!-- Rating Bar -->
+    <RatingBar
+        android:id="@+id/dialogRatingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1"
+        android:rating="0"
+        android:layout_gravity="center"
+        android:progressTint="#FFD700"
+        android:secondaryProgressTint="#FFD700"
+        android:progressBackgroundTint="#555555"
+        android:layout_marginBottom="16dp"
+        android:scaleX="1.2"
+        android:scaleY="1.2" />
+
+    <!-- Content EditText -->
+    <EditText
+        android:id="@+id/etDialogReviewContent"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:hint="Your detail description about this place..."
+        android:textColorHint="#888888"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:background="@drawable/bg_edittext_review"
+        android:padding="12dp"
+        android:gravity="top|start"
+        android:inputType="textMultiLine"
+        android:maxLines="5"
+        android:scrollbars="vertical"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Add Photos Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddPhotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add photos"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        app:backgroundTint="#3C4043"
+        app:cornerRadius="8dp"
+        app:icon="@drawable/ic_camera"
+        app:iconTint="#FFFFFF"
+        app:iconGravity="textStart"
+        app:iconSize="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:layout_marginBottom="8dp"
+        style="@style/Widget.MaterialComponents.Button" />
+
+    <!-- Selected Photos Preview -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSelectedPhotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancelReview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            app:backgroundTint="@android:color/transparent"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPostReview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Post"
+            android:textColor="#1B1B1B"
+            android:textSize="14sp"
+            app:backgroundTint="#01B8B3"
+            app:cornerRadius="20dp"
+            style="@style/Widget.MaterialComponents.Button"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -19,4 +19,5 @@ public class ReviewResponse {
     private LocalDateTime createdAt;
     private String content;
     private List<String> pictureUrl;
+    private long likeCount;
 }

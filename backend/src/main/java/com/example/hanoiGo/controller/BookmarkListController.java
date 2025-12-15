@@ -20,10 +20,7 @@ public class BookmarkListController {
     private final BookmarkListService bookmarkListService;
     private final JwtUtil jwtUtil;
 
-    /**
-     * Tạo bookmark list mới
-     * POST /api/bookmark-lists/create
-     */
+
     @PostMapping("/create")
     public ApiResponse<BookmarkListResponse> createBookmarkList(
             @Valid @RequestBody BookmarkListRequest request,
@@ -42,10 +39,7 @@ public class BookmarkListController {
                 .build();
     }
 
-    /**
-     * Lấy tất cả bookmark lists của user
-     * GET /api/bookmark-lists/my-lists
-     */
+
     @GetMapping("/my-lists")
     public ApiResponse<List<BookmarkListResponse>> getMyBookmarkLists(
             @RequestHeader("Authorization") String authHeader) {
@@ -62,10 +56,26 @@ public class BookmarkListController {
                 .build();
     }
 
-    /**
-     * Xóa bookmark list
-     * DELETE /api/bookmark-lists/{listId}
-     */
+
+    @PutMapping("/{listId}")
+    public ApiResponse<BookmarkListResponse> updateBookmarkList(
+            @PathVariable UUID listId,
+            @Valid @RequestBody BookmarkListRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = jwtUtil.extractToken(authHeader);
+        UUID userId = jwtUtil.extractUserId(token);
+        request.setUserId(userId);
+
+        BookmarkListResponse response = bookmarkListService.updateBookmarkList(listId, request);
+
+        return ApiResponse.<BookmarkListResponse>builder()
+                .code(1000)
+                .message("Cập nhật danh sách bookmark thành công")
+                .result(response)
+                .build();
+    }
+
     @DeleteMapping("/{listId}")
     public ApiResponse<Void> deleteBookmarkList(
             @PathVariable UUID listId,

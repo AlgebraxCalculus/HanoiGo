@@ -280,4 +280,14 @@ import java.util.concurrent.ExecutionException;
         //         .set(Map.of("lastUpdated", today.toString()));
     }
 
+    public UserResponse updateAvatar(String username, String avatarUrl) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        user.setProfilePicture(avatarUrl);
+        user = userRepository.save(user);
+
+        return userMapper.toUserResponse(user);
+    }
+
 }

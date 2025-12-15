@@ -10,6 +10,7 @@ import com.example.hanoiGo.model.LocationDetail;
 import com.example.hanoiGo.repository.BookmarkRepository;
 import com.example.hanoiGo.repository.BookmarkListRepository;
 import com.example.hanoiGo.repository.LocationDetailRepository;
+import com.example.hanoiGo.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final BookmarkListRepository bookmarkListRepository;
     private final LocationDetailRepository locationDetailRepository;
+    private final ReviewRepository reviewRepository;
 
 
     @Transactional
@@ -126,6 +128,10 @@ public class BookmarkService {
     private BookmarkResponse mapToResponse(Bookmark bookmark) {
         LocationDetail location = bookmark.getLocation();
 
+        // Fetch rating data
+        Double averageRating = reviewRepository.getAverageRatingByLocationId(location.getId());
+        Long reviewCount = reviewRepository.getReviewCountByLocationId(location.getId());
+
         return BookmarkResponse.builder()
                 .id(bookmark.getId())
                 .locationId(location.getId())
@@ -137,6 +143,8 @@ public class BookmarkService {
                 .longitude(location.getLongitude())
                 .description(bookmark.getDescription())
                 .bookmarkedAt(bookmark.getBookmarkedAt())
+                .averageRating(averageRating)
+                .reviewCount(reviewCount)
                 .build();
     }
 }

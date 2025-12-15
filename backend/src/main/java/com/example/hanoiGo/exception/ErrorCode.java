@@ -24,6 +24,7 @@ public enum ErrorCode {
     BOOKMARK_NOT_FOUND(2005, "Bookmark not found", HttpStatus.NOT_FOUND),
     BOOKMARK_LIST_NOT_FOUND(2006, "Bookmark list not found", HttpStatus.NOT_FOUND),
     BOOKMARK_LIST_ALREADY_EXISTS(2007, "Bookmark list already exists", HttpStatus.BAD_REQUEST),
+    REVIEW_ALREADY_EXISTS(2008, "Review already exists", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(9998, "Unauthorized", HttpStatus.FORBIDDEN)
     ;
 
