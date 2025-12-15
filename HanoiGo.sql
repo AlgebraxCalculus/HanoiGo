@@ -176,47 +176,34 @@ CREATE TABLE password_reset_token (
 
 select * from password_reset_token;
 
+delete from achievements;
 
---===============
--- Rank achievements
-INSERT INTO achievements (name, description, tier) VALUES
-('Climbing Rookie', 'Reached Top 100', 'A'),
-('Rank Riser', 'Reached Top 50', 'S'),
-('Elite Climber', 'Reached Top 25', 'S+'),
-('Legend on the Rise', 'Reached Top 10', 'SS'),
-('The G.O.A.T', 'Reached Rank 1', 'SSS');
-
--- Point achievements
-INSERT INTO achievements (name, description, tier) VALUES
-('Point Collector', 'Scored 50 points', 'A'),
-('Point Hunter', 'Scored 100 points', 'S'),
-('Point Master', 'Scored 200 points', 'S+'),
-('Point Slayer', 'Scored 400 points', 'SS'),
-('Bro chill...', 'Scored 500 points', 'SSS');
-
--- Checkpoint achievements
-INSERT INTO achievements (name, description, tier) VALUES
-('Touched grass', 'Checked in at 1 place', 'A'),
-('Pathfinder', 'Checked in at 10 places', 'S'),
-('Travel Addict', 'Checked in at 20 places', 'S+'),
-('Wanna take a break?', 'Checked in at 30 places', 'SS'),
-('Mr Worldwide', 'Checked in at 40 places', 'SSS');
-
--- Like achievements
-INSERT INTO achievements (name, description, tier) VALUES
-('Starter Influencer', 'Got 5 likes on a review', 'A'),
-('Trending Reviewer', 'Got 10 likes on a review', 'S'),
-('Hot Content', 'Got 20 likes on a review', 'S+'),
-('Auraaaa', 'Got 30 likes on a review', 'SS'),
-('Sir, you won the Internet!', 'Got 50 likes on a review', 'SSS');
-
--- Achievement collector
-INSERT INTO achievements (name, description, tier) VALUES
-('Badge Beginner', 'Owned 5 achievements', 'A'),
-('Badge Collector', 'Owned 10 achievements', 'S'),
-('Badge Hoarder', 'Owned 15 achievements', 'S+'),
-('Badge Freak', 'Owned 20 achievements', 'SS'),
-('SIUUUUUUUU', 'Owned all achievements', 'SSS');
+INSERT INTO achievements (id, name, description, tier) VALUES
+('e79c30f5-a945-43c3-a6b2-868e4cb948d5', 'Climbing Rookie', 'Reached Top 100', 'A'),
+('124c0e95-29af-41bf-a1bb-49a96c8d912c', 'Rank Riser', 'Reached Top 50', 'S'),
+('1b320855-9025-438c-843c-1e5b824ffc52', 'Elite Climber', 'Reached Top 25', 'S+'),
+('c6a47ba2-8f66-41d2-a8bb-52293b01afb5', 'Legend on the Rise', 'Reached Top 10', 'SS'),
+('febfc834-874a-4e1c-847f-66dd91496218', 'The G.O.A.T', 'Reached Rank 1', 'SSS'),
+('bd7c2d19-7a7f-4e2d-8e91-7725c996d8d7', 'Point Collector', 'Scored 50 points', 'A'),
+('3fdde005-7d39-47c9-aa2d-c04931db97b5', 'Point Hunter', 'Scored 100 points', 'S'),
+('8e22ca9c-0bf0-4b33-bce0-479256d024ff', 'Point Master', 'Scored 200 points', 'S+'),
+('79ef2b86-b3a7-4c12-9b77-3aa83962cd4f', 'Point Slayer', 'Scored 400 points', 'SS'),
+('72b648a6-7c51-472b-8d6e-ec8b25a218e3', 'Bro chill...', 'Scored 500 points', 'SSS'),
+('8fbbc088-c7c4-411c-802e-5b8b39f33aaa', 'Touched grass', 'Checked in at 1 place', 'A'),
+('38293740-246c-4386-8277-e6d8e033565f', 'Pathfinder', 'Checked in at 10 places', 'S'),
+('d072af28-d68e-4b7b-9a27-4408b7e63bcc', 'Travel Addict', 'Checked in at 20 places', 'S+'),
+('5f5a9538-6583-4426-8698-a47cb2fa6dbc', 'Wanna take a break?', 'Checked in at 30 places', 'SS'),
+('c4ab2401-ad1f-41f0-80f7-8c75e7b75154', 'Mr Worldwide', 'Checked in at 40 places', 'SSS'),
+('982d9551-61aa-48df-a484-268ad24a1f04', 'Starter Influencer', 'Got 5 likes on a review', 'A'),
+('0bcac092-ae03-4f88-9209-654754bc3568', 'Trending Reviewer', 'Got 10 likes on a review', 'S'),
+('973dab41-dfb0-49c2-a26c-3b44746370f3', 'Hot Content', 'Got 20 likes on a review', 'S+'),
+('c1e284a8-9fa0-4145-9c84-c250db23fe4d', 'Auraaaa', 'Got 30 likes on a review', 'SS'),
+('463a7d57-2a4c-4b83-ab55-ef23c3567f6e', 'Sir, you won the Internet!', 'Got 50 likes on a review', 'SSS'),
+('26ce4b21-ecc1-4b4b-8aed-bf3eaae8a788', 'Badge Beginner', 'Owned 5 achievements', 'A'),
+('4f8965aa-45b5-4a7f-b8b1-03e29b5c6845', 'Badge Collector', 'Owned 10 achievements', 'S'),
+('8ab40487-8269-4d15-91c4-d0a870cb6859', 'Badge Hoarder', 'Owned 15 achievements', 'S+'),
+('467a210e-79a9-4dae-945c-5d2a38c77f35', 'Badge Freak', 'Owned 20 achievements', 'SS'),
+('cd1318e3-68bd-4434-9850-8f9543568ea6', 'SIUUUUUUUU', 'Owned all achievements', 'SSS');
 
 --===============
 -- Tags

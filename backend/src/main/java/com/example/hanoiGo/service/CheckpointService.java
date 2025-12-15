@@ -21,6 +21,9 @@ import com.example.hanoiGo.repository.CheckpointRepository;
 import com.example.hanoiGo.repository.LocationDetailRepository;
 import com.example.hanoiGo.repository.ReviewRepository;
 import com.example.hanoiGo.repository.UserRepository;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
 import com.example.hanoiGo.repository.UserLikeRepository;
 
 import java.time.LocalDateTime;
@@ -68,7 +71,7 @@ public class CheckpointService {
         for (LocationListResponse locRes : locationListResponses) {
             LocationResponse locationResponse = locRes.getLocationResponse();
             int distance = locRes.getDistanceValue();
-            if (distance > 2000) break;
+            if (distance > 4000) break;
 
             LocationDetail detail = locationDetailRepository.findByAddress(locationResponse.getAddress()).orElse(null);
             if (detail == null) continue;
@@ -119,13 +122,31 @@ public class CheckpointService {
         checkpoint.setCheckedInTime(LocalDateTime.now());
         checkpointRepository.save(checkpoint);
 
-        // Push updated points to Firestore userStats
+        // Push updated points + check-in count to Firestore userStats
         try {
             firebaseService.pushUserStatsData(userEntity.getId(), "points", newPoints);
+
+            // Lấy checkin_count hiện tại từ Firestore, cộng thêm 1
+            int currentCheckinCount = 0;
+            try {
+                Firestore db = com.google.firebase.cloud.FirestoreClient.getFirestore();
+                String userId = userEntity.getId().toString();
+                DocumentReference docRef = db.collection("userStats").document(userId);
+                DocumentSnapshot snapshot = docRef.get().get();
+                if (snapshot.exists() && snapshot.contains("checkin_count")) {
+                    Number count = snapshot.getLong("checkin_count");
+                    if (count != null) {
+                        currentCheckinCount = count.intValue();
+                    }
+                }
+            } catch (Exception e) {
+                // Nếu lỗi khi lấy, giữ mặc định là 0
+            }
+            int newCheckinCount = currentCheckinCount + 1;
+            firebaseService.pushUserStatsData(userEntity.getId(), "checkin_count", newCheckinCount);
         } catch (Exception ex) {
             System.err.println("Failed to push user stats to Firestore: " + ex.getMessage());
         }
-
         // Send FCM notification
         String fcm = userEntity.getFcmToken();
         if (fcm != null && !fcm.isBlank()) {
