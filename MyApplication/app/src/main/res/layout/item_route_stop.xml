@@ -8,65 +8,80 @@
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="16dp"
-    app:cardUseCompatPadding="true"
-    app:cardBackgroundColor="@color/teal_700">
+    app:cardUseCompatPadding="false"
+    app:cardPreventCornerOverlap="true"
+    app:cardBackgroundColor="@android:color/transparent">
 
-    <LinearLayout
+    <!-- dùng FrameLayout để đặt ảnh + gradient -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <!-- Thumbnail full width on top -->
-        <ImageView
-            android:id="@+id/ivStopThumbnail"
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
-            android:contentDescription="@string/app_name" />
-
-        <!-- Text block with teal background -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/explore_card_bg"
-            android:paddingStart="12dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="10dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvStopName"
+            <!-- Thumbnail full width on top -->
+            <ImageView
+                android:id="@+id/ivStopThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/app_name" />
+
+            <!-- Text block (màu khác nền tổng thể) -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Place name"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:orientation="vertical"
+                android:background="@drawable/bg_stop_info_panel"
+                android:paddingStart="14dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="12dp">
 
-            <TextView
-                android:id="@+id/tvStopAddress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="Short description or address"
-                android:textColor="@color/explore_primary"
-                android:textSize="13sp"
-                android:maxLines="2"
-                android:ellipsize="end" />
+                <TextView
+                    android:id="@+id/tvStopName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Place name"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:textSize="17sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
-            <TextView
-                android:id="@+id/tvStopDistance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="3.6 km"
-                android:textColor="@android:color/white"
-                android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tvStopAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Short description or address"
+                    android:textColor="#BDEBFF"
+                    android:textSize="13sp"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/tvStopDistance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="3.6 km"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:textSize="13sp" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+
+        <!-- gradient đổ từ dưới ảnh lên -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_gravity="top"
+            android:background="@drawable/bg_stop_image_gradient" />
+    </FrameLayout>
 
 </androidx.cardview.widget.CardView>

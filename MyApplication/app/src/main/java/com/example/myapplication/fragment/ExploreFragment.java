@@ -66,6 +66,11 @@ public class ExploreFragment extends Fragment {
     private AiRouteAdapter aiRouteAdapter;
     private AiRouteApi aiRouteApi;
 
+    // ====== NEW: giữ popup route để quay lại vẫn còn ======
+    private AlertDialog routeDialog;
+    private AIRoute lastOpenedRoute;
+    private boolean reopenRouteDialogOnResume = false;
+
     double userLat = 0, userLng = 0;
 
     @Nullable
@@ -77,7 +82,6 @@ public class ExploreFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         setupBottomSheet(view);
-
         setupSuggestedRoutes(view);
 
         return view;
@@ -304,9 +308,9 @@ public class ExploreFragment extends Fragment {
         }
 
         List<String> interests = new ArrayList<>();
-        if (cbCuisine.isChecked()) interests.add("cuisine");
+        if (cbCuisine.isChecked()) interests.add("food");
         if (cbCulture.isChecked()) interests.add("culture");
-        if (cbEntertaining.isChecked()) interests.add("entertaining");
+        if (cbEntertaining.isChecked()) interests.add("entertainment");
         if (cbIconic.isChecked()) interests.add("iconic");
 
         if (interests.isEmpty()) {
@@ -375,6 +379,12 @@ public class ExploreFragment extends Fragment {
     private void showRouteDetailDialog(AIRoute route) {
         if (!isAdded()) return;
 
+        // Nếu đang có dialog khác -> đóng để tránh chồng
+        if (routeDialog != null && routeDialog.isShowing()) {
+            routeDialog.dismiss();
+            routeDialog = null;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
@@ -398,16 +408,47 @@ public class ExploreFragment extends Fragment {
         rvRouteStops.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         );
-        rvRouteStops.setAdapter(new RouteStopAdapter(route.getStops()));
+
+        // ✅ NEW: click stop -> hide dialog -> open place detail -> onResume show lại
+        rvRouteStops.setAdapter(new RouteStopAdapter(route.getStops(), place -> {
+            if (!isAdded()) return;
+
+            if (place == null || place.getId() == null || place.getId().trim().isEmpty()) {
+                Toast.makeText(requireContext(),
+                        "This stop has no id, cannot open detail.",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            reopenRouteDialogOnResume = true;
+            lastOpenedRoute = route;
+
+            if (routeDialog != null) routeDialog.hide();
+
+            openPlaceDetail(place);
+        }));
 
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();
+
+        // giữ instance dialog để show lại sau
+        this.routeDialog = dialog;
+        this.lastOpenedRoute = route;
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
 
-        btnCloseRoute.setOnClickListener(v -> dialog.dismiss());
+        // Close = đóng thật, không show lại nữa
+        btnCloseRoute.setOnClickListener(v -> {
+            reopenRouteDialogOnResume = false;
+            lastOpenedRoute = null;
+
+            if (routeDialog != null) {
+                routeDialog.dismiss();
+                routeDialog = null;
+            }
+        });
 
         dialog.show();
     }
@@ -422,9 +463,31 @@ public class ExploreFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         // Giữ lại logic reload khi resume từ nhánh bookmark-fix
         if (userLat != 0 && userLng != 0) {
             setupPlaceData();
         }
+
+        // ✅ NEW: quay lại từ PlaceDetail thì show lại popup route
+        if (reopenRouteDialogOnResume) {
+            reopenRouteDialogOnResume = false;
+
+            if (routeDialog != null) {
+                routeDialog.show();
+            } else if (lastOpenedRoute != null) {
+                showRouteDetailDialog(lastOpenedRoute);
+            }
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        // ✅ tránh leak window
+        if (routeDialog != null) {
+            routeDialog.dismiss();
+            routeDialog = null;
+        }
+        super.onDestroyView();
     }
 }

@@ -25,13 +25,17 @@ import okhttp3.Response;
 
 public class AiRouteApi {
 
-    private static final String BASE_URL = "http://192.168.1.8:8080/api/ai/routes";
+    // ✅ Đúng format: baseUrl không nên kèm / cuối nếu bạn tự nối path
+    private static final String BASE_URL = "http://10.0.2.2:8080";
+    private static final String ROUTE_PATH = "/api/ai/routes";
+
     private static final MediaType JSON
             = MediaType.get("application/json; charset=utf-8");
 
     private final OkHttpClient client = new OkHttpClient();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    // Callback để trả kết quả về Fragment
     public interface AiRouteCallback {
         void onSuccess(List<AIRoute> routes);
         void onError(Throwable t);
@@ -40,6 +44,8 @@ public class AiRouteApi {
     public void getSuggestedRoutes(String bearerToken,
                                    TravelPlan plan,
                                    AiRouteCallback callback) {
+
+        // 1) Build JSON body từ TravelPlan
         JSONObject json = new JSONObject();
         try {
             json.put("travelDate", plan.getTravelDate());
@@ -53,6 +59,7 @@ public class AiRouteApi {
             }
             json.put("interests", interestsArr);
 
+            // budget optional
             if (plan.getBudget() != null) {
                 json.put("budget", plan.getBudget());
             }
@@ -63,16 +70,20 @@ public class AiRouteApi {
 
         RequestBody body = RequestBody.create(json.toString(), JSON);
 
+        // 2) Tạo request OkHttp
         Request.Builder builder = new Request.Builder()
-                .url(BASE_URL)
-                .post(body);
+                .url(BASE_URL + ROUTE_PATH)
+                .post(body)
+                .addHeader("Content-Type", "application/json");
 
+        // ✅ Header Authorization phải là "Bearer <token>"
         if (bearerToken != null && !bearerToken.isEmpty()) {
             builder.addHeader("Authorization", bearerToken);
         }
 
         Request request = builder.build();
 
+        // 3) Gửi async
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -83,15 +94,17 @@ public class AiRouteApi {
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     mainHandler.post(() ->
-                            callback.onError(new IOException("HTTP " + response.code()))
+                            callback.onError(new IOException("HTTP " + response.code() + " " + response.message()))
                     );
                     return;
                 }
 
-                String responseBody = response.body().string();
+                String responseBody = (response.body() != null) ? response.body().string() : "[]";
+
                 try {
                     JSONArray arr = new JSONArray(responseBody);
                     List<AIRoute> routes = parseRoutes(arr);
+
                     // Đưa kết quả về Main thread để update UI
                     mainHandler.post(() -> callback.onSuccess(routes));
                 } catch (JSONException e) {
@@ -101,37 +114,65 @@ public class AiRouteApi {
         });
     }
 
+    /**
+     * Parse JSON -> List<AIRoute> + stops (List<Place>)
+     *
+     * Backend thường trả:
+     * [
+     *   {
+     *     "title": "...",
+     *     "description": "...",
+     *     "distanceKm": 3.5,
+     *     "duration": "20m",
+     *     "stops": [
+     *        { "id":"...", "name":"...", "description":"...", "defaultPicture":"...", "address":"...", "latitude":..., "longitude":... }
+     *     ]
+     *   }
+     * ]
+     */
     private List<AIRoute> parseRoutes(JSONArray arr) throws JSONException {
         List<AIRoute> result = new ArrayList<>();
 
         for (int i = 0; i < arr.length(); i++) {
             JSONObject obj = arr.getJSONObject(i);
 
-            String title = obj.optString("title");
-            String description = obj.optString("description");
+            String title = obj.optString("title", "");
+            String description = obj.optString("description", "");
             double distanceKm = obj.optDouble("distanceKm", 0.0);
-            String duration = obj.optString("duration");
+            String duration = obj.optString("duration", "");
 
+            // ✅ Parse stops
             List<Place> stops = new ArrayList<>();
-            JSONArray stopsArray = obj.optJSONArray("stops");
-            if (stopsArray != null) {
-                for (int j = 0; j < stopsArray.length(); j++) {
-                    JSONObject stopObj = stopsArray.getJSONObject(j);
+            JSONArray stopsArr = obj.optJSONArray("stops");
+            if (stopsArr != null) {
+                for (int j = 0; j < stopsArr.length(); j++) {
+                    JSONObject s = stopsArr.getJSONObject(j);
 
-                    String stopId      = stopObj.optString("id");
-                    String stopName    = stopObj.optString("name");
-                    String stopDesc    = stopObj.optString("description");
-                    String pictureUrl  = stopObj.optString("defaultPicture");
-                    String address     = stopObj.optString("address");
-                    double latitude    = stopObj.optDouble("latitude");
-                    double longitude   = stopObj.optDouble("longitude");
+                    String id = s.optString("id", "");
+                    String name = s.optString("name", "");
+                    String desc = s.optString("description", "");
+                    String address = s.optString("address", "");
 
-                    Place place = new Place(stopName, stopDesc, "", pictureUrl, address);
-                    place.setId(stopId);
-                    place.setLatitude(latitude);
-                    place.setLongitude(longitude);
+                    // picture có thể là defaultPicture hoặc pictureURL (tùy BE)
+                    String picture = s.optString("defaultPicture", "");
+                    if (picture.isEmpty()) {
+                        picture = s.optString("pictureURL", "");
+                    }
 
-                    stops.add(place);
+                    double lat = s.optDouble("latitude", 0.0);
+                    double lng = s.optDouble("longitude", 0.0);
+
+                    // Place constructor của bạn cần distance -> để rỗng ""
+                    Place p = new Place(name, desc, "", picture, address);
+
+                    if (!id.isEmpty()) {
+                        p.setId(id); // ✅ quan trọng để click mở PlaceDetail
+                    }
+
+                    p.setLatitude(lat);
+                    p.setLongitude(lng);
+
+                    stops.add(p);
                 }
             }
 

@@ -161,8 +161,14 @@ public class TravelAIService {
         String duration = estimateDuration(distanceKm);
 
         List<LocationResponse> stops = places.stream()
-                .map(locationMapper::toLocationResponse)
+                .map(ld -> {
+                    LocationResponse r = locationMapper.toLocationResponse(ld);
+                    // ép chắc chắn có id
+                    r.setId(ld.getId());
+                    return r;
+                })
                 .collect(Collectors.toList());
+
 
         SuggestedRouteResponse res = new SuggestedRouteResponse();
         res.setTitle(title);

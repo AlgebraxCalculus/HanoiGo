@@ -18,10 +18,16 @@ import java.util.List;
 
 public class RouteStopAdapter extends RecyclerView.Adapter<RouteStopAdapter.StopViewHolder> {
 
-    private final List<Place> stops;
+    public interface OnStopClickListener {
+        void onStopClick(Place place);
+    }
 
-    public RouteStopAdapter(List<Place> stops) {
+    private final List<Place> stops;
+    private final OnStopClickListener listener;
+
+    public RouteStopAdapter(List<Place> stops, OnStopClickListener listener) {
         this.stops = (stops != null) ? stops : new ArrayList<>();
+        this.listener = listener;
     }
 
     @NonNull
@@ -34,7 +40,12 @@ public class RouteStopAdapter extends RecyclerView.Adapter<RouteStopAdapter.Stop
 
     @Override
     public void onBindViewHolder(@NonNull StopViewHolder holder, int position) {
-        holder.bind(stops.get(position));
+        Place place = stops.get(position);
+        holder.bind(place);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onStopClick(place);
+        });
     }
 
     @Override
@@ -58,11 +69,11 @@ public class RouteStopAdapter extends RecyclerView.Adapter<RouteStopAdapter.Stop
         }
 
         public void bind(Place place) {
-            tvStopName.setText(place.getName());
+            tvStopName.setText(place.getName() != null ? place.getName() : "");
 
             if (place.getAddress() != null && !place.getAddress().isEmpty()) {
                 tvStopAddress.setText(place.getAddress());
-            } else if (place.getDescription() != null) {
+            } else if (place.getDescription() != null && !place.getDescription().isEmpty()) {
                 tvStopAddress.setText(place.getDescription());
             } else {
                 tvStopAddress.setText("");
