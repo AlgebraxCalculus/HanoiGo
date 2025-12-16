@@ -77,33 +77,23 @@ public class TravelAIService {
             result.addAll(List.of("Iconic", "Cuisine", "Entertaining", "Culture"));
         }
 
-        // bỏ trùng
         return result.stream().distinct().collect(Collectors.toList());
     }
-    /**
-     * Score 1 địa điểm:
-     * = điểm rating trung bình (1–5, nếu chưa có review => 2.5)
-     * + điểm theo số lượng review (mỗi review +0.1, tối đa 20 review => +2.0)
-     * + điểm theo checkpoint 7 ngày gần nhất (mỗi check-in +0.3, tối đa 10 => +3.0)
-     */
+    
     private double baseScore(LocationDetail loc, List<String> tagNames) {
         String locationId = loc.getId();
 
-        // 1️⃣ Điểm rating trung bình
         Double avgRating = locationDetailRepository.findAverageRatingByLocationId(locationId);
         double ratingScore = (avgRating != null && avgRating > 0) ? avgRating : 2.5;
 
-        // 2️⃣ Điểm theo số lượng review
         Integer reviewCount = locationDetailRepository.findReviewCountByLocationId(locationId);
         int count = (reviewCount != null) ? reviewCount : 0;
-        double popularityScore = Math.min(count, 20) * 0.1;  // max +2.0
+        double popularityScore = Math.min(count, 20) * 0.1;  
 
-        // 3️⃣ Điểm theo checkpoint (độ "hot" gần đây)
         Integer weeklyCheckins = locationDetailRepository.findWeeklyCheckinCountsById(locationId);
         int checkins = (weeklyCheckins != null) ? weeklyCheckins : 0;
-        double checkpointScore = Math.min(checkins, 10) * 0.3; // max +3.0
+        double checkpointScore = Math.min(checkins, 10) * 0.3;
 
-        // 4️⃣ Tổng score
         return ratingScore + popularityScore + checkpointScore;
     }
 
@@ -163,7 +153,6 @@ public class TravelAIService {
         List<LocationResponse> stops = places.stream()
                 .map(ld -> {
                     LocationResponse r = locationMapper.toLocationResponse(ld);
-                    // ép chắc chắn có id
                     r.setId(ld.getId());
                     return r;
                 })

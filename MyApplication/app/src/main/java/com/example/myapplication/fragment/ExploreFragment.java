@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.app.DatePickerDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,6 +40,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class ExploreFragment extends Fragment {
 
@@ -256,6 +260,14 @@ public class ExploreFragment extends Fragment {
 
     private void setupSuggestedRoutes(View view) {
         edtTravelDate = view.findViewById(R.id.edtTravelDate);
+        edtTravelDate.setKeyListener(null);
+        edtTravelDate.setFocusable(false);
+        edtTravelDate.setClickable(true);
+
+        setTravelDateToToday();
+
+        edtTravelDate.setOnClickListener(v -> showTravelDatePicker());
+
         edtDurationDays = view.findViewById(R.id.edtDurationDays);
         edtBudget = view.findViewById(R.id.edtBudget);
 
@@ -276,7 +288,6 @@ public class ExploreFragment extends Fragment {
 
         aiRouteApi = new AiRouteApi();
 
-        edtTravelDate.setText("2025-12-25");
         edtDurationDays.setText("1");
         cbCuisine.setChecked(true);
         cbCuisine.setChecked(true);
@@ -490,4 +501,45 @@ public class ExploreFragment extends Fragment {
         }
         super.onDestroyView();
     }
+
+    private void setTravelDateToToday() {
+        Calendar cal = Calendar.getInstance(); // real current time
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        edtTravelDate.setText(sdf.format(cal.getTime()));
+    }
+
+    private void showTravelDatePicker() {
+        if (!isAdded()) return;
+
+        Calendar now = Calendar.getInstance();
+        int year = now.get(Calendar.YEAR);
+        int month = now.get(Calendar.MONTH);
+        int day = now.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog dialog = new DatePickerDialog(
+                requireContext(),
+                (view, y, m, d) -> {
+                    Calendar chosen = Calendar.getInstance();
+                    chosen.set(Calendar.YEAR, y);
+                    chosen.set(Calendar.MONTH, m);
+                    chosen.set(Calendar.DAY_OF_MONTH, d);
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    edtTravelDate.setText(sdf.format(chosen.getTime()));
+                },
+                year, month, day
+        );
+
+        // ✅ minDate = tomorrow 00:00
+        Calendar tomorrow = Calendar.getInstance();
+        tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+        tomorrow.set(Calendar.HOUR_OF_DAY, 0);
+        tomorrow.set(Calendar.MINUTE, 0);
+        tomorrow.set(Calendar.SECOND, 0);
+        tomorrow.set(Calendar.MILLISECOND, 0);
+
+        dialog.getDatePicker().setMinDate(tomorrow.getTimeInMillis());
+        dialog.show();
+    }
+
 }
