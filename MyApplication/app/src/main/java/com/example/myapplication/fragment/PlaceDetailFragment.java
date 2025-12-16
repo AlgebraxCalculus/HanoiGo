@@ -221,6 +221,13 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             avatar = getArguments().getString("avatar");
         }
 
+        if (getArguments() != null) {
+            placeData = (Place) getArguments().getSerializable("placeData");
+            jwtToken = getArguments().getString("jwtToken");
+            username = getArguments().getString("username");
+            avatar = getArguments().getString("avatar");
+        }
+
         // Fetch available checkpoints for check-in
         CheckpointApi.GetEnableCheckIn(
                 userLat,
@@ -231,7 +238,7 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                     @Override
                     public void onSuccess(ArrayList<JSONObject> list) {
                         availableCheckpoints = list;
-                        System.out.println("availableCheckpoints: " + availableCheckpoints);
+                        System.out.println("AvailableCheckpoint: " + availableCheckpoints);
                         requireActivity().runOnUiThread(() -> updateCheckinUI());
                     }
 
@@ -276,43 +283,13 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                     }
                 }
         );
-
-        System.out.println("AvailableCheckpoint: " + availableCheckpoints);
-        System.out.println("UserCheckpoint: " + userCheckedInCheckpoints);
-
-        Runnable reviewCheckLogic = new Runnable() {
-            @Override
-            public void run() {
-                requireActivity().runOnUiThread(() -> {
-                    if(isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints)){
-                        Review myReview = getYourReview();
-                        if(myReview != null) {
-                            yourReviewLayout.setVisibility(View.VISIBLE);
-                            btnWriteReview.setVisibility(View.GONE);
-                            bindMyReviewData(myReview);
-                        }else{
-                            yourReviewLayout.setVisibility(View.GONE);
-                            btnWriteReview.setVisibility(View.VISIBLE);
-                            btnWriteReview.setEnabled(true);
-                        }
-                    } else{
-                        btnWriteReview.setEnabled(false);
-                        btnWriteReview.setBackgroundTintList(
-                                ColorStateList.valueOf(Color.parseColor("#808080"))
-                        );
-                        yourReviewLayout.setVisibility(View.GONE);
-                    }
-                });
-            }
-        };
-
-        setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
+        setupReviews(placeData.getAddress(), "most approved", this::updateReviewUI);
         fetchPlaceDetail(placeData.getAddress());
 
         return view;
     }
 
-    private Review getYourReview () {
+    private Review getYourReview() {
         if (reviewList == null) return null;
         for (Review a : reviewList) {
             if (a.getName().equalsIgnoreCase(username)) return a;
@@ -496,8 +473,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                 ((MapFragment) parent).showLocationMarker(placeLat, placeLng, result, true);
                             }
                         }
-                        placeTitle.setText(result.optString("name", "Không có tên"));
-                        placeAddress.setText(result.optString("address", "Không có địa chỉ"));
+
+                        placeTitle.setText(result.optString("name", "No name"));
+                        placeAddress.setText(result.optString("address", "No address"));
                         List<String> imageUrls = new ArrayList<>();
                         String defaultPic = result.optString("defaultPicture", "");
                         if (!TextUtils.isEmpty(defaultPic)) imageUrls.add(defaultPic);
@@ -509,12 +487,11 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
 
                         if (!imageUrls.isEmpty()) setupPlacePhotos(imageUrls);
 
-                        // Overall description và location text
-                        overallDescription.setText(result.optString("description", "Chưa có mô tả"));
-                        locationText.setText(result.optString("address", "Chưa có thông tin vị trí"));
+                        overallDescription.setText(result.optString("description", "No description"));
+                        locationText.setText(result.optString("address", "No location info"));
 
                     } catch (JSONException e) {
-                        Toast.makeText(getContext(), "Lỗi đọc dữ liệu chi tiết", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Error reading detail data", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -522,12 +499,37 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             @Override
             public void onFailure(String errorMessage) {
                 requireActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Lỗi khi tải chi tiết: " + errorMessage, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(getContext(), "Error loading details: " + errorMessage, Toast.LENGTH_SHORT).show()
                 );
             }
         });
     }
-
+    private void updateReviewUI() {
+        boolean isCheckedIn = isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints);
+        requireActivity().runOnUiThread(() -> {
+            if (isCheckedIn) {
+                Review myReview = getYourReview();
+                if (myReview != null) {
+                    yourReviewLayout.setVisibility(View.VISIBLE);
+                    btnWriteReview.setVisibility(View.GONE);
+                    bindMyReviewData(myReview);
+                } else {
+                    yourReviewLayout.setVisibility(View.GONE);
+                    btnWriteReview.setVisibility(View.VISIBLE);
+                    btnWriteReview.setEnabled(true);
+                    btnWriteReview.setBackgroundTintList(
+                            ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                    );
+                }
+            } else {
+                btnWriteReview.setEnabled(false);
+                btnWriteReview.setBackgroundTintList(
+                        ColorStateList.valueOf(Color.parseColor("#808080"))
+                );
+                yourReviewLayout.setVisibility(View.GONE);
+            }
+        });
+    }
     private void updateCheckinUI() {
         boolean isCheckedIn = isPlaceCheckedInByUser(placeData.getAddress(), userCheckedInCheckpoints);
         boolean isAvailableForCheckin = isPlaceAvailableForCheckin(placeData.getAddress(), availableCheckpoints);
@@ -542,6 +544,8 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             btnCheckin.setVisibility(View.GONE);
             setNormalBackground();
         }
+
+        updateReviewUI();
     }
 
     private void setDisabledBackground() {
