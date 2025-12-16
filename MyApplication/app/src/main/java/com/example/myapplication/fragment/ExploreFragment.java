@@ -10,12 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
-import android.widget.EditText;
 import android.widget.CheckBox;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.app.DatePickerDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,10 +36,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class ExploreFragment extends Fragment {
@@ -61,7 +59,7 @@ public class ExploreFragment extends Fragment {
     private PlaceAdapter adapterTopVisited;
     private PlaceAdapter adapterPopularNearU;
 
-    private EditText edtTravelDate, edtDurationDays, edtBudget;
+    // ✅ ONLY INTERESTS
     private CheckBox cbCuisine, cbCulture, cbEntertaining, cbIconic;
     private Button btnSuggestRoute;
     private ProgressBar progressBarAiRoute;
@@ -70,11 +68,12 @@ public class ExploreFragment extends Fragment {
     private AiRouteAdapter aiRouteAdapter;
     private AiRouteApi aiRouteApi;
 
-    // ====== NEW: giữ popup route để quay lại vẫn còn ======
+    // giữ popup route để quay lại vẫn còn
     private AlertDialog routeDialog;
     private AIRoute lastOpenedRoute;
     private boolean reopenRouteDialogOnResume = false;
 
+    // ✅ user location from MapFragment (real-time)
     double userLat = 0, userLng = 0;
 
     @Nullable
@@ -92,7 +91,6 @@ public class ExploreFragment extends Fragment {
     }
 
     private void setupBottomSheet(View view) {
-        // bottomSheetExplore trong XML là NestedScrollView
         nestedScrollExplore = view.findViewById(R.id.bottomSheetExplore);
         bottomSheetBehavior = BottomSheetBehavior.from(nestedScrollExplore);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -117,7 +115,7 @@ public class ExploreFragment extends Fragment {
     public void updateUserLocation(double lat, double lng) {
         this.userLat = lat;
         this.userLng = lng;
-        setupPlaceData(); // Gọi hàm load dữ liệu khi có vị trí
+        setupPlaceData();
     }
 
     private void setupPlaceData() {
@@ -125,7 +123,7 @@ public class ExploreFragment extends Fragment {
         listTopVisited = new ArrayList<>();
         listPopularNearU = new ArrayList<>();
 
-        // 1. Get Iconic Places
+        // Iconic
         LocationApi.GetLocationList(userLat, userLng, "Iconic", false, false, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -140,10 +138,7 @@ public class ExploreFragment extends Fragment {
                                         location.getString("defaultPicture"),
                                         location.getString("address")
                                 );
-                                // FIX: Thêm setId từ nhánh bookmark-fix
-                                if (location.has("id")) {
-                                    place.setId(location.getString("id"));
-                                }
+                                if (location.has("id")) place.setId(location.getString("id"));
                                 listIconic.add(place);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -151,25 +146,27 @@ public class ExploreFragment extends Fragment {
                         }
                         if (!isAdded()) return;
                         requireActivity().runOnUiThread(() -> {
-                            adapterIconic =
-                                    new PlaceAdapter(listIconic, place -> openPlaceDetail(place));
+                            adapterIconic = new PlaceAdapter(listIconic, this::openPlaceDetail);
                             rvIconicPlaces.setAdapter(adapterIconic);
                         });
                     }
 
                     @Override
                     public void onFailure(String errorMessage) {
-                        if (isAdded()) {
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(),
-                                            "fetch iconic failed: " + errorMessage,
-                                            Toast.LENGTH_SHORT).show()
-                            );
-                        }
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(),
+                                        "fetch iconic failed: " + errorMessage,
+                                        Toast.LENGTH_SHORT).show()
+                        );
+                    }
+
+                    private void openPlaceDetail(Place place) {
+                        ExploreFragment.this.openPlaceDetail(place);
                     }
                 });
 
-        // 2. Get Top Visited Places
+        // Top visited
         LocationApi.GetLocationList(userLat, userLng, "", true, false, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -184,10 +181,7 @@ public class ExploreFragment extends Fragment {
                                         location.getString("defaultPicture"),
                                         location.getString("address")
                                 );
-                                // FIX: Thêm setId
-                                if (location.has("id")) {
-                                    place.setId(location.getString("id"));
-                                }
+                                if (location.has("id")) place.setId(location.getString("id"));
                                 listTopVisited.add(place);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -195,25 +189,27 @@ public class ExploreFragment extends Fragment {
                         }
                         if (!isAdded()) return;
                         requireActivity().runOnUiThread(() -> {
-                            adapterTopVisited =
-                                    new PlaceAdapter(listTopVisited, place -> openPlaceDetail(place));
+                            adapterTopVisited = new PlaceAdapter(listTopVisited, this::openPlaceDetail);
                             rvTopVisited.setAdapter(adapterTopVisited);
                         });
                     }
 
                     @Override
                     public void onFailure(String errorMessage) {
-                        if (isAdded()) {
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(),
-                                            "fetch top visited failed: " + errorMessage,
-                                            Toast.LENGTH_SHORT).show()
-                            );
-                        }
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(),
+                                        "fetch top visited failed: " + errorMessage,
+                                        Toast.LENGTH_SHORT).show()
+                        );
+                    }
+
+                    private void openPlaceDetail(Place place) {
+                        ExploreFragment.this.openPlaceDetail(place);
                     }
                 });
 
-        // 3. Get Popular Near You Places
+        // Popular near you
         LocationApi.GetLocationList(userLat, userLng, "", false, true, getContext(),
                 new LocationApi.LocationApiCallback() {
                     @Override
@@ -228,10 +224,7 @@ public class ExploreFragment extends Fragment {
                                         location.getString("defaultPicture"),
                                         location.getString("address")
                                 );
-                                // FIX: Thêm setId
-                                if (location.has("id")) {
-                                    place.setId(location.getString("id"));
-                                }
+                                if (location.has("id")) place.setId(location.getString("id"));
                                 listPopularNearU.add(place);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -239,38 +232,28 @@ public class ExploreFragment extends Fragment {
                         }
                         if (!isAdded()) return;
                         requireActivity().runOnUiThread(() -> {
-                            adapterPopularNearU =
-                                    new PlaceAdapter(listPopularNearU, place -> openPlaceDetail(place));
+                            adapterPopularNearU = new PlaceAdapter(listPopularNearU, this::openPlaceDetail);
                             rvPopularNearYou.setAdapter(adapterPopularNearU);
                         });
                     }
 
                     @Override
                     public void onFailure(String errorMessage) {
-                        if (isAdded()) {
-                            requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(),
-                                            "fetch popular failed: " + errorMessage,
-                                            Toast.LENGTH_SHORT).show()
-                            );
-                        }
+                        if (!isAdded()) return;
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(),
+                                        "fetch popular failed: " + errorMessage,
+                                        Toast.LENGTH_SHORT).show()
+                        );
+                    }
+
+                    private void openPlaceDetail(Place place) {
+                        ExploreFragment.this.openPlaceDetail(place);
                     }
                 });
     }
 
     private void setupSuggestedRoutes(View view) {
-        edtTravelDate = view.findViewById(R.id.edtTravelDate);
-        edtTravelDate.setKeyListener(null);
-        edtTravelDate.setFocusable(false);
-        edtTravelDate.setClickable(true);
-
-        setTravelDateToToday();
-
-        edtTravelDate.setOnClickListener(v -> showTravelDatePicker());
-
-        edtDurationDays = view.findViewById(R.id.edtDurationDays);
-        edtBudget = view.findViewById(R.id.edtBudget);
-
         cbCuisine = view.findViewById(R.id.cbCuisine);
         cbCulture = view.findViewById(R.id.cbCulture);
         cbEntertaining = view.findViewById(R.id.cbEntertaining);
@@ -283,13 +266,12 @@ public class ExploreFragment extends Fragment {
         rvSuggestedRoutes.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
 
-        aiRouteAdapter = new AiRouteAdapter(route -> showRouteDetailDialog(route));
+        aiRouteAdapter = new AiRouteAdapter(this::showRouteDetailDialog);
         rvSuggestedRoutes.setAdapter(aiRouteAdapter);
 
         aiRouteApi = new AiRouteApi();
 
-        edtDurationDays.setText("1");
-        cbCuisine.setChecked(true);
+        // optional default tick for demo
         cbCuisine.setChecked(true);
         cbCulture.setChecked(true);
 
@@ -297,23 +279,10 @@ public class ExploreFragment extends Fragment {
     }
 
     private void requestAiRoutes() {
-        String date = edtTravelDate.getText().toString().trim();
-        String durationStr = edtDurationDays.getText().toString().trim();
-        String budgetStr = edtBudget.getText().toString().trim();
-
-        if (TextUtils.isEmpty(date) || TextUtils.isEmpty(durationStr)) {
+        // (optional) nếu bạn muốn bắt buộc phải có location thật
+        if (userLat == 0 || userLng == 0) {
             Toast.makeText(requireContext(),
-                    "Please enter travel date and duration",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        int durationDays;
-        try {
-            durationDays = Integer.parseInt(durationStr);
-        } catch (NumberFormatException e) {
-            Toast.makeText(requireContext(),
-                    "Duration is invalid",
+                    "Waiting for your location...",
                     Toast.LENGTH_SHORT).show();
             return;
         }
@@ -325,26 +294,20 @@ public class ExploreFragment extends Fragment {
         if (cbIconic.isChecked()) interests.add("iconic");
 
         if (interests.isEmpty()) {
-            Toast.makeText(
-                    requireContext(),
+            Toast.makeText(requireContext(),
                     "Please select at least one interest",
-                    Toast.LENGTH_SHORT
-            ).show();
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // ✅ default values because you removed 3 inputs
+        String date = getTomorrowDate();
+        int durationDays = 1;
         Long budget = null;
-        if (!TextUtils.isEmpty(budgetStr)) {
-            try {
-                budget = Long.parseLong(budgetStr);
-            } catch (NumberFormatException ignored) {
-            }
-        }
 
         TravelPlan plan = new TravelPlan(date, durationDays, interests, budget);
 
-        String bearerToken = getAuthTokenOrNull(); // hiện đang trả null
-
+        String bearerToken = getAuthTokenOrNull();
         progressBarAiRoute.setVisibility(View.VISIBLE);
 
         aiRouteApi.getSuggestedRoutes(bearerToken, plan, new AiRouteApi.AiRouteCallback() {
@@ -355,12 +318,11 @@ public class ExploreFragment extends Fragment {
                     progressBarAiRoute.setVisibility(View.GONE);
                     aiRouteAdapter.setRoutes(routes);
 
-                    if (routes.isEmpty()) {
+                    if (routes == null || routes.isEmpty()) {
                         Toast.makeText(requireContext(),
                                 "No suitable routes found",
                                 Toast.LENGTH_SHORT).show();
                     } else if (nestedScrollExplore != null && rvSuggestedRoutes != null) {
-
                         nestedScrollExplore.post(() -> {
                             int y = rvSuggestedRoutes.getTop() - 32;
                             if (y < 0) y = 0;
@@ -376,11 +338,17 @@ public class ExploreFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> {
                     progressBarAiRoute.setVisibility(View.GONE);
                     Toast.makeText(requireContext(),
-                            "AI Route error: " + t.getMessage(),
+                            "AI Route error: " + (t != null ? t.getMessage() : "unknown"),
                             Toast.LENGTH_SHORT).show();
                 });
             }
         });
+    }
+
+    private String getTomorrowDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.getTime());
     }
 
     private String getAuthTokenOrNull() {
@@ -388,18 +356,16 @@ public class ExploreFragment extends Fragment {
     }
 
     private void showRouteDetailDialog(AIRoute route) {
-        if (!isAdded()) return;
+        if (!isAdded() || route == null) return;
 
-        // Nếu đang có dialog khác -> đóng để tránh chồng
         if (routeDialog != null && routeDialog.isShowing()) {
             routeDialog.dismiss();
             routeDialog = null;
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        View dialogView = inflater.inflate(R.layout.dialog_route_detail, null, false);
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_route_detail, null, false);
 
         TextView tvRouteTitle = dialogView.findViewById(R.id.tvRouteTitle);
         TextView tvRouteSummary = dialogView.findViewById(R.id.tvRouteSummary);
@@ -409,7 +375,7 @@ public class ExploreFragment extends Fragment {
         tvRouteTitle.setText(route.getTitle());
 
         String summary = String.format(
-                java.util.Locale.getDefault(),
+                Locale.getDefault(),
                 "Total: %.2f km • %s",
                 route.getDistanceKm(),
                 route.getDuration()
@@ -420,11 +386,11 @@ public class ExploreFragment extends Fragment {
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         );
 
-        // ✅ NEW: click stop -> hide dialog -> open place detail -> onResume show lại
+        // ✅ click stop -> hide dialog -> open place detail -> onResume show lại
         rvRouteStops.setAdapter(new RouteStopAdapter(route.getStops(), place -> {
             if (!isAdded()) return;
 
-            if (place == null || place.getId() == null || place.getId().trim().isEmpty()) {
+            if (place == null || TextUtils.isEmpty(place.getId())) {
                 Toast.makeText(requireContext(),
                         "This stop has no id, cannot open detail.",
                         Toast.LENGTH_SHORT).show();
@@ -435,22 +401,19 @@ public class ExploreFragment extends Fragment {
             lastOpenedRoute = route;
 
             if (routeDialog != null) routeDialog.hide();
-
             openPlaceDetail(place);
         }));
 
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();
 
-        // giữ instance dialog để show lại sau
-        this.routeDialog = dialog;
-        this.lastOpenedRoute = route;
+        routeDialog = dialog;
+        lastOpenedRoute = route;
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
 
-        // Close = đóng thật, không show lại nữa
         btnCloseRoute.setOnClickListener(v -> {
             reopenRouteDialogOnResume = false;
             lastOpenedRoute = null;
@@ -475,12 +438,10 @@ public class ExploreFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // Giữ lại logic reload khi resume từ nhánh bookmark-fix
         if (userLat != 0 && userLng != 0) {
             setupPlaceData();
         }
 
-        // ✅ NEW: quay lại từ PlaceDetail thì show lại popup route
         if (reopenRouteDialogOnResume) {
             reopenRouteDialogOnResume = false;
 
@@ -494,52 +455,10 @@ public class ExploreFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        // ✅ tránh leak window
         if (routeDialog != null) {
             routeDialog.dismiss();
             routeDialog = null;
         }
         super.onDestroyView();
     }
-
-    private void setTravelDateToToday() {
-        Calendar cal = Calendar.getInstance(); // real current time
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        edtTravelDate.setText(sdf.format(cal.getTime()));
-    }
-
-    private void showTravelDatePicker() {
-        if (!isAdded()) return;
-
-        Calendar now = Calendar.getInstance();
-        int year = now.get(Calendar.YEAR);
-        int month = now.get(Calendar.MONTH);
-        int day = now.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog dialog = new DatePickerDialog(
-                requireContext(),
-                (view, y, m, d) -> {
-                    Calendar chosen = Calendar.getInstance();
-                    chosen.set(Calendar.YEAR, y);
-                    chosen.set(Calendar.MONTH, m);
-                    chosen.set(Calendar.DAY_OF_MONTH, d);
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    edtTravelDate.setText(sdf.format(chosen.getTime()));
-                },
-                year, month, day
-        );
-
-        // ✅ minDate = tomorrow 00:00
-        Calendar tomorrow = Calendar.getInstance();
-        tomorrow.add(Calendar.DAY_OF_MONTH, 1);
-        tomorrow.set(Calendar.HOUR_OF_DAY, 0);
-        tomorrow.set(Calendar.MINUTE, 0);
-        tomorrow.set(Calendar.SECOND, 0);
-        tomorrow.set(Calendar.MILLISECOND, 0);
-
-        dialog.getDatePicker().setMinDate(tomorrow.getTimeInMillis());
-        dialog.show();
-    }
-
 }

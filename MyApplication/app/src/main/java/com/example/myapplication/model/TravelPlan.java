@@ -8,12 +8,17 @@ public class TravelPlan {
     private List<String> interests;
     private Long budget;
 
+    private Double userLat;
+    private Double userLng;
+
     public TravelPlan(String travelDate, int durationDays,
                              List<String> interests, Long budget) {
         this.travelDate = travelDate;
         this.durationDays = durationDays;
         this.interests = interests;
         this.budget = budget;
+        this.userLat = userLat;
+        this.userLng = userLng;
     }
 
     public String getTravelDate() {
@@ -27,5 +32,14 @@ public class TravelPlan {
     }
     public Long getBudget() {
         return budget;
+    }
+
+    public Double getUserLat() {
+        return userLat;
+    }
+
+    public Double getUserLng() {
+        return userLng;
+
     }
 }

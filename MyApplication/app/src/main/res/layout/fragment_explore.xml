@@ -190,66 +190,6 @@
                             android:textColor="@color/explore_text_primary"
                             android:paddingBottom="8dp" />
 
-                        <!-- Travel date -->
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Travel date (yyyy-MM-dd)"
-                            app:boxBackgroundMode="outline"
-                            app:boxBackgroundColor="@color/explore_card_bg"
-                            app:boxStrokeColor="@android:color/white"
-                            app:hintTextColor="@color/explore_text_hint">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/edtTravelDate"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:focusable="false"
-                                android:clickable="true"
-                                android:textColor="@color/explore_text_primary"
-                                android:textColorHint="@color/explore_text_hint" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <!-- Duration days -->
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:hint="Duration (days)"
-                            app:boxBackgroundMode="outline"
-                            app:boxBackgroundColor="@color/explore_card_bg"
-                            app:boxStrokeColor="@android:color/white"
-                            app:hintTextColor="@color/explore_text_hint">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/edtDurationDays"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number"
-                                android:textColor="@color/explore_text_primary"
-                                android:textColorHint="@color/explore_text_hint" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <!-- Budget -->
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:hint="Budget (optional)"
-                            app:boxBackgroundMode="outline"
-                            app:boxBackgroundColor="@color/explore_card_bg"
-                            app:boxStrokeColor="@android:color/white"
-                            app:hintTextColor="@color/explore_text_hint">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/edtBudget"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number"
-                                android:textColor="@color/explore_text_primary"
-                                android:textColorHint="@color/explore_text_hint" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
                         <!-- Interests -->
                         <TextView
                             android:id="@+id/tvInterestsLabel"
@@ -315,7 +255,6 @@
                                     android:textColor="@color/explore_text_primary" />
                             </LinearLayout>
                         </LinearLayout>
-
 
                         <!-- Button + loading -->
                         <RelativeLayout

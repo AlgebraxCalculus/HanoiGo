@@ -3,10 +3,10 @@ package com.example.hanoiGo.service;
 import com.example.hanoiGo.dto.request.TravelPlanRequest;
 import com.example.hanoiGo.dto.response.LocationResponse;
 import com.example.hanoiGo.dto.response.SuggestedRouteResponse;
+import com.example.hanoiGo.mapper.LocationMapper;
 import com.example.hanoiGo.model.LocationDetail;
 import com.example.hanoiGo.repository.LocationDetailRepository;
 import com.example.hanoiGo.repository.LocationTagRepository;
-import com.example.hanoiGo.mapper.LocationMapper; 
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,21 +20,17 @@ public class TravelAIService {
 
     private final LocationDetailRepository locationDetailRepository;
     private final LocationTagRepository locationTagRepository;
-    private final LocationMapper locationMapper; 
+    private final LocationMapper locationMapper;
 
     public List<SuggestedRouteResponse> suggestRoutes(TravelPlanRequest request) {
 
         List<String> tagNames = mapInterestsToTags(request.getInterests());
 
         List<String> locationIds = locationTagRepository.findLocationIdsByTagNames(tagNames);
-        if (locationIds.isEmpty()) {
-            return Collections.emptyList();
-        }
+        if (locationIds.isEmpty()) return Collections.emptyList();
 
         List<LocationDetail> candidates = locationDetailRepository.findAllById(locationIds);
-        if (candidates.isEmpty()) {
-            return Collections.emptyList();
-        }
+        if (candidates.isEmpty()) return Collections.emptyList();
 
         Map<LocationDetail, Double> scoreMap = new HashMap<>();
         for (LocationDetail loc : candidates) {
@@ -79,7 +75,7 @@ public class TravelAIService {
 
         return result.stream().distinct().collect(Collectors.toList());
     }
-    
+
     private double baseScore(LocationDetail loc, List<String> tagNames) {
         String locationId = loc.getId();
 
@@ -88,15 +84,14 @@ public class TravelAIService {
 
         Integer reviewCount = locationDetailRepository.findReviewCountByLocationId(locationId);
         int count = (reviewCount != null) ? reviewCount : 0;
-        double popularityScore = Math.min(count, 20) * 0.1;  
+        double popularityScore = Math.min(count, 20) * 0.1; 
 
         Integer weeklyCheckins = locationDetailRepository.findWeeklyCheckinCountsById(locationId);
         int checkins = (weeklyCheckins != null) ? weeklyCheckins : 0;
-        double checkpointScore = Math.min(checkins, 10) * 0.3;
+        double checkpointScore = Math.min(checkins, 10) * 0.3; 
 
         return ratingScore + popularityScore + checkpointScore;
     }
-
 
     private List<SuggestedRouteResponse> buildRoutes(List<LocationDetail> sorted,
                                                      int routeSize,
@@ -119,7 +114,7 @@ public class TravelAIService {
                         .filter(loc -> !usedIds.contains(loc.getId()))
                         .min(Comparator.comparingDouble(loc ->
                                 simpleDistance(last.getLatitude(), last.getLongitude(),
-                                               loc.getLatitude(), loc.getLongitude())
+                                        loc.getLatitude(), loc.getLongitude())
                         ));
 
                 if (nextOpt.isEmpty()) break;
@@ -138,26 +133,20 @@ public class TravelAIService {
     private SuggestedRouteResponse buildRouteResponse(List<LocationDetail> places,
                                                       TravelPlanRequest request) {
 
-        String title = places.get(0).getName()
-                + " - "
-                + places.get(places.size() - 1).getName();
+        String title = places.get(0).getName() + " - " + places.get(places.size() - 1).getName();
 
-        String description = "Lộ trình " + request.getDurationDays() + " ngày gợi ý: "
+        String description = "Suggested " + request.getDurationDays() + " day route: "
                 + places.stream()
-                        .map(LocationDetail::getName)
-                        .collect(Collectors.joining(" → "));
+                .map(LocationDetail::getName)
+                .collect(Collectors.joining(" → "));
 
         double distanceKm = estimateRouteDistanceKm(places);
-        String duration = estimateDuration(distanceKm);
+
+        String duration = estimateDurationWithUser(request, places);
 
         List<LocationResponse> stops = places.stream()
-                .map(ld -> {
-                    LocationResponse r = locationMapper.toLocationResponse(ld);
-                    r.setId(ld.getId());
-                    return r;
-                })
+                .map(locationMapper::toLocationResponse)
                 .collect(Collectors.toList());
-
 
         SuggestedRouteResponse res = new SuggestedRouteResponse();
         res.setTitle(title);
@@ -168,8 +157,9 @@ public class TravelAIService {
 
         return res;
     }
+
     private double estimateRouteDistanceKm(List<LocationDetail> places) {
-        if (places.size() < 2) return 0.0;
+        if (places == null || places.size() < 2) return 0.0;
 
         double total = 0.0;
         for (int i = 0; i < places.size() - 1; i++) {
@@ -181,19 +171,40 @@ public class TravelAIService {
         return Math.round(total * 10.0) / 10.0; 
     }
 
+    private String estimateDurationWithUser(TravelPlanRequest request, List<LocationDetail> places) {
+        if (places == null || places.isEmpty()) return "0m";
+
+        double totalKm = 0.0;
+
+        // 1) user -> first stop
+        double userLat = (request != null) ? request.getUserLat() : 0.0;
+        double userLng = (request != null) ? request.getUserLng() : 0.0;
+
+        if (userLat != 0.0 && userLng != 0.0) {
+            LocationDetail first = places.get(0);
+            totalKm += simpleDistance(userLat, userLng, first.getLatitude(), first.getLongitude());
+        }
+
+        for (int i = 0; i < places.size() - 1; i++) {
+            totalKm += simpleDistance(
+                    places.get(i).getLatitude(), places.get(i).getLongitude(),
+                    places.get(i + 1).getLatitude(), places.get(i + 1).getLongitude()
+            );
+        }
+
+        double avgSpeedKmh = 10.0;
+
+        int totalMinutes = (int) Math.round((totalKm / avgSpeedKmh) * 60.0);
+        int h = totalMinutes / 60;
+        int m = totalMinutes % 60;
+
+        if (h <= 0) return m + "m";
+        return h + "h " + m + "m";
+    }
+
     private double simpleDistance(double lat1, double lon1, double lat2, double lon2) {
         double dx = lat1 - lat2;
         double dy = lon1 - lon2;
         return Math.sqrt(dx * dx + dy * dy) * 111;
-    }
-
-    private String estimateDuration(double distanceKm) {
-        double hours = distanceKm / 5.0;
-        int totalMinutes = (int) Math.round(hours * 60);
-
-        int h = totalMinutes / 60;
-        int m = totalMinutes % 60;
-        if (h == 0) return m + "m";
-        return h + "h " + m + "m";
     }
 }
