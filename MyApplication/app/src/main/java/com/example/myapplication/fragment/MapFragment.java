@@ -77,6 +77,10 @@ public class MapFragment extends Fragment {
     private RecyclerView rvSearchSuggestions;
 
     private CardView searchSuggestionsCard;
+
+    private CardView currentActiveButton = null;
+    private boolean isTagModeActive = false;
+
     private TextWatcher textWatcher;
     private final Map<Marker, JSONObject> markerMap = new HashMap<>();
 
@@ -165,23 +169,38 @@ public class MapFragment extends Fragment {
         List<CardView> allButtons = Arrays.asList(btnCheckpoint, btnBookmark, btnCompass, btnNavigate);
 
         View.OnClickListener buttonClickListener = v -> {
-            setActiveButton((CardView) v);
-            // Xóa marker cũ nếu có
+
+            CardView clickedButton = (CardView) v;
+            if (isTagModeActive) {
+                return;
+            }
+
+            // Bấm lại nút đang active → bỏ chọn
+            if (clickedButton == currentActiveButton) {
+                clearActiveButton();
+                enableTags(true);
+                resetMapToUserLocation();
+                return;
+            }
+
+            setActiveButton(clickedButton);
+            currentActiveButton = clickedButton;
+            enableTags(false);
+
             for (Marker m : new ArrayList<>(markerMap.keySet())) {
                 m.remove();
             }
             markerMap.clear();
-            if (v == btnBookmark) {
+
+            if (clickedButton == btnBookmark) {
                 loadChildFragment(new BookmarkFragment());
-            } else if (v == btnCompass) {
+            } else if (clickedButton == btnCompass) {
                 loadChildFragment(exploreFragment);
-            } else if (v == btnNavigate) {
+            } else if (clickedButton == btnNavigate) {
                 if (userLocation != null && map != null) {
                     showMarker(userLocation.getLatitude(), userLocation.getLongitude(), "You are here", true);
-                } else {
-                    Toast.makeText(requireContext(), "User location unavailable", Toast.LENGTH_SHORT).show();
                 }
-            } else if (v == btnCheckpoint) {
+            } else if (clickedButton == btnCheckpoint) {
                 fetchCheckpoints();
             }
         };
@@ -258,6 +277,39 @@ public class MapFragment extends Fragment {
                     }
                 }
         );
+    }
+
+    private void enableAllButtons(boolean enable) {
+        List<CardView> allButtons = Arrays.asList(
+                btnCheckpoint, btnBookmark, btnCompass, btnNavigate
+        );
+
+        for (CardView btn : allButtons) {
+            btn.setEnabled(enable);
+            btn.setAlpha(enable ? 1f : 0.4f);
+        }
+    }
+
+    private void clearActiveButton() {
+        currentActiveButton = null;
+
+        List<CardView> allButtons = Arrays.asList(
+                btnCheckpoint, btnBookmark, btnCompass, btnNavigate
+        );
+
+        for (CardView btn : allButtons) {
+            btn.setCardBackgroundColor(Color.parseColor("#001A2E"));
+            ImageView icon = (ImageView) btn.getChildAt(0);
+            if (icon != null) icon.setColorFilter(Color.WHITE);
+        }
+    }
+
+    private void enableTags(boolean enable) {
+        for (int i = 0; i < tagContainer.getChildCount(); i++) {
+            View tag = tagContainer.getChildAt(i);
+            tag.setEnabled(enable);
+            tag.setAlpha(enable ? 1f : 0.4f);
+        }
     }
 
     private void setActiveButton(CardView activeButton) {
@@ -495,22 +547,29 @@ public class MapFragment extends Fragment {
                 TextView tagView = (TextView) child;
 
                 tagView.setOnClickListener(v -> {
+                    // Nếu đang chọn button thì không cho chọn tag
+                    if (currentActiveButton != null) {
+                        return;
+                    }
                     String selectedTag = tagView.getText().toString()
                             .replaceAll("[^\\p{L}\\p{N}\\s]", "")
                             .trim();
 
                     if (selectedTag.equals(currentSelectedTag)) {
                         currentSelectedTag = null;
+                        isTagModeActive = false;
                         resetAllTagBackgrounds();
                         resetMapToUserLocation();
+                        enableAllButtons(true);
                         return;
                     }
 
                     resetAllTagBackgrounds();
-
                     tagView.setBackgroundResource(R.drawable.bg_tag_selected);
                     currentSelectedTag = selectedTag;
+                    isTagModeActive = true;
 
+                    enableAllButtons(false);
                     Log.d("TAG_SELECTED", "Clicked tag: " + selectedTag);
                     loadLocationsByTag(selectedTag);
                 });
