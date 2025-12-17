@@ -348,6 +348,18 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                             break;
                     }
                 }
+            }else{
+                ProgressBar progressBar;
+                progressBar = ratingBar1.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar2.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar3.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar4.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar5.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
             }
         });
     }
@@ -1344,7 +1356,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                     });
                                 }
                             };
-
                             setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
                         });
                     }
