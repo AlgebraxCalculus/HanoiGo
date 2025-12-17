@@ -196,21 +196,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setHideable(false);
 
-        //  Hiệu ứng Google Maps: header nổi khi kéo gần full
-        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View sheet, int newState) {}
-
-            @Override
-            public void onSlide(@NonNull View sheet, float slideOffset) {
-//                if (slideOffset > 0.8f) {
-//                    header.setElevation(12f);
-//                } else {
-//                    header.setElevation(0f);
-//                }
-            }
-        });
-
         btnClose.setOnClickListener(v -> closeFragment());
         setupActions();
 
@@ -221,12 +206,8 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             avatar = getArguments().getString("avatar");
         }
 
-        if (getArguments() != null) {
-            placeData = (Place) getArguments().getSerializable("placeData");
-            jwtToken = getArguments().getString("jwtToken");
-            username = getArguments().getString("username");
-            avatar = getArguments().getString("avatar");
-        }
+        updateSaveButtonState(false);
+        checkIfLocationIsSaved();
 
         // Fetch available checkpoints for check-in
         CheckpointApi.GetEnableCheckIn(
@@ -345,6 +326,18 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                             break;
                     }
                 }
+            }else{
+                ProgressBar progressBar;
+                progressBar = ratingBar1.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar2.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar3.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar4.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
+                progressBar = ratingBar5.findViewById(R.id.progressBar);
+                progressBar.setProgress(0);
             }
         });
     }
@@ -811,12 +804,38 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                 return;
             }
 
-            // Gọi API Check-in
             CheckpointApi.CheckIn(jwtToken, placeData.getAddress(), getContext(), new CheckpointApi.CheckpointApiCallback() {
                 @Override
                 public void onSuccess(ArrayList<JSONObject> resultList) {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(getContext(), "Check-in successful!", Toast.LENGTH_SHORT).show();
+
+                        // if resultList is not null
+                        if (resultList != null && !resultList.isEmpty()) {
+                            userCheckedInCheckpoints.addAll(resultList);
+                            updateCheckinUI();
+                        } else {
+                            UserApi.GetMyCheckpointList(
+                                    jwtToken,
+                                    "",
+                                    "newest",
+                                    "",
+                                    requireContext(),
+                                    new UserApi.UserApiCallback() {
+                                        @Override
+                                        public void onSuccess(ArrayList<JSONObject> dataList) {
+                                            userCheckedInCheckpoints = (dataList != null)
+                                                    ? dataList
+                                                    : new ArrayList<>();
+                                            requireActivity().runOnUiThread(() -> updateCheckinUI());
+                                        }
+                                        @Override public void onSuccess(JSONObject userObj) {}
+                                        @Override public void onFailure(String errorMessage) {
+                                            requireActivity().runOnUiThread(() -> updateCheckinUI());
+                                        }
+                                    }
+                            );
+                        }
                     });
                 }
 
@@ -1157,6 +1176,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                                 // hiển thị và active nút thêm review và visibility: gone cho review của user
                                                 yourReviewLayout.setVisibility(View.GONE);
                                                 btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setBackgroundTintList(
+                                                        ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                                                );
                                                 btnWriteReview.setEnabled(true);
                                             }
                                         }else{
@@ -1231,6 +1253,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                                 // hiển thị và active nút thêm review và visibility: gone cho review của user
                                                 yourReviewLayout.setVisibility(View.GONE);
                                                 btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setBackgroundTintList(
+                                                        ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                                                );
                                                 btnWriteReview.setEnabled(true);
                                             }
                                         }else{
@@ -1302,6 +1327,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                                 // hiển thị và active nút thêm review và visibility: gone cho review của user
                                                 yourReviewLayout.setVisibility(View.GONE);
                                                 btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setBackgroundTintList(
+                                                        ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                                                );
                                                 btnWriteReview.setEnabled(true);
                                             }
                                         }else{
@@ -1315,7 +1343,6 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                     });
                                 }
                             };
-
                             setupReviews(placeData.getAddress(), "most approved", reviewCheckLogic);
                         });
                     }

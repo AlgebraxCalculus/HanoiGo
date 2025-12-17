@@ -71,7 +71,7 @@ public class CheckpointService {
         for (LocationListResponse locRes : locationListResponses) {
             LocationResponse locationResponse = locRes.getLocationResponse();
             int distance = locRes.getDistanceValue();
-            if (distance > 4000) break;
+            if (distance > 15000) break;
 
             LocationDetail detail = locationDetailRepository.findByAddress(locationResponse.getAddress()).orElse(null);
             if (detail == null) continue;
@@ -88,7 +88,7 @@ public class CheckpointService {
 
         // If no eligible locations found, throw exception
         if (enableCheckpoints.isEmpty()) {
-            throw new RuntimeException("No eligible check-in locations within 100m.");
+            throw new RuntimeException("No eligible check-in locations within 15km.");
         }
 
         return enableCheckpoints;

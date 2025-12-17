@@ -26,7 +26,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class AiRouteApi {
-    private static final String BASE_URL = "http://192.168.1.12/api/ai/routes";
+    private static final String BASE_URL = "http://192.168.1.12:8080/api/ai/routes";
 
     private static final MediaType JSON
             = MediaType.get("application/json; charset=utf-8");

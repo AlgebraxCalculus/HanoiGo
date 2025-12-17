@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -84,6 +85,7 @@ public class MapFragment extends Fragment {
     private TextWatcher textWatcher;
     private final Map<Marker, JSONObject> markerMap = new HashMap<>();
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -132,18 +134,32 @@ public class MapFragment extends Fragment {
             map.setStyle(new Style.Builder().fromUri(styleUrl), style -> {
                 map.setOnMarkerClickListener(clickedMarker -> {
                     JSONObject placeData = markerMap.get(clickedMarker);
-                    JSONObject locationResponse = placeData.optJSONObject("locationResponse");
                     if (placeData != null) {
-                        Place place = new Place(
-                                locationResponse.optString("name"),
-                                locationResponse.optString("description"),
-                                placeData.optString("distanceText"),
-                                locationResponse.optString("defaultPicture"),
-                                locationResponse.optString("address")
-                        );
-                        place.setId(locationResponse.optString("id"));
-                        openPlaceDetailFragment(place);
-                        return true;
+                        JSONObject locationResponse = placeData.optJSONObject("locationResponse");
+                        // If locationResponse is null, using placeData
+                        JSONObject dataSource = (locationResponse != null) ? locationResponse : placeData;
+                        if (dataSource != null) {
+                            Place place = new Place(
+                                    dataSource.optString("name"),
+                                    dataSource.optString("description"),
+                                    placeData.optString("distanceText"),
+                                    dataSource.optString("defaultPicture"),
+                                    dataSource.optString("address")
+                            );
+                            place.setId(dataSource.optString("id"));
+                            // Close existing PlaceDetailFragment if any
+                            FragmentManager fm = getChildFragmentManager();
+                            for (int i = fm.getBackStackEntryCount() - 1; i >= 0; i--) {
+                                FragmentManager.BackStackEntry entry = fm.getBackStackEntryAt(i);
+                                Fragment f = fm.findFragmentById(R.id.childFragmentContainer);
+                                if (f instanceof PlaceDetailFragment) {
+                                    fm.popBackStackImmediate();
+                                    break;
+                                }
+                            }
+                            openPlaceDetailFragment(place);
+                            return true;
+                        }
                     }
                     return false;
                 });
