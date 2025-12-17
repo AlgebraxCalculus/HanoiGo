@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -146,6 +147,16 @@ public class MapFragment extends Fragment {
                                     dataSource.optString("address")
                             );
                             place.setId(dataSource.optString("id"));
+                            // Close existing PlaceDetailFragment if any
+                            FragmentManager fm = getChildFragmentManager();
+                            for (int i = fm.getBackStackEntryCount() - 1; i >= 0; i--) {
+                                FragmentManager.BackStackEntry entry = fm.getBackStackEntryAt(i);
+                                Fragment f = fm.findFragmentById(R.id.childFragmentContainer);
+                                if (f instanceof PlaceDetailFragment) {
+                                    fm.popBackStackImmediate();
+                                    break;
+                                }
+                            }
                             openPlaceDetailFragment(place);
                             return true;
                         }
