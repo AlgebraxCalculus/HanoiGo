@@ -811,12 +811,38 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                 return;
             }
 
-            // Gọi API Check-in
             CheckpointApi.CheckIn(jwtToken, placeData.getAddress(), getContext(), new CheckpointApi.CheckpointApiCallback() {
                 @Override
                 public void onSuccess(ArrayList<JSONObject> resultList) {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(getContext(), "Check-in successful!", Toast.LENGTH_SHORT).show();
+
+                        // if resultList is not null
+                        if (resultList != null && !resultList.isEmpty()) {
+                            userCheckedInCheckpoints.addAll(resultList);
+                            updateCheckinUI();
+                        } else {
+                            UserApi.GetMyCheckpointList(
+                                    jwtToken,
+                                    "",
+                                    "newest",
+                                    "",
+                                    requireContext(),
+                                    new UserApi.UserApiCallback() {
+                                        @Override
+                                        public void onSuccess(ArrayList<JSONObject> dataList) {
+                                            userCheckedInCheckpoints = (dataList != null)
+                                                    ? dataList
+                                                    : new ArrayList<>();
+                                            requireActivity().runOnUiThread(() -> updateCheckinUI());
+                                        }
+                                        @Override public void onSuccess(JSONObject userObj) {}
+                                        @Override public void onFailure(String errorMessage) {
+                                            requireActivity().runOnUiThread(() -> updateCheckinUI());
+                                        }
+                                    }
+                            );
+                        }
                     });
                 }
 

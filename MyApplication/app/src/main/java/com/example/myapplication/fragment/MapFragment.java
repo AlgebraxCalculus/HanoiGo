@@ -84,6 +84,7 @@ public class MapFragment extends Fragment {
     private TextWatcher textWatcher;
     private final Map<Marker, JSONObject> markerMap = new HashMap<>();
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -132,18 +133,22 @@ public class MapFragment extends Fragment {
             map.setStyle(new Style.Builder().fromUri(styleUrl), style -> {
                 map.setOnMarkerClickListener(clickedMarker -> {
                     JSONObject placeData = markerMap.get(clickedMarker);
-                    JSONObject locationResponse = placeData.optJSONObject("locationResponse");
                     if (placeData != null) {
-                        Place place = new Place(
-                                locationResponse.optString("name"),
-                                locationResponse.optString("description"),
-                                placeData.optString("distanceText"),
-                                locationResponse.optString("defaultPicture"),
-                                locationResponse.optString("address")
-                        );
-                        place.setId(locationResponse.optString("id"));
-                        openPlaceDetailFragment(place);
-                        return true;
+                        JSONObject locationResponse = placeData.optJSONObject("locationResponse");
+                        // If locationResponse is null, using placeData
+                        JSONObject dataSource = (locationResponse != null) ? locationResponse : placeData;
+                        if (dataSource != null) {
+                            Place place = new Place(
+                                    dataSource.optString("name"),
+                                    dataSource.optString("description"),
+                                    placeData.optString("distanceText"),
+                                    dataSource.optString("defaultPicture"),
+                                    dataSource.optString("address")
+                            );
+                            place.setId(dataSource.optString("id"));
+                            openPlaceDetailFragment(place);
+                            return true;
+                        }
                     }
                     return false;
                 });
