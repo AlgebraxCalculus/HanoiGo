@@ -228,6 +228,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
             avatar = getArguments().getString("avatar");
         }
 
+        updateSaveButtonState(false);
+        checkIfLocationIsSaved();
+
         // Fetch available checkpoints for check-in
         CheckpointApi.GetEnableCheckIn(
                 userLat,
