@@ -196,30 +196,8 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottomSheetBehavior.setHideable(false);
 
-        //  Hiệu ứng Google Maps: header nổi khi kéo gần full
-        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View sheet, int newState) {}
-
-            @Override
-            public void onSlide(@NonNull View sheet, float slideOffset) {
-//                if (slideOffset > 0.8f) {
-//                    header.setElevation(12f);
-//                } else {
-//                    header.setElevation(0f);
-//                }
-            }
-        });
-
         btnClose.setOnClickListener(v -> closeFragment());
         setupActions();
-
-        if (getArguments() != null) {
-            placeData = (Place) getArguments().getSerializable("placeData");
-            jwtToken = getArguments().getString("jwtToken");
-            username = getArguments().getString("username");
-            avatar = getArguments().getString("avatar");
-        }
 
         if (getArguments() != null) {
             placeData = (Place) getArguments().getSerializable("placeData");
@@ -1198,6 +1176,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                                 // hiển thị và active nút thêm review và visibility: gone cho review của user
                                                 yourReviewLayout.setVisibility(View.GONE);
                                                 btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setBackgroundTintList(
+                                                        ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                                                );
                                                 btnWriteReview.setEnabled(true);
                                             }
                                         }else{
@@ -1272,6 +1253,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                                 // hiển thị và active nút thêm review và visibility: gone cho review của user
                                                 yourReviewLayout.setVisibility(View.GONE);
                                                 btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setBackgroundTintList(
+                                                        ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                                                );
                                                 btnWriteReview.setEnabled(true);
                                             }
                                         }else{
@@ -1343,6 +1327,9 @@ public class PlaceDetailFragment extends Fragment implements ReviewAdapter.OnMyR
                                                 // hiển thị và active nút thêm review và visibility: gone cho review của user
                                                 yourReviewLayout.setVisibility(View.GONE);
                                                 btnWriteReview.setVisibility(View.VISIBLE);
+                                                btnWriteReview.setBackgroundTintList(
+                                                        ColorStateList.valueOf(Color.parseColor("#01B8B3"))
+                                                );
                                                 btnWriteReview.setEnabled(true);
                                             }
                                         }else{
