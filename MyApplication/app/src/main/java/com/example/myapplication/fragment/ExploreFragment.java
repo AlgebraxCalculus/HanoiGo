@@ -270,8 +270,6 @@ public class ExploreFragment extends Fragment {
         rvSuggestedRoutes.setAdapter(aiRouteAdapter);
 
         aiRouteApi = new AiRouteApi();
-
-        // optional default tick for demo
         cbCuisine.setChecked(true);
         cbCulture.setChecked(true);
 
@@ -279,7 +277,6 @@ public class ExploreFragment extends Fragment {
     }
 
     private void requestAiRoutes() {
-        // (optional) nếu bạn muốn bắt buộc phải có location thật
         if (userLat == 0 || userLng == 0) {
             Toast.makeText(requireContext(),
                     "Waiting for your location...",
@@ -300,7 +297,6 @@ public class ExploreFragment extends Fragment {
             return;
         }
 
-        // ✅ default values because you removed 3 inputs
         String date = getTomorrowDate();
         int durationDays = 1;
         Long budget = null;
@@ -386,7 +382,6 @@ public class ExploreFragment extends Fragment {
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         );
 
-        // ✅ click stop -> hide dialog -> open place detail -> onResume show lại
         rvRouteStops.setAdapter(new RouteStopAdapter(route.getStops(), place -> {
             if (!isAdded()) return;
 

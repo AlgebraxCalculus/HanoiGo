@@ -26,8 +26,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class AiRouteApi {
-
-    // Endpoint AI routes
     private static final String BASE_URL = "http://192.168.1.12/api/ai/routes";
 
     private static final MediaType JSON
@@ -48,10 +46,6 @@ public class AiRouteApi {
         void onSuccess(List<AIRoute> routes);
         void onError(Throwable t);
     }
-
-    /**
-     * NEW: Có truyền userLat/userLng để backend dùng vị trí thật.
-     */
     public void getSuggestedRoutes(
             String bearerToken,
             TravelPlan plan,
@@ -61,7 +55,6 @@ public class AiRouteApi {
     ) {
         JSONObject json = new JSONObject();
         try {
-            // TravelPlan fields (đang dùng trong app bạn)
             json.put("travelDate", plan.getTravelDate());
             json.put("durationDays", plan.getDurationDays());
 
@@ -77,7 +70,6 @@ public class AiRouteApi {
                 json.put("budget", plan.getBudget());
             }
 
-            // ✅ add realtime user location for AI scoring (backend phải support)
             json.put("userLat", userLat);
             json.put("userLng", userLng);
 
@@ -124,11 +116,6 @@ public class AiRouteApi {
             }
         });
     }
-
-    /**
-     * BACKWARD COMPAT: Nếu chỗ khác trong code vẫn gọi signature cũ.
-     * Mặc định userLat/userLng = 0.
-     */
     public void getSuggestedRoutes(
             String bearerToken,
             TravelPlan plan,
@@ -148,7 +135,6 @@ public class AiRouteApi {
             double distanceKm = obj.optDouble("distanceKm", 0.0);
             String duration = obj.optString("duration", "");
 
-            // stops: backend trả List<LocationResponse> => mỗi phần tử là object {id,name,address,description,defaultPicture,...}
             List<Place> stops = new ArrayList<>();
             JSONArray stopsArr = obj.optJSONArray("stops");
             if (stopsArr != null) {
@@ -162,7 +148,6 @@ public class AiRouteApi {
                     String desc = s.optString("description", "");
                     String pic = s.optString("defaultPicture", "");
 
-                    // distanceText không có trong AI response => để "" (adapter sẽ ẩn nếu rỗng)
                     Place place = new Place(
                             name,
                             desc,
