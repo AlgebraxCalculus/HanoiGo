@@ -49,9 +49,7 @@ public class CheckpointService {
     private final FirebaseService firebaseService;
     private final UserLikeRepository userLikeRepository;
 
-    // Get list of locations eligible for check-in
     public List<EnableCheckpointResponse> enableCheckIn(UUID userId, Double userLatitude, Double userLongitude) {
-        // Validate user
         UserResponse userResponse = userService.getUserById(userId);
         if (userResponse == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
@@ -86,7 +84,6 @@ public class CheckpointService {
             }
         }
 
-        // If no eligible locations found, throw exception
         if (enableCheckpoints.isEmpty()) {
             throw new RuntimeException("No eligible check-in locations within 15km.");
         }
@@ -96,26 +93,22 @@ public class CheckpointService {
 
     // Check in a detail location
     public CheckpointResponse checkIn(CheckpointRequest request) {
-        // Validate user (DTO)
         UserResponse userResponse = userService.getUserById(request.getUserId());
         if (userResponse == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        // Load user entity
         User userEntity = userRepository.findUserById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // Load location detail by id from request
         LocationDetail loc = locationDetailRepository.findByAddress(request.getLocationAddress())
                 .orElseThrow(() -> new AppException(ErrorCode.LOCATION_NOT_EXISTED));
-        // Add points for check-in
+
         int addedPoints = 5;
         int newPoints = (userEntity.getPoints() == null ? 0 : userEntity.getPoints()) + addedPoints;
         userEntity.setPoints(newPoints);
         userRepository.save(userEntity);
 
-        // Create and save checkpoint
         Checkpoint checkpoint = new Checkpoint();
         checkpoint.setUser(userEntity);
         checkpoint.setLocation(loc);
@@ -126,7 +119,6 @@ public class CheckpointService {
         try {
             firebaseService.pushUserStatsData(userEntity.getId(), "points", newPoints);
 
-            // Lấy checkin_count hiện tại từ Firestore, cộng thêm 1
             int currentCheckinCount = 0;
             try {
                 Firestore db = com.google.firebase.cloud.FirestoreClient.getFirestore();
@@ -140,7 +132,7 @@ public class CheckpointService {
                     }
                 }
             } catch (Exception e) {
-                // Nếu lỗi khi lấy, giữ mặc định là 0
+                // Log and ignore, default to 0
             }
             int newCheckinCount = currentCheckinCount + 1;
             firebaseService.pushUserStatsData(userEntity.getId(), "checkin_count", newCheckinCount);
@@ -155,7 +147,6 @@ public class CheckpointService {
             firebaseService.sendNotification(fcm, title, body);
         }
 
-        // Build response objects
         LocationResponse locationRes = locationMapper.toLocationResponse(loc);
         ReviewResponse reviewRes = null; // no review on check-in
         CheckpointResponse resp = checkpointMapper.toCheckpointResponse(checkpoint, locationRes, reviewRes);
@@ -201,7 +192,7 @@ public class CheckpointService {
             responses.add(resp);
         }
 
-        // Filtering by view only (don't auto-filter when sorting by rating)
+        // Filtering by view only 
         if ("review-only".equalsIgnoreCase(view)) {
             responses = responses.stream()
                 .filter(r -> r.getReview() != null)
