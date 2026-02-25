@@ -65,3 +65,62 @@ backend/src/main/java/com/example/hanoiGo/
 ├── repository/      # Spring Data JPA interfaces (Repository Layer)
 ├── service/         # Business logic implementation (Service Layer)
 └── util/            # Utility classes (JWT processing, cryptos, etc.)
+
+## API Endpoints
+
+*Note: Most endpoints require a valid JWT token provided in the `Authorization` header as `Bearer <Token>`.*
+
+### Authentication & Password Reset (`/api/auth`)
+- `POST /api/auth/forgot-password` - Request an OTP for password reset.
+- `POST /api/auth/verify-otp` - Verify the received OTP.
+- `POST /api/auth/reset-password` - Set a new password after successful OTP verification.
+
+### User Management (`/api/users`)
+- `POST /api/users/register` - Register a new user account.
+- `POST /api/users/login` - Authenticate using username and password.
+- `POST /api/users/firebase-login` - Authenticate using a Firebase token.
+- `GET /api/users/me` - Retrieve current authenticated user profile.
+- `GET /api/users/get` - Get a list of all users (optionally ordered by points).
+- `GET /api/users/my-rank` - Get the current user's leaderboard rank.
+- `POST /api/users/update-fcm-token` - Update Firebase Cloud Messaging token for push notifications.
+- `POST /api/users/update-userStats` - Sync user statistics to Firebase.
+- `GET /api/users/get-chartData` - Retrieve user activity chart data.
+- `POST /api/users/update-avatar` - Update the user's profile avatar URL.
+
+### Locations & Discovery (`/api/locations`)
+- `GET /api/locations/get-list` - Retrieve a list of locations with filters (lat, lng, tag, mostVisited, nearest, limit).
+- `GET /api/locations/get-detail-by-id` - Get detailed information by location ID.
+- `GET /api/locations/get-detail-by-address` - Get detailed information by exact address.
+- `GET /api/locations/get-tags-by-id` - Retrieve tags associated with a specific location.
+- `GET /api/locations/search-autocomplete` - Auto-complete search suggestions based on keyword.
+
+### Routing & AI Travel (`/api/directions`, `/api/ai`)
+- `GET /api/directions` - Get map directions between origin and destination coordinates.
+- `POST /api/ai/routes` - Generate an AI-suggested travel plan based on user preferences.
+
+### Checkpoints & Gamification (`/api/checkpoints`, `/api/achievements`)
+- `GET /api/checkpoints/enable-checkin` - Get a list of nearby locations available for check-in.
+- `POST /api/checkpoints/checkin` - Verify and check-in at a specific location.
+- `GET /api/checkpoints/me` - Retrieve the current user's check-in history.
+- `GET /api/achievements/me` - Get achievements unlocked by the current user.
+- `GET /api/achievements/my-total` - Get the total count of user's achievements.
+
+### Reviews & Social (`/api/reviews`)
+- `GET /api/reviews/get-list` - Get reviews for a specific location.
+- `POST /api/reviews/add` - Submit a new review for a location.
+- `POST /api/reviews/update` - Update an existing review.
+- `POST /api/reviews/delete` - Delete a user's review.
+- `POST /api/reviews/like` - Like/Unlike a review.
+- `GET /api/reviews/get-liked-reviews` - Retrieve a list of reviews liked by the user.
+
+### Bookmarks & Personal Collections (`/api/bookmarks`, `/api/bookmark-lists`)
+- `POST /api/bookmark-lists/create` - Create a new custom list for saving places.
+- `GET /api/bookmark-lists/my-lists` - Get all custom bookmark lists of the user.
+- `PUT /api/bookmark-lists/{listId}` - Update a bookmark list's details.
+- `DELETE /api/bookmark-lists/{listId}` - Delete a custom bookmark list.
+- `POST /api/bookmarks/add` - Add a location to a specific bookmark list.
+- `DELETE /api/bookmarks/remove` - Remove a location from a bookmark list.
+- `GET /api/bookmarks/list/{listId}` - Get all locations saved within a specific list.
+- `GET /api/bookmarks/all` - Get all bookmarked locations across all lists.
+- `GET /api/bookmarks/check` - Check if a specific location is saved in a given list.
+- `GET /api/bookmarks/count/{listId}` - Count the number of saved places in a specific list.
