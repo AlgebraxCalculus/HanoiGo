@@ -65,6 +65,7 @@ backend/src/main/java/com/example/hanoiGo/
 ├── repository/      # Spring Data JPA interfaces (Repository Layer)
 ├── service/         # Business logic implementation (Service Layer)
 └── util/            # Utility classes (JWT processing, cryptos, etc.)
+```
 
 ## API Endpoints
 
@@ -124,3 +125,6 @@ backend/src/main/java/com/example/hanoiGo/
 - `GET /api/bookmarks/all` - Get all bookmarked locations across all lists.
 - `GET /api/bookmarks/check` - Check if a specific location is saved in a given list.
 - `GET /api/bookmarks/count/{listId}` - Count the number of saved places in a specific list.
+
+## Project demo: 
+https://drive.google.com/file/d/1uYMwnlz-EZ56rIext6w7q7DR5Jumq0q8/view?usp=drive_link
